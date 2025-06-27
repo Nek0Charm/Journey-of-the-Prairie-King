@@ -1,7 +1,7 @@
 #ifndef __APPLICATION_H__
 #define __APPLICATION_H__
 
-#include <view/MainWindow.h>
+#include <view/mainwindow.h>
 
 /*
 主程序
