@@ -1,13 +1,28 @@
-#ifndef __MAINWINDOW_H__
-#define __MAINWINDOW_H__
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
-/*
-主窗口
-*/
+#include <QMainWindow>
+#include <QPainter>
+#include <QColor>
+#include <QString>
+#include <QKeyEvent>
+#include <iostream>
+using namespace std;
+class GameWidget; 
 
-class MainWindow: public QWidget {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 
-};
+public:
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+public:
+    void paintEvent(QPaintEvent* painter1) override;
+    void keyPressEvent(QKeyEvent* event) override;
+private slots:
 
-#endif
+private:
+    GameWidget *m_gameWidget;
+};
+#endif // MAINWINDOW_H

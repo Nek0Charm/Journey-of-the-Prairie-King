@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>assert/sprite.png</file>
+        <file>assert/sprite.json</file>
+        <file>assert/gamemap.json</file>
+    </qresource>
+</RCC>
