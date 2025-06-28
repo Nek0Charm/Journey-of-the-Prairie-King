@@ -1,9 +1,15 @@
 file(GLOB_RECURSE SOURCES 
     "./*.cpp"
+    "app/*.cpp"
+    "view/*.cpp"
+    "viewmodel/*.cpp"
 )
 
 file(GLOB_RECURSE HEADERS
     "include/*.h"
+    "include/app/*.h"
+    "include/view/*.h"
+    "include/viewmodel/*.h"
 )
 
 file(GLOB_RECURSE RESOURCES
@@ -19,7 +25,9 @@ add_executable(MaodieAdventure
 
 target_include_directories(MaodieAdventure PRIVATE
     include
-    src
+    include/app
+    include/view
+    include/viewmodel
 )
 
 target_precompile_headers(MaodieAdventure PRIVATE
