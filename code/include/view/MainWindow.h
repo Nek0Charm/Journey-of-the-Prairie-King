@@ -7,7 +7,12 @@
 
 class MainWindow: public QWidget {
     Q_OBJECT
+public:
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow() = default;
 
+    bool initialize();
+    
 };
 
 #endif

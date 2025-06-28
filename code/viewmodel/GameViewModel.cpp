@@ -1,7 +1,6 @@
 #include "viewmodel/GameViewModel.h"
 #include "viewmodel/PlayerViewModel.h"
 #include "viewmodel/EnemyManager.h"
-#include "viewmodel/InputManager.h"
 #include "viewmodel/CollisionSystem.h"
 #include "viewmodel/HUDViewModel.h"
 #include <QDebug>
@@ -61,19 +60,16 @@ void GameViewModel::updateGame(double deltaTime)
         return;
     }
     
-    // 更新输入
-    m_inputManager->updateInput();
-    
     // 更新玩家
     m_player->update(deltaTime);
     
     // 更新敌人
     m_enemyManager->updateEnemies(deltaTime, m_player->getPosition());
-    
+    // TODO
     // 碰撞检测
-    m_collisionSystem->checkCollisions(*m_player, 
-                                      m_enemyManager->getEnemies(),
-                                      m_player->getBullets());
+    // m_collisionSystem->checkCollisions(*m_player, 
+    //                                   m_enemyManager->getEnemies(),
+    //                                   m_player->getBullets());
     
     // 更新HUD
     m_hudViewModel->updateLives(m_player->getLives());
@@ -81,20 +77,6 @@ void GameViewModel::updateGame(double deltaTime)
     
     // 检查游戏状态
     checkGameState();
-}
-
-void GameViewModel::handleKeyPress(int key)
-{
-    if (m_inputManager) {
-        m_inputManager->handleKeyPress(static_cast<Qt::Key>(key));
-    }
-}
-
-void GameViewModel::handleKeyRelease(int key)
-{
-    if (m_inputManager) {
-        m_inputManager->handleKeyRelease(static_cast<Qt::Key>(key));
-    }
 }
 
 void GameViewModel::checkGameState()
@@ -112,20 +94,10 @@ void GameViewModel::handlePlayerDeath()
 
 void GameViewModel::setupConnections()
 {
-    if (!m_player || !m_inputManager || !m_enemyManager || !m_collisionSystem) {
+    if (!m_player || !m_enemyManager || !m_collisionSystem) {
         return;
     }
-    
-    // 连接输入到玩家
-    connect(m_inputManager.get(), &InputManager::movementChanged,
-            m_player.get(), &PlayerViewModel::move);
-    
-    connect(m_inputManager.get(), &InputManager::shootingChanged,
-            [this](const QPointF& direction, bool isShooting) {
-                if (isShooting) {
-                    m_player->shoot(direction);
-                }
-            });
+
     
     // 连接碰撞检测
     connect(m_collisionSystem.get(), &CollisionSystem::playerHitByEnemy,
@@ -169,7 +141,6 @@ void GameViewModel::initializeComponents()
 {
     m_player = std::make_unique<PlayerViewModel>(this);
     m_enemyManager = std::make_unique<EnemyManager>(this);
-    m_inputManager = std::make_unique<InputManager>(this);
     m_collisionSystem = std::make_unique<CollisionSystem>(this);
     m_hudViewModel = std::make_unique<HUDViewModel>(this);
 }
@@ -177,13 +148,11 @@ void GameViewModel::initializeComponents()
 void GameViewModel::resetGame()
 {
     if (m_player) {
-        m_player->reset();
+        // TODO
+        // m_player->reset();
     }
     if (m_enemyManager) {
         m_enemyManager->clearAllEnemies();
-    }
-    if (m_inputManager) {
-        m_inputManager->resetInput();
     }
     if (m_hudViewModel) {
         m_hudViewModel->reset();
