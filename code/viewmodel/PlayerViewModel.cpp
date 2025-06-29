@@ -31,6 +31,7 @@ void PlayerViewModel::shoot(const QPointF& direction)
 
 void PlayerViewModel::update(double deltaTime) {
     move(deltaTime);
+    qDebug() << "update shoot cooldown: " << m_currentShootCooldown;
     updateShootCooldown(deltaTime);
     m_bulletViewModel->updateBullets(deltaTime);
 }
@@ -56,7 +57,7 @@ void PlayerViewModel::reset()
     m_stats.position = QPointF(MAP_WIDTH/2, MAP_HEIGHT/2);
     m_stats.shootingDirection = QPointF(1, 0);
     m_stats.moveSpeed = 100.0;
-    m_stats.shootCooldown = 20;
+    m_stats.shootCooldown = 1;
     
     m_bulletViewModel->clearAllBullets();
     m_currentShootCooldown = 0.0;
