@@ -4,18 +4,14 @@
 #include <QObject>
 #include <memory>
 
-
+#include "viewmodel/PlayerViewModel.h"
+#include "viewmodel/EnemyManager.h"
+#include "viewmodel/CollisionSystem.h"
 // 前向声明
-class PlayerViewModel;
-class EnemyManager;
-class InputManager;
-class CollisionSystem;
 
 class GameViewModel : public QObject {
     Q_OBJECT
 
-    Q_PROPERTY(GameState gameState READ getGameState NOTIFY gameStateChanged)
-    Q_PROPERTY(bool isGameActive READ isGameActive NOTIFY gameStateChanged)
 public:
     enum GameState { MENU, PLAYING, PAUSED, GAME_OVER };
     
@@ -25,26 +21,29 @@ public:
     /*
     GameViewModel的接口
     */
-    Q_INVOKABLE void startGame();
-    Q_INVOKABLE void pauseGame();
-    Q_INVOKABLE void resumeGame();
-    Q_INVOKABLE void endGame();
-    Q_INVOKABLE void playerAttack(const QPointF& direction);
-    Q_INVOKABLE void setPlayerMoveDirection(const QPointF& direction, bool isMoving);
-
-    // 游戏循环
+    void startGame();
+    void pauseGame();
+    void resumeGame();
+    void endGame();
+    void playerAttack(const QPointF& direction);
+    void setPlayerMoveDirection(const QPointF& direction, bool isMoving);
+    PlayerViewModel* getPlayer() const { return m_player.get(); }
+    EnemyManager* getEnemyManager() const { return m_enemyManager.get(); }
+    QPointF getPlayerPosition() const { return m_player->getPosition();}
+    int getPlayerLives() const { return m_player->getLives();}
+    
+    
     void updateGame(double deltaTime);
         
     // 状态查询
     GameState getGameState() const { return m_gameState; }
     bool isGameActive() const { return m_gameState == PLAYING; }
     
-    // 获取组件
-    PlayerViewModel* getPlayer() const { return m_player.get(); }
-    EnemyManager* getEnemyManager() const { return m_enemyManager.get(); }
-    
 signals:
     void gameStateChanged(GameState state);
+    void playerDied();
+    void playerLivesChanged();
+    void playerPositonChanged(const QPointF& position);
     
 private:
     GameState m_gameState = MENU;

@@ -54,6 +54,8 @@ public:
 signals:
     void playerDied();
     void livesChanged();
+    void positionChanged(const QPointF& position);
+    
     
 private:
     PlayerStats m_stats;

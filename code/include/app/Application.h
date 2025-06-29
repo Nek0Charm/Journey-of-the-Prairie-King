@@ -21,7 +21,7 @@ private:
     void calculateDeltaTime();
 
     std::unique_ptr<MainWindow> m_view;
-    std::unique_ptr<GameViewModel> m_viewModel;
+    std::shared_ptr<GameViewModel> m_viewModel;
 
     QTimer m_gameTimer;
     QElapsedTimer m_frameTimer;

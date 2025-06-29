@@ -1,7 +1,5 @@
 #include "viewmodel/GameViewModel.h"
-#include "viewmodel/PlayerViewModel.h"
-#include "viewmodel/EnemyManager.h"
-#include "viewmodel/CollisionSystem.h"
+
 #include <QDebug>
 
 GameViewModel::GameViewModel(QObject *parent)
@@ -95,6 +93,7 @@ void GameViewModel::checkGameState()
 
 void GameViewModel::handlePlayerDeath()
 {
+    emit playerDied();
     endGame();
 }
 
@@ -116,6 +115,12 @@ void GameViewModel::setupConnections()
     // 连接玩家状态变化
     connect(m_player.get(), &PlayerViewModel::playerDied,
             this, &GameViewModel::handlePlayerDeath);
+
+    connect(m_player.get(), &PlayerViewModel::livesChanged,
+            this, &GameViewModel::playerLivesChanged);
+
+    connect(m_player.get(), &PlayerViewModel::positionChanged,
+            this, &GameViewModel::playerPositonChanged);
     
     // 连接游戏状态变化
 }

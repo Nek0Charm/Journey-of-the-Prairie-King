@@ -11,8 +11,8 @@ Application::Application(int &argc, char **argv)
 
 
 void Application::setupGameLoop() {
-    m_viewModel = std::make_unique<GameViewModel>(this);
-    m_view = std::make_unique<MainWindow>();
+    m_viewModel = std::make_shared<GameViewModel>(this);
+    m_view = std::make_unique<MainWindow>(m_viewModel.get());
     /*
     TODO: 在MainWindow中设置游戏试图模型（可能需要）
     m_view->setGameViewModel(m_viewModel);

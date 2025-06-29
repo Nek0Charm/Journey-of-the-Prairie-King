@@ -11,8 +11,13 @@ PlayerViewModel::PlayerViewModel(QObject *parent)
 
 void PlayerViewModel::move(double deltaTime)
 {
+    QPointF orig_pos = m_stats.position;
+
     if(m_stats.moving)
         m_stats.position += m_stats.movingDirection * m_stats.moveSpeed * deltaTime;
+    if(orig_pos != m_stats.position) {
+        emit positionChanged(m_stats.position);
+    }
 }
 
 void PlayerViewModel::shoot(const QPointF& direction)
