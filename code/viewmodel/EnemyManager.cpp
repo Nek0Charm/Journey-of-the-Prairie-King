@@ -43,11 +43,15 @@ void EnemyManager::spawnEnemy(const QPointF& position)
     emit enemyCountChanged(getActiveEnemyCount());
     
     qDebug() << "Enemy spawned at position:" << position << "ID:" << enemy.id;
+    qDebug() << "Enemy 1 at" << m_enemies[0].position << "ID:" << m_enemies[0].id;
 }
 
 void EnemyManager::spawnEnemyAtRandomPosition()
 {
     QPointF position = getRandomSpawnPosition();
+    if(position == QPointF(0, 0)) {
+        return; 
+    }
     spawnEnemy(position);
 }
 
@@ -56,11 +60,13 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos)
     for (auto& enemy : m_enemies) {
         if (enemy.isActive) {
             updateEnemyAI(enemy, playerPos);
-            
+            if(!isPositionValid(enemy.position + enemy.velocity * deltaTime, enemy.id)) {
+                continue;
+            }
             enemy.position += enemy.velocity * deltaTime;
-            
         }
     }
+    spawnEnemies(deltaTime);
     
     removeInactiveEnemies();
 }
@@ -112,6 +118,7 @@ int EnemyManager::getActiveEnemyCount() const
 
 QPointF EnemyManager::getRandomSpawnPosition() const
 {
+    static int count = 0;
     const int margin = 50;
     
     QPointF position;
@@ -119,19 +126,27 @@ QPointF EnemyManager::getRandomSpawnPosition() const
     
     switch (side) {
     case 0: // 上边
-        position = QPointF(QRandomGenerator::global()->bounded(MAP_WIDTH), -margin);
+        position = QPointF(QRandomGenerator::global()->bounded(3)*16+7*16+8, MAP_HEIGHT-8);
         break;
     case 1: // 右边
-        position = QPointF(MAP_WIDTH + margin, QRandomGenerator::global()->bounded(MAP_HEIGHT));
+        position = QPointF(MAP_WIDTH-8, QRandomGenerator::global()->bounded(3)*16+6*16+8);
         break;
     case 2: // 下边
-        position = QPointF(QRandomGenerator::global()->bounded(MAP_WIDTH), MAP_HEIGHT + margin);
+        position = QPointF(QRandomGenerator::global()->bounded(3)*16+7*16+8, 8);
         break;
     case 3: // 左边
-        position = QPointF(-margin, QRandomGenerator::global()->bounded(MAP_HEIGHT));
+        position = QPointF(8, QRandomGenerator::global()->bounded(3)*16+6*16+8);
         break;
     }
     
+    if(!isPositionValid(position) && count < 5) {
+        count++;
+        return getRandomSpawnPosition();
+    } else if (count >= 5) {
+        count = 0;
+        return QPointF(0, 0);
+    }
+    count = 0;
     return position;
 }
 
@@ -155,9 +170,32 @@ void EnemyManager::removeInactiveEnemies()
 
 bool EnemyManager::isPositionValid(const QPointF& position) const
 {
-    // 检查位置是否在合理范围内
-    return position.x() >= -100 && position.x() <= MAP_WIDTH + 100 &&
-           position.y() >= -100 && position.y() <= MAP_HEIGHT + 100;
+    for(const auto& enemy : m_enemies) {
+        if (enemy.isActive ) {
+            if(enemy.position.x() < position.x() + ENEMY_WIDTH &&
+               enemy.position.x() + ENEMY_WIDTH > position.x() &&
+               enemy.position.y() < position.y() + ENEMY_WIDTH &&
+               enemy.position.y() + ENEMY_WIDTH > position.y()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool EnemyManager::isPositionValid(const QPointF& position, const int enemyId) const
+{
+    for(const auto& enemy : m_enemies) {
+        if (enemy.isActive && enemy.id != enemyId) {
+            if(enemy.position.x() < position.x() + ENEMY_WIDTH &&
+               enemy.position.x() + ENEMY_WIDTH > position.x() &&
+               enemy.position.y() < position.y() + ENEMY_WIDTH &&
+               enemy.position.y() + ENEMY_WIDTH > position.y()) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos) const

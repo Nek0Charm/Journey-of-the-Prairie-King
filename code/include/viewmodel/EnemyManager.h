@@ -58,11 +58,14 @@ private:
     double m_spawnInterval = 2.0;
     int m_maxEnemies = 10;
     double m_enemyMoveSpeed = 50.0;
+
+    static constexpr double ENEMY_WIDTH = 15.0;
     
     QPointF getRandomSpawnPosition() const;
     void updateEnemyAI(EnemyData& enemy, const QPointF& playerPos);
     void removeInactiveEnemies();
     bool isPositionValid(const QPointF& position) const;
+    bool isPositionValid(const QPointF& position, const int enemyId) const;
     QPointF calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos) const;
     double calculateDistance(const QPointF& pos1, const QPointF& pos2) const;
 };

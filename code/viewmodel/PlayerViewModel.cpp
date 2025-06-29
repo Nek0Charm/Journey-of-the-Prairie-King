@@ -31,7 +31,6 @@ void PlayerViewModel::shoot(const QPointF& direction)
 
 void PlayerViewModel::update(double deltaTime) {
     move(deltaTime);
-    qDebug() << "update shoot cooldown: " << m_currentShootCooldown;
     updateShootCooldown(deltaTime);
     m_bulletViewModel->updateBullets(deltaTime);
 }
