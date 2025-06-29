@@ -19,7 +19,6 @@ void GameViewModel::startGame()
         resetGame();
         m_gameState = PLAYING;
         emit gameStateChanged(m_gameState);
-        emit gameStarted();
         qDebug() << "Game started";
     }
 }
@@ -29,7 +28,6 @@ void GameViewModel::pauseGame()
     if (m_gameState == PLAYING) {
         m_gameState = PAUSED;
         emit gameStateChanged(m_gameState);
-        emit gamePaused();
         qDebug() << "Game paused";
     }
 }
@@ -39,7 +37,6 @@ void GameViewModel::resumeGame()
     if (m_gameState == PAUSED) {
         m_gameState = PLAYING;
         emit gameStateChanged(m_gameState);
-        emit gameResumed();
         qDebug() << "Game resumed";
     }
 }
@@ -49,8 +46,20 @@ void GameViewModel::endGame()
     if (m_gameState != GAME_OVER) {
         m_gameState = GAME_OVER;
         emit gameStateChanged(m_gameState);
-        emit gameOver();
         qDebug() << "Game over";
+    }
+}
+
+void GameViewModel::playerAttack(const QPointF& direction) {
+    if (m_gameState == PLAYING && m_player) {
+        m_player->shoot(direction);
+        qDebug() << "Player attacked in direction:" << direction;
+    }
+}
+
+void GameViewModel::setPlayerMoveDirection(const QPointF& direciton, bool isMoving) {
+    if(m_gameState == PLAYING && m_player) {
+        m_player->setMovingDirection(direciton, isMoving);
     }
 }
 
@@ -65,11 +74,10 @@ void GameViewModel::updateGame(double deltaTime)
     
     // 更新敌人
     m_enemyManager->updateEnemies(deltaTime, m_player->getPosition());
-    // TODO
-    // 碰撞检测
-    // m_collisionSystem->checkCollisions(*m_player, 
-    //                                   m_enemyManager->getEnemies(),
-    //                                   m_player->getBullets());
+
+    m_collisionSystem->checkCollisions(*m_player, 
+                                      m_enemyManager->getEnemies(),
+                                      m_player->getActiveBullets());
     
     // 更新HUD
     m_hudViewModel->updateLives(m_player->getLives());
@@ -101,10 +109,11 @@ void GameViewModel::setupConnections()
     
     // 连接碰撞检测
     connect(m_collisionSystem.get(), &CollisionSystem::playerHitByEnemy,
-            m_player.get(), &PlayerViewModel::takeDamage);
+            this, &GameViewModel::handlePlayerHitByEnemy);
     
     connect(m_collisionSystem.get(), &CollisionSystem::enemyHitByBullet,
-            m_enemyManager.get(), &EnemyManager::damageEnemy);
+            this, &GameViewModel::handleEnemyHitByBullet);
+
     
     // 连接玩家状态变化
     connect(m_player.get(), &PlayerViewModel::playerDied,
@@ -116,6 +125,8 @@ void GameViewModel::setupConnections()
     // 连接敌人状态变化
     connect(m_enemyManager.get(), &EnemyManager::enemyCountChanged,
             m_hudViewModel.get(), &HUDViewModel::updateEnemyCount);
+
+
     
     // 连接游戏状态变化
     connect(this, &GameViewModel::gameStateChanged,
@@ -148,8 +159,7 @@ void GameViewModel::initializeComponents()
 void GameViewModel::resetGame()
 {
     if (m_player) {
-        // TODO
-        // m_player->reset();
+        m_player->reset();
     }
     if (m_enemyManager) {
         m_enemyManager->clearAllEnemies();
@@ -157,4 +167,17 @@ void GameViewModel::resetGame()
     if (m_hudViewModel) {
         m_hudViewModel->reset();
     }
+}
+
+void GameViewModel::handlePlayerHitByEnemy(int enemyId)
+{
+    m_player->takeDamage();
+    m_enemyManager->removeEnemy(enemyId);
+}
+
+void GameViewModel::handleEnemyHitByBullet(int bulletId, int enemyId)
+{
+    m_enemyManager->damageEnemy(bulletId, enemyId);
+    m_player->removeBullet(bulletId);
+    
 }

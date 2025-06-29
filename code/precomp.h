@@ -16,4 +16,7 @@
 #include <QWidget>
 #include <QList>
 
+#define MAP_WIDTH 1280
+#define MAP_HEIGHT 1280
+
 #endif

@@ -5,18 +5,9 @@
 #include <QPointF>
 #include <QList>
 
-// 前向声明
-class PlayerViewModel;
-class EnemyManager;
-
-struct BulletData {
-    int id;
-    QPointF position;
-    QPointF velocity;
-    double damage = 1.0;
-    bool canPenetrate = false;
-    bool isActive = true;
-};
+#include "viewmodel/PlayerViewModel.h"
+#include "viewmodel/EnemyManager.h"
+#include "viewmodel/BulletViewModel.h"
 
 class CollisionSystem : public QObject
 {
@@ -29,12 +20,12 @@ public:
     // 碰撞检测
     void checkCollisions(const PlayerViewModel& player,
                         const QList<EnemyManager::EnemyData>& enemies,
-                        const QList<BulletData>& bullets);
+                        const QList<BulletViewModel::BulletData>& bullets);
     
     void checkPlayerEnemyCollisions(const PlayerViewModel& player,
                                    const QList<EnemyManager::EnemyData>& enemies);
     
-    void checkBulletEnemyCollisions(const QList<BulletData>& bullets,
+    void checkBulletEnemyCollisions(const QList<BulletViewModel::BulletData>& bullets,
                                    const QList<EnemyManager::EnemyData>& enemies);
 
     // 碰撞查询
@@ -58,8 +49,6 @@ public:
 signals:
     void playerHitByEnemy(int enemyId);
     void enemyHitByBullet(int bulletId, int enemyId);
-    void bulletHitPlayer(int bulletId);
-    void collisionDetected(const QString& type, int id1, int id2);
 
 private:
     double m_playerCollisionRadius = 20.0;
