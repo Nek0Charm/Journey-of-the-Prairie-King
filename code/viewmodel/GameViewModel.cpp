@@ -2,7 +2,6 @@
 #include "viewmodel/PlayerViewModel.h"
 #include "viewmodel/EnemyManager.h"
 #include "viewmodel/CollisionSystem.h"
-#include "viewmodel/HUDViewModel.h"
 #include <QDebug>
 
 GameViewModel::GameViewModel(QObject *parent)
@@ -10,6 +9,7 @@ GameViewModel::GameViewModel(QObject *parent)
     , m_gameState(MENU)
 {
     initializeComponents();
+
     setupConnections();
 }
 
@@ -65,6 +65,7 @@ void GameViewModel::setPlayerMoveDirection(const QPointF& direciton, bool isMovi
 
 void GameViewModel::updateGame(double deltaTime)
 {
+    // qDebug() << "Updating game state, deltaTime:" << deltaTime;
     if (m_gameState != PLAYING) {
         return;
     }
@@ -79,9 +80,6 @@ void GameViewModel::updateGame(double deltaTime)
                                       m_enemyManager->getEnemies(),
                                       m_player->getActiveBullets());
     
-    // 更新HUD
-    m_hudViewModel->updateLives(m_player->getLives());
-    m_hudViewModel->updateEnemyCount(m_enemyManager->getActiveEnemyCount());
     
     // 检查游戏状态
     checkGameState();
@@ -119,41 +117,16 @@ void GameViewModel::setupConnections()
     connect(m_player.get(), &PlayerViewModel::playerDied,
             this, &GameViewModel::handlePlayerDeath);
     
-    connect(m_player.get(), &PlayerViewModel::livesChanged,
-            m_hudViewModel.get(), &HUDViewModel::updateLives);
-    
-    // 连接敌人状态变化
-    connect(m_enemyManager.get(), &EnemyManager::enemyCountChanged,
-            m_hudViewModel.get(), &HUDViewModel::updateEnemyCount);
-
-
-    
     // 连接游戏状态变化
-    connect(this, &GameViewModel::gameStateChanged,
-            [this](GameState state) {
-                switch (state) {
-                case PLAYING:
-                    m_hudViewModel->setGameState("Playing");
-                    break;
-                case PAUSED:
-                    m_hudViewModel->setGameState("Paused");
-                    break;
-                case GAME_OVER:
-                    m_hudViewModel->setGameState("Game Over");
-                    break;
-                default:
-                    m_hudViewModel->setGameState("Menu");
-                    break;
-                }
-            });
 }
 
 void GameViewModel::initializeComponents()
 {
+
     m_player = std::make_unique<PlayerViewModel>(this);
+
     m_enemyManager = std::make_unique<EnemyManager>(this);
     m_collisionSystem = std::make_unique<CollisionSystem>(this);
-    m_hudViewModel = std::make_unique<HUDViewModel>(this);
 }
 
 void GameViewModel::resetGame()
@@ -163,9 +136,6 @@ void GameViewModel::resetGame()
     }
     if (m_enemyManager) {
         m_enemyManager->clearAllEnemies();
-    }
-    if (m_hudViewModel) {
-        m_hudViewModel->reset();
     }
 }
 

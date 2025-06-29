@@ -5,8 +5,8 @@
 PlayerViewModel::PlayerViewModel(QObject *parent)
     : QObject(parent)
 {
-    reset();
     m_bulletViewModel = std::make_unique<BulletViewModel>(this);
+    reset();
 }
 
 void PlayerViewModel::move(double deltaTime)

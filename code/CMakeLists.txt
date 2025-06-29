@@ -1,27 +1,17 @@
-set(SOURCES
-    main.cpp
-    view/MainWindow.cpp
-    view/StartWidget.cpp
-    view/GameWidget.cpp
-    view/GameMap.cpp
-    view/Animation.cpp
-    view/SpriteManager.cpp
-    view/Entity.cpp
+file(GLOB_RECURSE SOURCES 
+    "main.cpp"
+    "./*.cpp"
 )
 
-set(HEADERS
-    include/view/MainWindow.h
-    include/view/StartWidget.h
-    include/view/GameWidget.h
-    include/view/GameMap.h
-    include/view/Animation.h
-    include/view/SpriteManager.h
-    include/view/Entity.h
+# 收集头文件
+file(GLOB_RECURSE HEADERS
+    "include/*.h"
 )
-
 set(RESOURCES
-    ../resource.qrc
+    "../resource.qrc"
 )
+
+
 
 add_executable(MaodieAdventure 
     ${SOURCES}

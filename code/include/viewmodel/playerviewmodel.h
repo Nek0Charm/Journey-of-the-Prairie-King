@@ -28,8 +28,6 @@ public:
     void update(double deltaTime);
     void reset();
     
-    // 状态管理
-    void takeDamage();
     
     // 状态查询
     const PlayerStats& getStats() const { return m_stats; }

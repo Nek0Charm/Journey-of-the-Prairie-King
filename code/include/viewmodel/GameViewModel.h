@@ -10,14 +10,12 @@ class PlayerViewModel;
 class EnemyManager;
 class InputManager;
 class CollisionSystem;
-class HUDViewModel;
 
 class GameViewModel : public QObject {
     Q_OBJECT
 
     Q_PROPERTY(GameState gameState READ getGameState NOTIFY gameStateChanged)
     Q_PROPERTY(bool isGameActive READ isGameActive NOTIFY gameStateChanged)
-    
 public:
     enum GameState { MENU, PLAYING, PAUSED, GAME_OVER };
     
@@ -44,7 +42,6 @@ public:
     // 获取组件
     PlayerViewModel* getPlayer() const { return m_player.get(); }
     EnemyManager* getEnemyManager() const { return m_enemyManager.get(); }
-    HUDViewModel* getHUDViewModel() const { return m_hudViewModel.get(); }
     
 signals:
     void gameStateChanged(GameState state);
@@ -54,7 +51,6 @@ private:
     std::unique_ptr<PlayerViewModel> m_player;
     std::unique_ptr<EnemyManager> m_enemyManager;
     std::unique_ptr<CollisionSystem> m_collisionSystem;
-    std::unique_ptr<HUDViewModel> m_hudViewModel;
     
     void checkGameState();
     void handlePlayerDeath();

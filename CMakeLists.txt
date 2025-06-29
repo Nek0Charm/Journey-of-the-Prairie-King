@@ -2,11 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(MaodieAdventure)
 
-set(CMAKE_PREFIX_PATH "/home/leafi/Qt/6.9.1/gcc_64")
-find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

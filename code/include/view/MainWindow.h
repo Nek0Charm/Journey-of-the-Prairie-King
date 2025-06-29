@@ -1,5 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include "viewmodel/GameViewModel.h"
 
 #include <QMainWindow>
 #include <QPainter>
@@ -25,6 +26,6 @@ private:
     QStackedWidget *m_stackedWidget;
     GameWidget *m_gameWidget;
     StartWidget *m_startWidget;
-    
+    GameViewModel *m_gameViewModel;
 };
 #endif // MAINWINDOW_H

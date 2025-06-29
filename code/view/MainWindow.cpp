@@ -5,6 +5,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent) {
+    m_gameViewModel = new GameViewModel();
     setWindowTitle("Maodie Adventure");
     setupUi();
     setupConnections();
@@ -12,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::setupUi() {
     resize(1550, 1390); // (16*16+54)*5 = 1550, (16*16+22)*5 = 1390
-    setFixedSize(1550, 1390);
+    // setFixedSize(1550, 1390);
     this->setStyleSheet("background-color: black;");  
     m_stackedWidget = new QStackedWidget(this);
     m_startWidget = new StartWidget(this);
@@ -32,6 +33,7 @@ void MainWindow::setupConnections() {
 
 void MainWindow::onStartGameRequested() {
     m_stackedWidget->setCurrentWidget(m_gameWidget);
+    m_gameViewModel->startGame();
 }
 
 void MainWindow::onExitGameRequested() {
