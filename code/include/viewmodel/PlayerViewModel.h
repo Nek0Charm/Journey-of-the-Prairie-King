@@ -43,7 +43,8 @@ public:
     }
     
     void setMovingDirection(const QPointF& direction, bool isMoving = true) {
-        m_stats.movingDirection = direction;
+        double length = std::hypot(direction.x(), direction.y());
+        m_stats.movingDirection = direction / (length > 0 ? length : 1.0);
         m_stats.moving = isMoving;
     }
 
