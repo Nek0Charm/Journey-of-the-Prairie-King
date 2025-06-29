@@ -27,6 +27,7 @@ void BulletViewModel::updateBullets(double deltaTime){
             }
         }
     }
+    removeBullets();
 }
 
 void BulletViewModel::removeBullet(int bulletId) {

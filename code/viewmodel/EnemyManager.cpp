@@ -43,7 +43,6 @@ void EnemyManager::spawnEnemy(const QPointF& position)
     emit enemyCountChanged(getActiveEnemyCount());
     
     qDebug() << "Enemy spawned at position:" << position << "ID:" << enemy.id;
-    qDebug() << "Enemy 1 at" << m_enemies[0].position << "ID:" << m_enemies[0].id;
 }
 
 void EnemyManager::spawnEnemyAtRandomPosition()
