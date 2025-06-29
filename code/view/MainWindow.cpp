@@ -1,40 +1,54 @@
 #include "view/MainWindow.h"
-#include "view/GameWidget.h"
-#include <qapplication.h>
-#include <QScreen>
-#include <QPixmap>
-#include <QPainter>
-#include <QtWidgets>
-
+#include "view/menuview.h"
+#include <QApplication>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent) {
-    m_gameWidget = new GameWidget(this); // 创建 GameWidget，将 MainWindow 设置为其父对象
-    this->setCentralWidget(m_gameWidget); // 将其设置为中心部件
-    auto t = (QMainWindow*)this;
-    t->centralWidget()->setMouseTracking(true);
-    this->setMouseTracking(true);
-    QWidget *widget = new QWidget(this);
-    // QTimeLine timeline=new QTimeLine(1000);
-    // timeLine->setFrameRange(0, 100);
-    // connect(timeline,SIGNAL(frameChanged(int)),this,SLOT(yourobjslot(int)));
-    // timeline->start();
+    : QWidget(parent)
+    , m_layout(nullptr)
+    , m_stackedWidget(nullptr)
+    , m_menuView(nullptr)
+{
 }
 
-MainWindow::~MainWindow() {
+bool MainWindow::initialize() {
+    setWindowTitle("Maodie Adventure");
+    setupUi();
+    setupConnections();
+    return true;
 }
 
-void MainWindow::paintEvent(QPaintEvent* event) {
-    QMainWindow::paintEvent(event); 
-    QPainter painter(this); 
-    drawMap(painter);
+void MainWindow::setupUi() {
+    resize(800, 600);
+    setMinimumSize(600, 400);
+    
+    m_layout = new QVBoxLayout(this);
+    m_layout->setContentsMargins(0, 0, 0, 0);
+    
+    m_stackedWidget = new QStackedWidget(this);
+    
+    m_menuView = new MenuView(this);
+    m_menuView->initialize();
+    
+    m_stackedWidget->addWidget(m_menuView);
+    
+    m_stackedWidget->setCurrentWidget(m_menuView);
+    
+    m_layout->addWidget(m_stackedWidget);
+    
+    setLayout(m_layout);
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* event) {
-    if (event->key() == Qt::Key_Escape) {
-        showNormal();
+void MainWindow::setupConnections() {
+    if (m_menuView) {
+        connect(m_menuView, &MenuView::startGameRequested, this, &MainWindow::onStartGameRequested);
+        connect(m_menuView, &MenuView::exitGameRequested, this, &MainWindow::onExitGameRequested);
     }
-    update();
 }
 
+void MainWindow::onStartGameRequested() {
+}
+
+void MainWindow::onExitGameRequested() {
+    QApplication::quit();
+}
 

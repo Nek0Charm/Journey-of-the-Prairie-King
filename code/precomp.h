@@ -8,5 +8,12 @@
 #include <QString>
 #include <QPushButton>
 #include <QObject>
+#include <QTimer>
+#include <QElapsedTimer>
+#include <QStackedWidget>
+#include <QDebug>
+#include <QPointF>
+#include <QWidget>
+#include <QList>
 
 #endif
