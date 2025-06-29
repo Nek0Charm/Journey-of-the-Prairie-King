@@ -22,11 +22,14 @@ GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent)
     if (!m_gameMap->loadFromFile(":/assert/gamemap.json", "map_1", "1")) { 
         qWarning() << "GameWidget: 地图未能加载，地图将不会被绘制。";
     }
-    player = new Entity("player_walk_left");
-    m_entity.append(new Entity("orc_walk")); 
-    Entity* another_orc = new Entity("orc_walk");
-    another_orc->setPosition(QPointF(200, 200));
-    m_entity.append(another_orc);
+    player = new PlayerEntity();
+    // m_entity.append(new Entity("orc_walk")); 
+    // Entity* another_orc = new Entity("orc_walk");
+    // another_orc->setPosition(QPointF(200, 200));
+    // m_entity.append(another_orc);
+    setFocusPolicy(Qt::StrongFocus); 
+    startTimer(1000/60);
+
     m_maxTime = 60.0; 
     m_currentTime = 60.0; 
     m_timer = new QTimer(this); // 临时时钟
@@ -44,7 +47,7 @@ GameWidget::~GameWidget() {
 void GameWidget::gameLoop() {
     double deltaTime = m_elapsedTimer.restart() / 1000.0;
     if (player) {
-        player->update(deltaTime, player->getPosition(), m_viewModel->getPlayer()->getShootingDirection());
+        player->update(deltaTime);
     }
     // m_animation->update(deltaTime);
     if (m_currentTime > 0) {
@@ -53,14 +56,14 @@ void GameWidget::gameLoop() {
         m_currentTime = 0;
     }
     for (Entity* enemy : m_entity) {
-        enemy->update(deltaTime, {150, 200});
+        enemy->update(deltaTime);
     }
     this->update();
 }
 
 void GameWidget::playerPositionChanged() {
     player->setPosition(m_viewModel->getPlayerPosition());
-    // qDebug() << m_viewModel->getPlayerPosition();
+    qDebug() << m_viewModel->getPlayerPosition();
 }
 
 // void GameWidget::onStateUpdated() {
@@ -83,7 +86,7 @@ void GameWidget::paintEvent(QPaintEvent *event) {
         if (!bulletSourceRect.isNull()) {
             for (const auto& bullet : bullets) {
                 qDebug() << "bullet";
-                QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(UI_LEFT, UI_UP) + QPointF(8, 8)) * (SCALE, SCALE);
+                QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(UI_LEFT, UI_UP) + QPointF(10, 10)) * (SCALE, SCALE);
                 qDebug() << bullet.position;
                 QSizeF scaledSize(bulletSourceRect.width() * SCALE, bulletSourceRect.height() * SCALE);
                 QRectF destRect(topLeft, scaledSize);
@@ -182,44 +185,84 @@ void GameWidget::paintUi(QPainter *painter) {
     painter->drawText(moneyTextPos, moneyText);
 }
 
-void GameWidget::keyPressEvent(QKeyEvent *event) {
+void GameWidget::keyPressEvent(QKeyEvent *event) {    
+    keys[event->key()] = true;
+    QWidget::keyPressEvent(event);
+    return;
+}
+
+void GameWidget::keyReleaseEvent(QKeyEvent *event) {     
+    keys[event->key()] = false;
+    QWidget::keyReleaseEvent(event);
+    return;        
+    m_viewModel->setPlayerMoveDirection({0,0}, false);
+    player->setState(PlayerState::Idle);
+}
+
+void GameWidget::timerEvent(QTimerEvent* event) {
+    QPointF Direction = QPointF(0, 0);
     PlayerViewModel* playerVM = m_viewModel->getPlayer();
     if (!playerVM) return;
-    switch (event->key()) {
-        case Qt::Key_W:
-            m_viewModel->setPlayerMoveDirection({0,-1}, true);
-            player->setDirection({0,-1});
-            break;
-        case Qt::Key_S:
-            m_viewModel->setPlayerMoveDirection({0,1}, true);
-            player->setDirection({0,1});
-            break;
-        case Qt::Key_A:
-            m_viewModel->setPlayerMoveDirection({-1,0}, true);
-            player->setDirection({-1,0});
-            break;
-        case Qt::Key_D:
-            m_viewModel->setPlayerMoveDirection({1,0}, true);
-            player->setDirection({1,0});
-            break;
-        case Qt::Key_Up:
-            playerVM->shoot({0, -1});
-            break;
-        case Qt::Key_Down:
-            playerVM->shoot({0, 1}); 
-            break;
-        case Qt::Key_Left:
-            playerVM->shoot({-1, 0}); 
-            break;
-        case Qt::Key_Right:
-            playerVM->shoot({1, 0}); 
-            break;
-        default:
-            QWidget::keyPressEvent(event);
-            break;
+    if (keys[Qt::Key_S]) {
+        Direction += QPointF(0, 1);
+    }
+    if (keys[Qt::Key_W]) {
+        Direction += QPointF(0, -1);
+    }
+    if (keys[Qt::Key_A]) {
+        Direction += QPointF(-1, 0);
+    }
+    if (keys[Qt::Key_D]) {
+        Direction += QPointF(1, 0);
+    }
+    playerVM->setMovingDirection(Direction);
+
+    QPointF ShootDirection;
+    if (keys[Qt::Key_Down]) {
+        ShootDirection += QPointF(0, 1);
+    }
+    if (keys[Qt::Key_Up]) {
+        ShootDirection += QPointF(0, -1);
+    }
+    if (keys[Qt::Key_Left]) {
+        ShootDirection += QPointF(-1, 0);
+    }
+    if (keys[Qt::Key_Right]) {
+        ShootDirection += QPointF(1, 0);
+    }
+    playerVM->shoot(ShootDirection);
+
+    if (Direction.y() == 1 && ShootDirection.y() == 0) {
+        player->setState(PlayerState::WalkDown);
+    } else if (Direction.y() == -1 && ShootDirection.y() == 0) {
+        player->setState(PlayerState::WalkUp);
+    } else if (Direction.y() == 0 && ShootDirection.y() == 1) {
+        player->setState(PlayerState::ShootDown);
+    } else if (Direction.y() == 0 && ShootDirection.y() == -1) {
+        player->setState(PlayerState::ShootUp);
+    }
+    if (Direction.x() == 1 && ShootDirection.x() == 0) {
+        player->setState(PlayerState::WalkRight);
+    } else if (Direction.x() == -1 && ShootDirection.x() == 0) {
+        player->setState(PlayerState::WalkLeft);
+    } else if (Direction.x() == 0 && ShootDirection.x() == 1) {
+        player->setState(PlayerState::ShootRight);
+    } else if (Direction.x() == 0 && ShootDirection.x() == -1) {
+        player->setState(PlayerState::ShootLeft);
+    }
+    if (ShootDirection.y() == 1 && (Direction.x() !=0 ||Direction.y() != 0)) {
+        player->setState(PlayerState::ShootDownWalk);
+    } else if (ShootDirection.y() == -1 && (Direction.x() !=0 ||Direction.y() != 0)) {
+        player->setState(PlayerState::ShootUpWalk);
+    }
+    if (ShootDirection.x() == 1 && (Direction.x() !=0 ||Direction.y() != 0)) {
+        player->setState(PlayerState::ShootRightWalk);
+    } else if (ShootDirection.x() == -1 && (Direction.x() !=0 ||Direction.y() != 0)) {
+        player->setState(PlayerState::ShootLeftWalk);
+    }
+    if (ShootDirection.x() == 0 && ShootDirection.y() == 0 && Direction.x() == 0 && Direction.y() == 0) {
+        player->setState(PlayerState::Idle);
     }
 }
 
-void GameWidget::keyReleaseEvent(QKeyEvent *event) {
-    m_viewModel->setPlayerMoveDirection({0,0}, false);
-}
+

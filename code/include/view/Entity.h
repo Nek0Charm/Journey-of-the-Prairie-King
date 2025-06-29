@@ -1,26 +1,52 @@
 #ifndef ENTITY_H
 #define ENTITY_H
-#include <QObject> // 可以继承QObject以便未来使用信号槽，或者不继承任何东西
+#include <QObject> 
 #include <QPointF>
+#include <QPainter>
+#include <QMap>
 #include "view/Animation.h"
 #include "view/SpriteManager.h"
 
 class Entity : public QObject {
     Q_OBJECT
 public:
-    Entity(const QString& animationName, QObject* parent = nullptr);
-    ~Entity();
-    void update(double deltaTime, QPointF new_pos, QPointF shoot_direction);
-    void update(double deltaTime, QPointF new_pos);
-    void paint(QPainter* painter, const QPixmap& spriteSheet);
+    explicit Entity(QObject* parent = nullptr);
+    virtual ~Entity();
+
+    virtual void update(double deltaTime);
+    virtual void paint(QPainter* painter, const QPixmap& spriteSheet);
+
     void setPosition(const QPointF& pos) { m_position = pos; }
     const QPointF& getPosition() const { return m_position; }
-    void setDirection(const QPointF& dir) { direction = dir; }
-    const QPointF& getDirection() const { return direction; }
-private:
     QPointF m_position;
-    Animation* m_animation;
-    QPointF direction = {2, 2};
+};
+
+enum class PlayerState {
+    Idle,
+    WalkDown,
+    WalkUp,
+    WalkLeft,
+    WalkRight,
+    ShootDown,
+    ShootUp,
+    ShootLeft,
+    ShootRight,
+    ShootDownWalk,
+    ShootUpWalk,
+    ShootLeftWalk,
+    ShootRightWalk
+};
+class PlayerEntity : public Entity {
+public:
+    PlayerEntity(QObject* parent = nullptr);
+    ~PlayerEntity() override;
+    void paint(QPainter* painter, const QPixmap& spriteSheet) override;
+    void setState(PlayerState newState);
+    void update(double deltaTime);
+private:
+    QMap<PlayerState, Animation*> m_animations;
+    PlayerState m_currentState; 
+    Animation* m_currentAnimation;
 };
 
 #endif // ENTITY_H
