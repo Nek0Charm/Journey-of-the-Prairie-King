@@ -4,7 +4,8 @@
 #define UI_LEFT 27
 #define UI_UP 16
 
-GameWidget::GameWidget(QWidget *parent) : QWidget(parent) {
+GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent) 
+    : QWidget(parent), m_viewModel(viewModel) {
     bool isLoaded = SpriteManager::instance().loadFromFile(":/assert/sprite.json");
     if (!isLoaded) {
         qDebug() << "错误：加载 :/assert/sprite.json 文件失败！";
@@ -20,7 +21,8 @@ GameWidget::GameWidget(QWidget *parent) : QWidget(parent) {
     if (!m_gameMap->loadFromFile(":/assert/gamemap.json", "map_1", "1")) { 
         qWarning() << "GameWidget: 地图未能加载，地图将不会被绘制。";
     }
-    m_entity.append(new Entity("player_walk_left")); 
+    player = new Entity("player_walk_left");
+    m_entity.append(new Entity("orc_walk")); 
     Entity* another_orc = new Entity("orc_walk");
     another_orc->setPosition(QPointF(200, 200));
     m_entity.append(another_orc);
@@ -28,6 +30,7 @@ GameWidget::GameWidget(QWidget *parent) : QWidget(parent) {
     m_currentTime = 60.0; 
     m_timer = new QTimer(this); // 临时时钟
     connect(m_timer, &QTimer::timeout, this, &GameWidget::gameLoop);
+    connect(m_viewModel, &GameViewModel::playerPositonChanged, this, &GameWidget::playerPositionChanged);
     m_timer->start(16);
     m_elapsedTimer.start();
 }
@@ -39,6 +42,9 @@ GameWidget::~GameWidget() {
 
 void GameWidget::gameLoop() {
     double deltaTime = m_elapsedTimer.restart() / 1000.0;
+    if (player) {
+        player->update(deltaTime, player->getPosition()); // 第二个参数可能需要调整
+    }
     // m_animation->update(deltaTime);
     if (m_currentTime > 0) {
         m_currentTime -= deltaTime;
@@ -46,9 +52,14 @@ void GameWidget::gameLoop() {
         m_currentTime = 0;
     }
     for (Entity* enemy : m_entity) {
-        enemy->update(deltaTime);
+        enemy->update(deltaTime, {150, 200});
     }
     this->update();
+}
+
+void GameWidget::playerPositionChanged() {
+    player->setPosition(m_viewModel->getPlayerPosition());
+    qDebug() << m_viewModel->getPlayerPosition();
 }
 
 // void GameWidget::onStateUpdated() {
@@ -60,6 +71,7 @@ void GameWidget::paintEvent(QPaintEvent *event) {
     painter.setRenderHint(QPainter::Antialiasing, false);
     paintMap(&painter);
     paintUi(&painter);
+    player->paint(&painter, m_spriteSheet);
     for (Entity* enemy : m_entity) {
         enemy->paint(&painter, m_spriteSheet); 
     }
@@ -152,4 +164,28 @@ void GameWidget::paintUi(QPainter *painter) {
         moneyRectF.center().y() + Mfont.pointSize() / 2.0 
     );
     painter->drawText(moneyTextPos, moneyText);
+}
+
+void GameWidget::keyPressEvent(QKeyEvent *event) {
+    switch (event->key()) {
+        case Qt::Key_W:
+            m_viewModel->setPlayerMoveDirection({0,-1}, true);
+            break;
+        case Qt::Key_S:
+            m_viewModel->setPlayerMoveDirection({0,1}, true);
+            break;
+        case Qt::Key_A:
+            m_viewModel->setPlayerMoveDirection({-1,0}, true);
+            break;
+        case Qt::Key_D:
+            m_viewModel->setPlayerMoveDirection({1,0}, true);
+            break;
+        default:
+            QWidget::keyPressEvent(event);
+            break;
+    }
+}
+
+void GameWidget::keyReleaseEvent(QKeyEvent *event) {
+    m_viewModel->setPlayerMoveDirection({0,0}, false);
 }

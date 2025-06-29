@@ -1,4 +1,4 @@
-#include "viewmodel/playerviewmodel.h"
+#include "viewmodel/PlayerViewModel.h"
 #include <QDebug>
 #include <cmath>
 

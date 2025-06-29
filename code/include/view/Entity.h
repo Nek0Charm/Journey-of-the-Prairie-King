@@ -10,7 +10,7 @@ class Entity : public QObject {
 public:
     Entity(const QString& animationName, QObject* parent = nullptr);
     ~Entity();
-    void update(double deltaTime);
+    void update(double deltaTime, QPointF new_pos);
     void paint(QPainter* painter, const QPixmap& spriteSheet);
     void setPosition(const QPointF& pos) { m_position = pos; }
     const QPointF& getPosition() const { return m_position;}

@@ -15,15 +15,15 @@ Entity::~Entity() {
     delete m_animation;
 }
 
-void Entity::update(double deltaTime) {
+void Entity::update(double deltaTime, QPointF new_pos) {
     if (m_animation) {
         m_animation->update(deltaTime);
     }
+    setPosition(new_pos);
 }
 
 void Entity::paint(QPainter* painter, const QPixmap& spriteSheet) {
     if (!m_animation) return;
-
     const QString& currentFrameName = m_animation->getCurrentFrameName();
     QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
     double scale = 5.0; 
