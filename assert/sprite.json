@@ -17,7 +17,7 @@
     "player_walk_leg_3": { "x": 111, "y": 86, "w": 16, "h": 3},
     "player_walk_leg_4": { "x": 111, "y": 89, "w": 16, "h": 3},
 
-    "player_bullet_pistol": { "x": 389, "y": 112, "w": 4, "h": 4},
+    "player_bullet": { "x": 389, "y": 112, "w": 4, "h": 4},
 
     "ui_circle": {"x": 465, "y": 96, "w": 11, "h": 16 },
     "ui_item_ground": {"x": 165, "y": 134, "w": 22, "h": 22},

@@ -9,12 +9,12 @@ class PlayerViewModel : public QObject {
 public:
     struct PlayerStats {
         int lives = 4;
-        QPointF position = QPointF(8*16, 8*16);
+        QPointF position = QPointF(128, 128);
         QPointF movingDirection = QPointF(0, 0);
         QPointF shootingDirection = QPointF(1, 0);
         bool moving = false;
         double moveSpeed = 100.0;
-        double shootCooldown = 200;
+        double shootCooldown = 1;
     };
 
     

@@ -10,13 +10,17 @@ class Entity : public QObject {
 public:
     Entity(const QString& animationName, QObject* parent = nullptr);
     ~Entity();
+    void update(double deltaTime, QPointF new_pos, QPointF shoot_direction);
     void update(double deltaTime, QPointF new_pos);
     void paint(QPainter* painter, const QPixmap& spriteSheet);
     void setPosition(const QPointF& pos) { m_position = pos; }
-    const QPointF& getPosition() const { return m_position;}
+    const QPointF& getPosition() const { return m_position; }
+    void setDirection(const QPointF& dir) { direction = dir; }
+    const QPointF& getDirection() const { return direction; }
 private:
     QPointF m_position;
     Animation* m_animation;
+    QPointF direction = {2, 2};
 };
 
 #endif // ENTITY_H

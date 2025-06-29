@@ -15,6 +15,30 @@ Entity::~Entity() {
     delete m_animation;
 }
 
+void Entity::update(double deltaTime, QPointF new_pos, QPointF shoot_direction) {
+    if (shoot_direction != direction) {
+        direction = shoot_direction;
+        if (shoot_direction == QPointF(0, 1)) {
+            QList<QString> frameNames = SpriteManager::instance().getAnimationSequence("player_walk_down");
+            m_animation = new Animation(frameNames, 8.0, true);
+        } else if (shoot_direction == QPointF(0, -1)) {
+            QList<QString> frameNames = SpriteManager::instance().getAnimationSequence("player_walk_up");
+            m_animation = new Animation(frameNames, 8.0, true);
+        } else if (shoot_direction == QPointF(-1, 0)) {
+            QList<QString> frameNames = SpriteManager::instance().getAnimationSequence("player_walk_left");
+            m_animation = new Animation(frameNames, 8.0, true);
+        } else if (shoot_direction == QPointF(1, 0)) {
+            QList<QString> frameNames = SpriteManager::instance().getAnimationSequence("player_walk_right");
+            m_animation = new Animation(frameNames, 8.0, true);
+        }
+    }
+    
+    if (m_animation) {
+        m_animation->update(deltaTime);
+    }
+    setPosition(new_pos);
+}
+
 void Entity::update(double deltaTime, QPointF new_pos) {
     if (m_animation) {
         m_animation->update(deltaTime);
