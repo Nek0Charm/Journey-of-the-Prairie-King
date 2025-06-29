@@ -31,8 +31,8 @@ public:
     Q_INVOKABLE void pauseGame();
     Q_INVOKABLE void resumeGame();
     Q_INVOKABLE void endGame();
-    Q_INVOKABLE void playerAttack();
-    Q_INVOKABLE void playerMove(const QPointF& direction);
+    Q_INVOKABLE void playerAttack(const QPointF& direction);
+    Q_INVOKABLE void setPlayerMoveDirection(const QPointF& direction, bool isMoving);
 
     // 游戏循环
     void updateGame(double deltaTime);
@@ -48,10 +48,6 @@ public:
     
 signals:
     void gameStateChanged(GameState state);
-    void gameOver();
-    void gameStarted();
-    void gamePaused();
-    void gameResumed();
     
 private:
     GameState m_gameState = MENU;
@@ -65,6 +61,8 @@ private:
     void setupConnections();
     void initializeComponents();
     void resetGame();
+    void handlePlayerHitByEnemy(int enemyId);
+    void handleEnemyHitByBullet(int bulletId, int enemyId);
 };
 
 #endif // GAMEVIEWMODEL_H

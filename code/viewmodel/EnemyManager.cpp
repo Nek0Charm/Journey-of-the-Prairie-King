@@ -57,32 +57,25 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos)
         if (enemy.isActive) {
             updateEnemyAI(enemy, playerPos);
             
-            // 更新位置
             enemy.position += enemy.velocity * deltaTime;
             
-            // 检查是否到达玩家位置
-            double distanceToPlayer = calculateDistance(enemy.position, playerPos);
-            if (distanceToPlayer < 30.0) { // 碰撞距离
-                emit enemyReachedPlayer(enemy.id);
-            }
         }
     }
     
     removeInactiveEnemies();
 }
 
-void EnemyManager::damageEnemy(int enemyId, int damage)
+void EnemyManager::damageEnemy(int bulletId,int enemyId)
 {
     for (auto& enemy : m_enemies) {
         if (enemy.id == enemyId && enemy.isActive) {
-            enemy.health -= damage;
-            
-            emit enemyDamaged(enemyId, enemy.health);
-            
+            enemy.health -= 1;
+                        
             if (enemy.health <= 0) {
                 enemy.isActive = false;
-                emit enemyDestroyed(enemyId);
+                emit enemyCountChanged(getActiveEnemyCount());
                 qDebug() << "Enemy destroyed, ID:" << enemyId;
+                
             }
             break;
         }
@@ -119,9 +112,6 @@ int EnemyManager::getActiveEnemyCount() const
 
 QPointF EnemyManager::getRandomSpawnPosition() const
 {
-    // 屏幕边界 (假设800x600)
-    const int screenWidth = 800;
-    const int screenHeight = 600;
     const int margin = 50;
     
     QPointF position;
@@ -129,16 +119,16 @@ QPointF EnemyManager::getRandomSpawnPosition() const
     
     switch (side) {
     case 0: // 上边
-        position = QPointF(QRandomGenerator::global()->bounded(screenWidth), -margin);
+        position = QPointF(QRandomGenerator::global()->bounded(MAP_WIDTH), -margin);
         break;
     case 1: // 右边
-        position = QPointF(screenWidth + margin, QRandomGenerator::global()->bounded(screenHeight));
+        position = QPointF(MAP_WIDTH + margin, QRandomGenerator::global()->bounded(MAP_HEIGHT));
         break;
     case 2: // 下边
-        position = QPointF(QRandomGenerator::global()->bounded(screenWidth), screenHeight + margin);
+        position = QPointF(QRandomGenerator::global()->bounded(MAP_WIDTH), MAP_HEIGHT + margin);
         break;
     case 3: // 左边
-        position = QPointF(-margin, QRandomGenerator::global()->bounded(screenHeight));
+        position = QPointF(-margin, QRandomGenerator::global()->bounded(MAP_HEIGHT));
         break;
     }
     
@@ -166,8 +156,8 @@ void EnemyManager::removeInactiveEnemies()
 bool EnemyManager::isPositionValid(const QPointF& position) const
 {
     // 检查位置是否在合理范围内
-    return position.x() >= -100 && position.x() <= 900 &&
-           position.y() >= -100 && position.y() <= 700;
+    return position.x() >= -100 && position.x() <= MAP_WIDTH + 100 &&
+           position.y() >= -100 && position.y() <= MAP_HEIGHT + 100;
 }
 
 QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos) const
@@ -177,6 +167,13 @@ QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const 
     
     if (distance > 0) {
         direction /= distance; // 归一化
+    }
+    if (std::abs(direction.x()) > std::abs(direction.y())) {
+        direction.setY(0);
+        direction.setX(direction.x() > 0 ? 1 : -1);
+    } else {
+        direction.setX(0);
+        direction.setY(direction.y() > 0 ? 1 : -1);
     }
     
     return direction;

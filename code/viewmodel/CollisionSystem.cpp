@@ -1,8 +1,5 @@
-#include "viewmodel/CollisionSystem.h"
-#include "viewmodel/PlayerViewModel.h"
-#include "viewmodel/EnemyManager.h"
 #include <QDebug>
-#include <cmath>
+#include "viewmodel/CollisionSystem.h"
 
 CollisionSystem::CollisionSystem(QObject *parent)
     : QObject(parent)
@@ -14,7 +11,7 @@ CollisionSystem::CollisionSystem(QObject *parent)
 
 void CollisionSystem::checkCollisions(const PlayerViewModel& player,
                                     const QList<EnemyManager::EnemyData>& enemies,
-                                    const QList<BulletData>& bullets)
+                                    const QList<BulletViewModel::BulletData>& bullets)
 {
     // 检查玩家与敌人的碰撞
     checkPlayerEnemyCollisions(player, enemies);
@@ -37,7 +34,7 @@ void CollisionSystem::checkPlayerEnemyCollisions(const PlayerViewModel& player,
     }
 }
 
-void CollisionSystem::checkBulletEnemyCollisions(const QList<BulletData>& bullets,
+void CollisionSystem::checkBulletEnemyCollisions(const QList<BulletViewModel::BulletData>& bullets,
                                                const QList<EnemyManager::EnemyData>& enemies)
 {
     for (const auto& bullet : bullets) {
@@ -47,11 +44,7 @@ void CollisionSystem::checkBulletEnemyCollisions(const QList<BulletData>& bullet
             if (enemy.isActive && checkBulletEnemyCollision(bullet.position, enemy.position)) {
                 emit enemyHitByBullet(bullet.id, enemy.id);
                 logCollision("Bullet-Enemy", bullet.id, enemy.id);
-                
-                // 如果子弹不能穿透，则停止检查这颗子弹
-                if (!bullet.canPenetrate) {
-                    break;
-                }
+                break;
             }
         }
     }

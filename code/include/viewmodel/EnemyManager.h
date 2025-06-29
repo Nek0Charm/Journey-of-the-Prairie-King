@@ -29,7 +29,7 @@ public:
     
     // 敌人管理
     void updateEnemies(double deltaTime, const QPointF& playerPos);
-    void damageEnemy(int enemyId, int damage);
+    void damageEnemy(int bulletId ,int enemyId);
     void removeEnemy(int enemyId);
     void clearAllEnemies();
     
@@ -64,6 +64,7 @@ private:
     void removeInactiveEnemies();
     bool isPositionValid(const QPointF& position) const;
     QPointF calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos) const;
+    double calculateDistance(const QPointF& pos1, const QPointF& pos2) const;
 };
 
 #endif // ENEMYMANAGER_H
