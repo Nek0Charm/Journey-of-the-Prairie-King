@@ -66,51 +66,51 @@
  "composites": {
     "player_walk_left_frame_1": [
       { "frame": "player_body_left", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_1", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_1", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_left_frame_2": [
       { "frame": "player_body_left", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_2", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_2", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_left_frame_3": [
       { "frame": "player_body_left", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_3", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_3", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_left_frame_4": [
       { "frame": "player_body_left", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_4", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_4", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_right_frame_1": [
       { "frame": "player_body_right", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_1", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_1", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_right_frame_2": [
       { "frame": "player_body_right", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_2", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_2", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_right_frame_3": [
       { "frame": "player_body_right", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_3", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_3", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_right_frame_4": [
       { "frame": "player_body_right", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_4", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_4", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_up_frame_1": [
       { "frame": "player_body_up", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_1", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_1", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_up_frame_2": [
       { "frame": "player_body_up", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_2", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_2", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_up_frame_3": [
       { "frame": "player_body_up", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_3", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_3", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_up_frame_4": [
       { "frame": "player_body_up", "offset": { "x": 0, "y": 0 } },
-      { "frame": "player_walk_leg_4", "offset": { "x": 0, "y": 11 } }
+      { "frame": "player_walk_leg_4", "offset": { "x": 0, "y": 13 } }
     ],
     "player_walk_down_frame_1": [
       { "frame": "player_walk_leg_1", "offset": { "x": 0, "y": 13 } },

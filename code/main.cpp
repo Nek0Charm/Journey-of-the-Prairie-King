@@ -1,7 +1,9 @@
-#include "app/application.h"
+#include "view/MainWindow.h"
 
 int main(int argc, char *argv[])
 {
-    Application app(argc, argv);
-    return app.run();
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+    return a.exec();
 }

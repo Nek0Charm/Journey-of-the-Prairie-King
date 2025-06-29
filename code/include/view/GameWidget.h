@@ -4,9 +4,12 @@
 #include <QWidget>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <QPainter>
+#include <iostream>
 #include "view/GameMap.h"
 #include "view/Animation.h"
-
+#include "view/SpriteManager.h"
+#include "view/Entity.h"
 class GameWidget : public QWidget {
     Q_OBJECT
 
@@ -17,16 +20,22 @@ public:
 protected:
     void paintEvent(QPaintEvent *event) override;
     void paintMap(QPainter *painter);
+    void paintUi(QPainter *painter);
 
+public slots:
+    // void onStateUpdated();
 private slots:
-    void gameLoop(); // 游戏主循环
+    void gameLoop(); // 临时函数
 
 private:
-    QTimer* m_timer;            // 驱动游戏循环的定时器
-    QElapsedTimer m_elapsedTimer; // 用于计算帧之间的时间差 (deltaTime)
+    QTimer* m_timer;            // 临时变量
+    QElapsedTimer m_elapsedTimer; // 临时变量
     GameMap* m_gameMap;
-    QPixmap m_spriteSheet;      // 雪碧图
-    Animation* m_playerWalk;      // 玩家的行走动画实例
+    QPixmap m_spriteSheet;
+    QList<Entity*> m_entity;
+    // Animation* m_animation;      
+    double m_maxTime;      
+    double m_currentTime;  
 };
 
-#endif // GAMEWIDGET_H
+#endif

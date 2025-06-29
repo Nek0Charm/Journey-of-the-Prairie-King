@@ -1,8 +1,4 @@
 #include "view/SpriteManager.h"
-#include <QFile>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QDebug>
 
 SpriteManager& SpriteManager::instance() {
     static SpriteManager instance;

@@ -1,10 +1,12 @@
 #ifndef GAMEMAP_H
 #define GAMEMAP_H
 
-#include <QList>
 #include <QMap>
 #include <QString>
-
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 class GameMap {
 public:
     GameMap();

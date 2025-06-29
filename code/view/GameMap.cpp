@@ -1,9 +1,4 @@
-#include "view/Gamemap.h"
-#include <QFile>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QDebug>
+#include "view/GameMap.h"
 
 GameMap::GameMap() : m_width(16), m_height(16) {}
 

@@ -1,21 +1,27 @@
-file(GLOB_RECURSE SOURCES 
-    "./*.cpp"
-    "app/*.cpp"
-    "view/*.cpp"
-    "viewmodel/*.cpp"
+set(SOURCES
+    main.cpp
+    view/MainWindow.cpp
+    view/StartWidget.cpp
+    view/GameWidget.cpp
+    view/GameMap.cpp
+    view/Animation.cpp
+    view/SpriteManager.cpp
+    view/Entity.cpp
 )
 
-file(GLOB_RECURSE HEADERS
-    "include/*.h"
-    "include/app/*.h"
-    "include/view/*.h"
-    "include/viewmodel/*.h"
+set(HEADERS
+    include/view/MainWindow.h
+    include/view/StartWidget.h
+    include/view/GameWidget.h
+    include/view/GameMap.h
+    include/view/Animation.h
+    include/view/SpriteManager.h
+    include/view/Entity.h
 )
 
-file(GLOB_RECURSE RESOURCES
-    "resources/*.qrc"
+set(RESOURCES
+    ../resource.qrc
 )
-
 
 add_executable(MaodieAdventure 
     ${SOURCES}
@@ -25,9 +31,9 @@ add_executable(MaodieAdventure
 
 target_include_directories(MaodieAdventure PRIVATE
     include
-    include/app
+    # include/app
     include/view
-    include/viewmodel
+    # include/viewmodel
 )
 
 target_precompile_headers(MaodieAdventure PRIVATE

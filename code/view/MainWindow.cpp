@@ -1,51 +1,37 @@
 #include "view/MainWindow.h"
-#include "view/menuview.h"
-#include <QApplication>
+// #include "view/menuview.h"
+#include "view/StartWidget.h"
+#include "view/GameWidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QWidget(parent)
-    , m_layout(nullptr)
-    , m_stackedWidget(nullptr)
-    , m_menuView(nullptr)
-{
-}
-
-bool MainWindow::initialize() {
+    : QMainWindow(parent) {
     setWindowTitle("Maodie Adventure");
     setupUi();
     setupConnections();
-    return true;
 }
 
 void MainWindow::setupUi() {
-    resize(800, 600);
-    setMinimumSize(600, 400);
-    
-    m_layout = new QVBoxLayout(this);
-    m_layout->setContentsMargins(0, 0, 0, 0);
-    
+    resize(1550, 1390); // (16*16+54)*5 = 1550, (16*16+22)*5 = 1390
+    setFixedSize(1550, 1390);
+    this->setStyleSheet("background-color: black;");  
     m_stackedWidget = new QStackedWidget(this);
-    
-    m_menuView = new MenuView(this);
-    m_menuView->initialize();
-    
-    m_stackedWidget->addWidget(m_menuView);
-    
-    m_stackedWidget->setCurrentWidget(m_menuView);
-    
-    m_layout->addWidget(m_stackedWidget);
-    
-    setLayout(m_layout);
+    m_startWidget = new StartWidget(this);
+    m_gameWidget = new GameWidget(this);
+    m_stackedWidget->addWidget(m_startWidget);
+    m_stackedWidget->addWidget(m_gameWidget);
+    this->setCentralWidget(m_stackedWidget);
+    m_stackedWidget->setCurrentWidget(m_startWidget);
 }
 
 void MainWindow::setupConnections() {
-    if (m_menuView) {
-        connect(m_menuView, &MenuView::startGameRequested, this, &MainWindow::onStartGameRequested);
-        connect(m_menuView, &MenuView::exitGameRequested, this, &MainWindow::onExitGameRequested);
+    if (m_startWidget) {
+        connect(m_startWidget, &StartWidget::startGameClicked, this, &MainWindow::onStartGameRequested);
+        connect(m_startWidget, &StartWidget::exitGameClicked, this, &MainWindow::onExitGameRequested);
     }
 }
 
 void MainWindow::onStartGameRequested() {
+    m_stackedWidget->setCurrentWidget(m_gameWidget);
 }
 
 void MainWindow::onExitGameRequested() {

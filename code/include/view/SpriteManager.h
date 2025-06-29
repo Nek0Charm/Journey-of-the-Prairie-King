@@ -1,12 +1,12 @@
 #ifndef SPRITEMANAGER_H
 #define SPRITEMANAGER_H
-
-#include <QObject>
 #include <QMap>
 #include <QRect>
-#include <QString>
 #include <QJsonObject>
 #include <QPoint>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonArray>
 
 // 一个描述复合精灵的部件的结构体
 struct SpritePart {
