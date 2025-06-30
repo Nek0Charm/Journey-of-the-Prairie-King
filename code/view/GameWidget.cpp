@@ -55,8 +55,7 @@ void GameWidget::gameLoop() {
     for (auto& it: m_monsters) {
         it->update(deltaTime);
     }
-    
-    for (auto it = m_deadmonsters.begin(); it != m_deadmonsters.end(); ) { // 使用迭代器循环
+    for (auto it = m_deadmonsters.begin(); it != m_deadmonsters.end(); ) {
         DeadMonsterEntity* deadMonster = it.value();
         int monsterId = it.key();
 
@@ -149,7 +148,7 @@ void GameWidget::paintMap(QPainter *painter, const QPointF& viewOffset) {
 }
 
 void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
-    int healthCount = m_viewModel->getPlayerLives();
+    int healthCount = m_viewModel->getPlayerLives() - 1;
     int moneyCount = 5; 
     double ui_margin = 3.0;
     

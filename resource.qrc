@@ -3,5 +3,6 @@
         <file>assert/sprite.png</file>
         <file>assert/sprite.json</file>
         <file>assert/gamemap.json</file>
+        <file>assert/gameover.png</file>
     </qresource>
 </RCC>

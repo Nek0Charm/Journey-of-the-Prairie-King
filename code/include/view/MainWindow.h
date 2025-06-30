@@ -12,6 +12,7 @@
 using namespace std;
 class GameWidget;
 class StartWidget;
+class EndWidget;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -21,13 +22,17 @@ public:
     ~MainWindow() = default;
     void setupUi();
     void setupConnections();
+    void update();
 private slots:
     void onStartGameRequested();
     void onExitGameRequested();
+    void onRestartGameRequested();
+    void onExitToMenuRequested();
 private:
     QStackedWidget *m_stackedWidget;
     GameWidget *m_gameWidget;
     StartWidget *m_startWidget;
     GameViewModel *m_gameViewModel;
+    EndWidget *m_endWidget; 
 };
 #endif // MAINWINDOW_H

@@ -58,5 +58,6 @@ void Application::calculateDeltaTime() {
 }
 
 void Application::onGameStateChanged() {
+    m_view->update();
     return;
 }

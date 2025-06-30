@@ -17,6 +17,7 @@ class GameWidget : public QWidget {
 
 public:
     GameWidget(GameViewModel *viewModel, QWidget *parent = nullptr);
+    void clearKeys() {keys.clear();};
     ~GameWidget();
 
 protected:
