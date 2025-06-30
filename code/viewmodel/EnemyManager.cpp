@@ -2,6 +2,7 @@
 #include <QRandomGenerator>
 #include <QDebug>
 #include <cmath>
+#include "../../precomp.h"
 
 EnemyManager::EnemyManager(QObject *parent)
     : QObject(parent)

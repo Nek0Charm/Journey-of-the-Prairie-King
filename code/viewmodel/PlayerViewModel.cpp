@@ -1,6 +1,6 @@
 #include "viewmodel/PlayerViewModel.h"
 #include <QDebug>
-#include <cmath>
+#include "../../precomp.h"
 
 PlayerViewModel::PlayerViewModel(QObject *parent)
     : QObject(parent)

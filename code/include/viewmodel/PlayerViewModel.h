@@ -1,6 +1,10 @@
 #ifndef __PLAYER_VIEW_MODEL_H__
 #define __PLAYER_VIEW_MODEL_H__
 
+#include <QObject>
+#include <QPointF>
+#include <QList>
+#include <memory>
 #include "viewmodel/BulletViewModel.h"
 
 class PlayerViewModel : public QObject {
