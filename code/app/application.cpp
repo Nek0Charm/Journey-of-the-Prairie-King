@@ -69,27 +69,7 @@ void Application::calculateDeltaTime() {
 }
 
 void Application::onGameStateChanged() {
-    if (!m_viewModel) return;
-    
-    GameViewModel::GameState state = m_viewModel->getGameState();
-    qDebug() << "[Application] Game state changed to:" << state;
-    
-    switch (state) {
-        case GameViewModel::MENU:
-            // 菜单音乐
-            AudioManager::instance().playMusic(OVERWORLD);
-            break;
-        case GameViewModel::PLAYING:
-            // 游戏进行中的音乐
-            AudioManager::instance().playMusic(OVERWORLD);
-            break;
-        case GameViewModel::PAUSED:
-            // 暂停时暂停音乐
-            AudioManager::instance().pauseMusic();
-            break;
-        case GameViewModel::GAME_OVER:
-            // 游戏结束时的音乐
-            AudioManager::instance().playMusic(THE_OUTLAW);
-            break;
-    }
+    m_view->update();
+    // 音乐播放逻辑已移至AudioEventListener中处理
+    qDebug() << "[Application] Game state changed, music handled by AudioEventListener";
 }

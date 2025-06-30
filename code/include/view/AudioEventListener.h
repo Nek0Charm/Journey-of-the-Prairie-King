@@ -2,11 +2,10 @@
 #define AUDIOEVENTLISTENER_H
 
 #include <QObject>
-#include <QString>
-#include <QDebug>
+#include <QPointF>
+#include "viewmodel/GameViewModel.h"
 
 // 前向声明
-class GameViewModel;
 class PlayerViewModel;
 
 /**
@@ -17,10 +16,11 @@ class PlayerViewModel;
  */
 class AudioEventListener : public QObject
 {
-    Q_OBJECT
+    Q_OBJECT  // MOC: 重新生成元对象信息
 
 public:
     explicit AudioEventListener(QObject *parent = nullptr);
+    ~AudioEventListener() = default;
     
     /**
      * @brief 设置游戏视图模型
@@ -43,10 +43,13 @@ private slots:
     void onPlayerHit();
     
     // 玩家事件音效槽函数
-    void onPlayerMove();
+    void onPlayerMove(const QPointF& position);
     
     // 射击事件音效槽函数
     void onPlayerShot(const QPointF& direction);
+    
+    // 游戏状态变化槽函数
+    void onGameStateChanged(GameViewModel::GameState state);
 
 private:
     GameViewModel* m_gameViewModel;

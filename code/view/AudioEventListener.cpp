@@ -69,6 +69,15 @@ void AudioEventListener::connectGameEvents()
     
     qDebug() << "[DEBUG] GameViewModel信号连接结果: playerDied=" << connected1 << ", playerLivesChanged=" << connected2;
     
+    // 新增：连接游戏状态变化信号
+    bool connected5 = connect(m_gameViewModel, &GameViewModel::gameStateChanged, this, &AudioEventListener::onGameStateChanged);
+    qDebug() << "[DEBUG] gameStateChanged信号连接结果:" << connected5;
+    if (connected5) {
+        qDebug() << "[DEBUG] gameStateChanged信号连接成功！";
+    } else {
+        qDebug() << "[DEBUG] gameStateChanged信号连接失败！";
+    }
+    
     // 连接玩家事件信号
     if (m_playerViewModel) {
         qDebug() << "[DEBUG] m_playerViewModel存在，准备连接positionChanged信号";
@@ -94,7 +103,7 @@ void AudioEventListener::connectGameEvents()
         qDebug() << "[DEBUG] m_playerViewModel为null，无法连接positionChanged信号";
     }
     
-  
+    qDebug() << "AudioEventListener: 开始监听游戏事件";
 }
 
 void AudioEventListener::disconnectGameEvents()
@@ -119,9 +128,9 @@ void AudioEventListener::onPlayerHit()
 }
 
 // 玩家事件音效槽函数实现
-void AudioEventListener::onPlayerMove()
+void AudioEventListener::onPlayerMove(const QPointF& position)
 {
-    qDebug() << "[DEBUG] onPlayerMove called";
+    qDebug() << "[DEBUG] onPlayerMove called with position:" << position;
     qDebug() << "AudioEventListener: 播放玩家移动音效";
     static int moveCounter = 0;
     if (++moveCounter % 5 == 0) {
@@ -134,4 +143,30 @@ void AudioEventListener::onPlayerShot(const QPointF& direction)
 {
     qDebug() << "AudioEventListener: 播放射击音效";
     AudioManager::instance().playSound(SHOOT);
+}
+
+// 游戏状态变化事件音效槽函数实现
+void AudioEventListener::onGameStateChanged(GameViewModel::GameState state)
+{
+    qDebug() << "AudioEventListener: 游戏状态变化，当前状态:" << state;
+    
+    // 根据游戏状态变化播放相应的背景音乐
+    switch (state) {
+        case GameViewModel::MENU:
+            qDebug() << "AudioEventListener: 播放菜单音乐";
+            AudioManager::instance().playMusic(MENU);
+            break;
+        case GameViewModel::PLAYING:
+            qDebug() << "AudioEventListener: 播放游戏音乐";
+            AudioManager::instance().playMusic(OVERWORLD);
+            break;
+        case GameViewModel::PAUSED:
+            qDebug() << "AudioEventListener: 暂停音乐";
+            AudioManager::instance().pauseMusic();
+            break;
+        case GameViewModel::GAME_OVER:
+            qDebug() << "AudioEventListener: 播放游戏结束音乐";
+            AudioManager::instance().playMusic(THE_OUTLAW);
+            break;
+    }
 } 
