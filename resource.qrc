@@ -20,7 +20,7 @@
         
         <!-- 音乐资源 -->
         <file>assert/music/TheOutlaw.mp3</file>
-        <file>assert/music/FinalBoss_Ending.mp3</file>
+        <file>assert/music/FinalBossEnding.mp3</file>
         <file>assert/music/Overworld.mp3</file>
     </qresource>
 </RCC>

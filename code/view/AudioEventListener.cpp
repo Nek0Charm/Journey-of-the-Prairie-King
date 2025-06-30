@@ -6,6 +6,11 @@
 #include <QObject>
 #include <QDebug>
 #include <QString>
+/**
+ * @file AudioEventListener.cpp
+ * @brief 音频事件监听器
+ * 负责监听相关事件，调用audiomanager播放音效
+ */
 
 AudioEventListener::AudioEventListener(QObject *parent)
     : QObject(parent)

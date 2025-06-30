@@ -1,4 +1,6 @@
 #include "app/Application.h"
+#include "view/AudioManager.h"
+#include <QDebug>
 
 Application::Application(int &argc, char **argv)
     : QApplication(argc, argv)
@@ -6,6 +8,8 @@ Application::Application(int &argc, char **argv)
     , m_frameTimer()
     , m_deltaTime(0.0)
     , m_lastFrameTime(0) {
+    qDebug() << "Application starting up...";
+    AudioManager::instance().initialize();
     setupGameLoop();
 }
 

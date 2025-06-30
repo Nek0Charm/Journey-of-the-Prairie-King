@@ -46,18 +46,18 @@ void AudioManager::loadSoundEffects()
     
     // 创建音效映射
     QMap<SoundType, QString> soundPaths = {
-        {SHOOT, ":/assert/sound/Cowboy_gunshot.wav"},
-        {HIT, ":/assert/sound/cowboy_monsterhit.wav"},
-        {ENEMY_DEATH, ":/assert/sound/cowboy_gopher.wav"},
-        {PLAYER_HURT, ":/assert/sound/cowboy_dead.wav"},
-        {POWERUP, ":/assert/sound/cowboy_powerup.wav"},
-        {EXPLOSION, ":/assert/sound/cowboy_explosion.wav"},
-        {FOOTSTEP, ":/assert/sound/Cowboy_Footstep.wav"},
-        {GUNLOAD, ":/assert/sound/cowboy_gunload.wav"},
-        {SECRET, ":/assert/sound/Cowboy_Secret.wav"},
-        {UNDEAD, ":/assert/sound/cowboy_undead.wav"},
-        {COIN_PICKUP, ":/assert/sound/Pickup_Coin15.wav"},
-        {BUTTON_CLICK, ":/assert/sound/Cowboy_gunshot.wav"} // 使用射击音效作为按钮音效
+        {SHOOT, ":/assert/sound/Cowboy_gunshot.mp3"},
+        {HIT, ":/assert/sound/cowboy_monsterhit.mp3"},
+        {ENEMY_DEATH, ":/assert/sound/cowboy_gopher.mp3"},
+        {PLAYER_HURT, ":/assert/sound/cowboy_dead.mp3"},
+        {POWERUP, ":/assert/sound/cowboy_powerup.mp3"},
+        {EXPLOSION, ":/assert/sound/cowboy_explosion.mp3"},
+        {FOOTSTEP, ":/assert/sound/Cowboy_Footstep.mp3"},
+        {GUNLOAD, ":/assert/sound/cowboy_gunload.mp3"},
+        {SECRET, ":/assert/sound/Cowboy_Secret.mp3"},
+        {UNDEAD, ":/assert/sound/cowboy_undead.mp3"},
+        {COIN_PICKUP, ":/assert/sound/Pickup_Coin15.mp3"},
+        {BUTTON_CLICK, ":/assert/sound/Cowboy_gunshot.mp3"} // 使用射击音效作为按钮音效
     };
     
     // 加载每个音效
@@ -255,18 +255,18 @@ bool AudioManager::isMusicEnabled() const
 QString AudioManager::getSoundPath(SoundType type) const
 {
     QMap<SoundType, QString> soundPaths = {
-        {SHOOT, ":/assert/sound/Cowboy_gunshot.wav"},
-        {HIT, ":/assert/sound/cowboy_monsterhit.wav"},
-        {ENEMY_DEATH, ":/assert/sound/cowboy_gopher.wav"},
-        {PLAYER_HURT, ":/assert/sound/cowboy_dead.wav"},
-        {POWERUP, ":/assert/sound/cowboy_powerup.wav"},
-        {EXPLOSION, ":/assert/sound/cowboy_explosion.wav"},
-        {FOOTSTEP, ":/assert/sound/Cowboy_Footstep.wav"},
-        {GUNLOAD, ":/assert/sound/cowboy_gunload.wav"},
-        {SECRET, ":/assert/sound/Cowboy_Secret.wav"},
-        {UNDEAD, ":/assert/sound/cowboy_undead.wav"},
-        {COIN_PICKUP, ":/assert/sound/Pickup_Coin15.wav"},
-        {BUTTON_CLICK, ":/assert/sound/Cowboy_gunshot.wav"}
+        {SHOOT, ":/assert/sound/Cowboy_gunshot.mp3"},
+        {HIT, ":/assert/sound/cowboy_monsterhit.mp3"},
+        {ENEMY_DEATH, ":/assert/sound/cowboy_gopher.mp3"},
+        {PLAYER_HURT, ":/assert/sound/cowboy_dead.mp3"},
+        {POWERUP, ":/assert/sound/cowboy_powerup.mp3"},
+        {EXPLOSION, ":/assert/sound/cowboy_explosion.mp3"},
+        {FOOTSTEP, ":/assert/sound/Cowboy_Footstep.mp3"},
+        {GUNLOAD, ":/assert/sound/cowboy_gunload.mp3"},
+        {SECRET, ":/assert/sound/Cowboy_Secret.mp3"},
+        {UNDEAD, ":/assert/sound/cowboy_undead.mp3"},
+        {COIN_PICKUP, ":/assert/sound/Pickup_Coin15.mp3"},
+        {BUTTON_CLICK, ":/assert/sound/Cowboy_gunshot.mp3"}
     };
     
     return soundPaths.value(type, QString());
@@ -275,10 +275,10 @@ QString AudioManager::getSoundPath(SoundType type) const
 QString AudioManager::getMusicPath(MusicType type) const
 {
     QMap<MusicType, QString> musicPaths = {
-        {OVERWORLD, ":/assert/music/Overworld.opus"},
-        {THE_OUTLAW, ":/assert/music/TheOutlaw.opus"},
-        {FINAL_BOSS, ":/assert/music/FinalBoss_Ending.opus"},
-        {MENU, ":/assert/music/Overworld.opus"}
+        {OVERWORLD, ":/assert/music/Overworld.mp3"},
+        {THE_OUTLAW, ":/assert/music/TheOutlaw.mp3"},
+        {FINAL_BOSS, ":/assert/music/FinalBossEnding.mp3"},
+        {MENU, ":/assert/music/Overworld.mp3"}
     };
     
     return musicPaths.value(type, QString());
