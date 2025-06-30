@@ -186,73 +186,45 @@ void GameWidget::keyPressEvent(QKeyEvent *event) {
 void GameWidget::keyReleaseEvent(QKeyEvent *event) {     
     keys[event->key()] = false;
     QWidget::keyReleaseEvent(event);
-    return;        
-    m_viewModel->setPlayerMoveDirection({0,0}, false);
-    player->setState(PlayerState::Idle);
 }
 
 void GameWidget::timerEvent(QTimerEvent* event) {
-    QPointF Direction = QPointF(0, 0);
+    QPointF moveDirection(0, 0);
+    if (keys[Qt::Key_W]) { moveDirection.ry() -= 1; }
+    if (keys[Qt::Key_S]) { moveDirection.ry() += 1; }
+    if (keys[Qt::Key_A]) { moveDirection.rx() -= 1; }
+    if (keys[Qt::Key_D]) { moveDirection.rx() += 1; }
+
+    QPointF shootDirection(0, 0);
+    if (keys[Qt::Key_Up])    { shootDirection.ry() -= 1; }
+    if (keys[Qt::Key_Down])  { shootDirection.ry() += 1; }
+    if (keys[Qt::Key_Left])  { shootDirection.rx() -= 1; }
+    if (keys[Qt::Key_Right]) { shootDirection.rx() += 1; }
     PlayerViewModel* playerVM = m_viewModel->getPlayer();
     if (!playerVM) return;
-    if (keys[Qt::Key_S]) {
-        Direction += QPointF(0, 1);
-    }
-    if (keys[Qt::Key_W]) {
-        Direction += QPointF(0, -1);
-    }
-    if (keys[Qt::Key_A]) {
-        Direction += QPointF(-1, 0);
-    }
-    if (keys[Qt::Key_D]) {
-        Direction += QPointF(1, 0);
-    }
-    playerVM->setMovingDirection(Direction);
 
-    QPointF ShootDirection;
-    if (keys[Qt::Key_Down]) {
-        ShootDirection += QPointF(0, 1);
+    playerVM->setMovingDirection(moveDirection);
+    if (!shootDirection.isNull()) { 
+        playerVM->shoot(shootDirection);
     }
-    if (keys[Qt::Key_Up]) {
-        ShootDirection += QPointF(0, -1);
-    }
-    if (keys[Qt::Key_Left]) {
-        ShootDirection += QPointF(-1, 0);
-    }
-    if (keys[Qt::Key_Right]) {
-        ShootDirection += QPointF(1, 0);
-    }
-    playerVM->shoot(ShootDirection);
-
-    if (Direction.y() == 1 && ShootDirection.y() == 0) {
-        player->setState(PlayerState::WalkDown);
-    } else if (Direction.y() == -1 && ShootDirection.y() == 0) {
-        player->setState(PlayerState::WalkUp);
-    } else if (Direction.y() == 0 && ShootDirection.y() == 1) {
-        player->setState(PlayerState::ShootDown);
-    } else if (Direction.y() == 0 && ShootDirection.y() == -1) {
-        player->setState(PlayerState::ShootUp);
-    }
-    if (Direction.x() == 1 && ShootDirection.x() == 0) {
-        player->setState(PlayerState::WalkRight);
-    } else if (Direction.x() == -1 && ShootDirection.x() == 0) {
-        player->setState(PlayerState::WalkLeft);
-    } else if (Direction.x() == 0 && ShootDirection.x() == 1) {
-        player->setState(PlayerState::ShootRight);
-    } else if (Direction.x() == 0 && ShootDirection.x() == -1) {
-        player->setState(PlayerState::ShootLeft);
-    }
-    if (ShootDirection.y() == 1 && (Direction.x() !=0 ||Direction.y() != 0)) {
-        player->setState(PlayerState::ShootDownWalk);
-    } else if (ShootDirection.y() == -1 && (Direction.x() !=0 ||Direction.y() != 0)) {
-        player->setState(PlayerState::ShootUpWalk);
-    }
-    if (ShootDirection.x() == 1 && (Direction.x() !=0 ||Direction.y() != 0)) {
-        player->setState(PlayerState::ShootRightWalk);
-    } else if (ShootDirection.x() == -1 && (Direction.x() !=0 ||Direction.y() != 0)) {
-        player->setState(PlayerState::ShootLeftWalk);
-    }
-    if (ShootDirection.x() == 0 && ShootDirection.y() == 0 && Direction.x() == 0 && Direction.y() == 0) {
+    bool isMoving = !moveDirection.isNull();
+    bool isShooting = !shootDirection.isNull();
+    if (isShooting && isMoving) {
+        if (shootDirection.x() < 0)       player->setState(PlayerState::ShootLeftWalk);
+        else if (shootDirection.x() > 0)  player->setState(PlayerState::ShootRightWalk);
+        else if (shootDirection.y() < 0)  player->setState(PlayerState::ShootUpWalk);
+        else if (shootDirection.y() > 0)  player->setState(PlayerState::ShootDownWalk);
+    } else if (isShooting) {
+        if (shootDirection.x() < 0)       player->setState(PlayerState::ShootLeft);
+        else if (shootDirection.x() > 0)  player->setState(PlayerState::ShootRight);
+        else if (shootDirection.y() < 0)  player->setState(PlayerState::ShootUp);
+        else if (shootDirection.y() > 0)  player->setState(PlayerState::ShootDown);
+    } else if (isMoving) {
+        if (moveDirection.x() < 0)       player->setState(PlayerState::WalkLeft);
+        else if (moveDirection.x() > 0)  player->setState(PlayerState::WalkRight);
+        else if (moveDirection.y() < 0)  player->setState(PlayerState::WalkUp);
+        else if (moveDirection.y() > 0)  player->setState(PlayerState::WalkDown);
+    } else {
         player->setState(PlayerState::Idle);
     }
 }
