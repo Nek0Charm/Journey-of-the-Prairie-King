@@ -14,7 +14,7 @@ public:
         QPointF shootingDirection = QPointF(1, 0);
         bool moving = false;
         double moveSpeed = 100.0;
-        double shootCooldown = 1;
+        double shootCooldown = 0.2;
     };
 
     

@@ -157,6 +157,18 @@
       "player_walk_down_frame_3",
       "player_walk_down_frame_4"
     ],
+    "player_shoot_down": [
+      "player_walk_down_frame_2"
+    ],
+    "player_shoot_up": [
+      "player_walk_up_frame_2"
+    ],
+    "player_shoot_left": [
+      "player_walk_left_frame_2"
+    ],
+    "player_shoot_right": [
+      "player_walk_right_frame_2"
+    ],
     "orc_walk": [
       "orc_walk_1",
       "orc_walk_2"

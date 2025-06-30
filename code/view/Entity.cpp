@@ -1,54 +1,55 @@
 #include "view/Entity.h"
-#include <QPainter>
+#include "view/SpriteManager.h"
 
-Entity::Entity(const QString& animationName, QObject* parent) : QObject(parent) {
-    QList<QString> frameNames = SpriteManager::instance().getAnimationSequence(animationName);
-    if (!frameNames.isEmpty()) {
-        m_animation = new Animation(frameNames, 8.0, true);
-    } else {
-        m_animation = nullptr;
-    }
+Entity::Entity(QObject* parent) : QObject(parent), m_position(0, 0) {};
+
+Entity::~Entity() {}
+
+void Entity::update(double deltaTime) {}
+void Entity::paint(QPainter* painter, const QPixmap& spriteSheet) {}
+
+PlayerEntity::PlayerEntity(QObject *parent) : Entity(parent) {
+    m_currentState = PlayerState::Idle;
+    m_animations[PlayerState::Idle]      = new Animation(SpriteManager::instance().getAnimationSequence("player_idle"), 8.0, true);
+    m_animations[PlayerState::WalkDown]  = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_down"), 8.0, true);
+    m_animations[PlayerState::WalkUp]    = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_up"), 8.0, true);
+    m_animations[PlayerState::WalkLeft]  = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_left"), 8.0, true);
+    m_animations[PlayerState::WalkRight] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_right"), 8.0, true);
+    m_animations[PlayerState::ShootDown]  = new Animation(SpriteManager::instance().getAnimationSequence("player_shoot_down"), 8.0, true);
+    m_animations[PlayerState::ShootUp]    = new Animation(SpriteManager::instance().getAnimationSequence("player_shoot_up"), 8.0, true);
+    m_animations[PlayerState::ShootLeft]  = new Animation(SpriteManager::instance().getAnimationSequence("player_shoot_left"), 8.0, true);
+    m_animations[PlayerState::ShootRight] = new Animation(SpriteManager::instance().getAnimationSequence("player_shoot_right"), 8.0, true);
+    m_animations[PlayerState::ShootDownWalk]  = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_down"), 8.0, true);
+    m_animations[PlayerState::ShootUpWalk]    = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_up"), 8.0, true);
+    m_animations[PlayerState::ShootLeftWalk]  = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_left"), 8.0, true);
+    m_animations[PlayerState::ShootRightWalk] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_right"), 8.0, true);
+    m_currentAnimation = m_animations.value(m_currentState, nullptr);
     m_position = QPointF(16*8, 16*8);
 }
 
-Entity::~Entity() {
-    delete m_animation;
+PlayerEntity::~PlayerEntity() {
+    qDeleteAll(m_animations);
 }
 
-void Entity::update(double deltaTime, QPointF new_pos, QPointF shoot_direction) {
-    if (shoot_direction != direction) {
-        direction = shoot_direction;
-        if (shoot_direction == QPointF(0, 1)) {
-            QList<QString> frameNames = SpriteManager::instance().getAnimationSequence("player_walk_down");
-            m_animation = new Animation(frameNames, 8.0, true);
-        } else if (shoot_direction == QPointF(0, -1)) {
-            QList<QString> frameNames = SpriteManager::instance().getAnimationSequence("player_walk_up");
-            m_animation = new Animation(frameNames, 8.0, true);
-        } else if (shoot_direction == QPointF(-1, 0)) {
-            QList<QString> frameNames = SpriteManager::instance().getAnimationSequence("player_walk_left");
-            m_animation = new Animation(frameNames, 8.0, true);
-        } else if (shoot_direction == QPointF(1, 0)) {
-            QList<QString> frameNames = SpriteManager::instance().getAnimationSequence("player_walk_right");
-            m_animation = new Animation(frameNames, 8.0, true);
-        }
+void PlayerEntity::setState(PlayerState newState) {
+    if (m_currentState == newState) return; 
+
+    m_currentState = newState;
+    m_currentAnimation = m_animations.value(m_currentState, nullptr);
+    if (m_currentAnimation) {
+        m_currentAnimation->reset(); 
     }
-    
-    if (m_animation) {
-        m_animation->update(deltaTime);
-    }
-    setPosition(new_pos);
 }
 
-void Entity::update(double deltaTime, QPointF new_pos) {
-    if (m_animation) {
-        m_animation->update(deltaTime);
+void PlayerEntity::update(double deltaTime) {
+    if (m_currentAnimation) {
+        m_currentAnimation->update(deltaTime);
     }
-    setPosition(new_pos);
 }
 
-void Entity::paint(QPainter* painter, const QPixmap& spriteSheet) {
-    if (!m_animation) return;
-    const QString& currentFrameName = m_animation->getCurrentFrameName();
+void PlayerEntity::paint(QPainter* painter, const QPixmap& spriteSheet) {
+    if (!m_currentAnimation) return;
+    const QString& currentFrameName = m_currentAnimation->getCurrentFrameName();
     QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
     double scale = 5.0; 
     QPointF destinationAnchor((m_position.x() + 27)*scale, (m_position.y() + 16)*scale);
@@ -68,5 +69,4 @@ void Entity::paint(QPainter* painter, const QPixmap& spriteSheet) {
         }
     }
 }
-
 
