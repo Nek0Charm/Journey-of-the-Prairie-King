@@ -24,7 +24,7 @@ void PlayerViewModel::shoot(const QPointF& direction)
 {
     if (canShoot() && !direction.isNull()) {
         m_stats.shootingDirection = direction;
-        m_bulletViewModel->createBullet(m_stats.position, direction, 500);
+        m_bulletViewModel->createBullet(m_stats.position, direction, 300);
         m_currentShootCooldown = m_stats.shootCooldown;
     }
 }
@@ -56,7 +56,7 @@ void PlayerViewModel::reset()
     m_stats.position = QPointF(MAP_WIDTH/2, MAP_HEIGHT/2);
     m_stats.shootingDirection = QPointF(1, 0);
     m_stats.moveSpeed = 100.0;
-    m_stats.shootCooldown = 20;
+    m_stats.shootCooldown = 0.2;
     
     m_bulletViewModel->clearAllBullets();
     m_currentShootCooldown = 0.0;

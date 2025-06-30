@@ -25,6 +25,7 @@ protected:
     void paintUi(QPainter *painter);
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
+    void timerEvent(QTimerEvent *event) override;
 
 public slots:
     // void onStateUpdated();
@@ -33,11 +34,13 @@ private slots:
     void playerPositionChanged();
 
 private:
+    QTimer* keyRespondTimer;
+    QMap<int, bool> keys;
     QTimer* m_timer;            // 临时变量
     QElapsedTimer m_elapsedTimer; // 临时变量
     GameMap* m_gameMap;
     QPixmap m_spriteSheet;
-    Entity* player;
+    PlayerEntity* player;
     QList<Entity*> m_entity;
     GameViewModel *m_viewModel;      
     double m_maxTime;      
