@@ -30,6 +30,7 @@ GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent)
     m_timer = new QTimer(this); // 临时时钟
     connect(m_timer, &QTimer::timeout, this, &GameWidget::gameLoop);
     connect(m_viewModel, &GameViewModel::playerPositonChanged, this, &GameWidget::playerPositionChanged);
+    connect(m_viewModel, &GameViewModel::playerLivesChanged, this, &GameWidget::playerLivesChanged);
     m_timer->start(16);
     m_elapsedTimer.start();
 }
@@ -59,9 +60,14 @@ void GameWidget::playerPositionChanged() {
     qDebug() << m_viewModel->getPlayerPosition();
 }
 
-// void GameWidget::onStateUpdated() {
-//     this->update(); 
-// }
+void GameWidget::playerLivesChanged() {
+    if (player->isInvincible()) {
+        return;
+    }
+    // qDebug() << "受伤了";
+    player->setInvincible(true);
+    player->setInvincibilityTime(100.0);
+}
 
 void GameWidget::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
@@ -88,9 +94,9 @@ void GameWidget::paintEvent(QPaintEvent *event) {
         QRect bulletSourceRect = SpriteManager::instance().getSpriteRect("player_bullet");
         if (!bulletSourceRect.isNull()) {
             for (const auto& bullet : bullets) {
-                qDebug() << "bullet";
+                // qDebug() << "bullet";
                 QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(10, 10)) * (SCALE, SCALE);
-                qDebug() << bullet.position;
+                // qDebug() << bullet.position;
                 QSizeF scaledSize(bulletSourceRect.width() * SCALE, bulletSourceRect.height() * SCALE);
                 QRectF destRect(topLeft, scaledSize);
                 destRect.translate(viewOffset);

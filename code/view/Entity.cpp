@@ -42,7 +42,22 @@ void PlayerEntity::setState(PlayerState newState) {
     }
 }
 
+bool PlayerEntity::isVisible() const {
+    if (!m_isInvincible) {
+        return true;
+    }
+    return static_cast<int>(m_invincibilityTimer / 10) % 2 == 0;
+}
+
 void PlayerEntity::update(double deltaTime) {
+    if (m_isInvincible) {
+        m_invincibilityTimer -= deltaTime; 
+        if (m_invincibilityTimer <= 0) {
+            m_isInvincible = false; 
+            m_invincibilityTimer = 0;
+            // qDebug() << "无敌时间结束。";
+        }
+    }
     if (m_currentAnimation) {
         m_currentAnimation->update(deltaTime);
     }
@@ -50,6 +65,7 @@ void PlayerEntity::update(double deltaTime) {
 
 void PlayerEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) {
     if (!m_currentAnimation) return;
+    if (!isVisible()) return;
     const QString& currentFrameName = m_currentAnimation->getCurrentFrameName();
     QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
     double scale = 5.0; 

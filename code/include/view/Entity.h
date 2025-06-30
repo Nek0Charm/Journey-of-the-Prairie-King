@@ -43,10 +43,16 @@ public:
     void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
     void setState(PlayerState newState);
     void update(double deltaTime);
+    bool isVisible() const;
+    bool isInvincible() const {return m_isInvincible;}
+    void setInvincible(bool res) {m_isInvincible = res;}
+    void setInvincibilityTime(int t) {m_invincibilityTimer = t;}
 private:
     QMap<PlayerState, Animation*> m_animations;
     PlayerState m_currentState; 
     Animation* m_currentAnimation;
+    int m_invincibilityTimer = 0;
+    bool m_isInvincible = false;
 };
 
 class MonsterEntity : public Entity {
