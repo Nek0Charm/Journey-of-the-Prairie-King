@@ -52,6 +52,11 @@ public:
         m_bulletViewModel->removeBullet(bulletId);
     }
 
+    void setPositon(const QPointF& position) {
+        m_stats.position = position;
+        emit positionChanged(m_stats.position);
+    }
+
 signals:
     void playerDied();
     void livesChanged();

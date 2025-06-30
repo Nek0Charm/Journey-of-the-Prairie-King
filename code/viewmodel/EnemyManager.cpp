@@ -18,8 +18,12 @@ void EnemyManager::spawnEnemies(double deltaTime)
     m_spawnTimer += deltaTime;
     
     if (m_spawnTimer >= m_spawnInterval && getActiveEnemyCount() < m_maxEnemies) {
-        spawnEnemyAtRandomPosition();
+        int spawnCount = QRandomGenerator::global()->bounded(1, 4);
+        for (int i = 0; i < spawnCount; ++i) {
+            spawnEnemyAtRandomPosition();
+        }
         m_spawnTimer = 0.0;
+        m_spawnInterval = std::max(0.9, m_spawnInterval * 0.95); // 减少生成间隔
     }
 }
 
