@@ -55,6 +55,13 @@ private:
     bool m_isInvincible = false;
 };
 
+
+enum class MonsterState {
+    Walking,
+    Dying, 
+    Dead   
+};
+
 class MonsterEntity : public Entity {
     Q_OBJECT
 public:
@@ -62,14 +69,37 @@ public:
     ~MonsterEntity() override;
     void update(double deltaTime) override;
     void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
-    
+    void setState(MonsterState newState) { m_currentState = newState; }
     void setVelocity(const QPointF& velocity);
-
+    QString getType() const {return monsterType;}
 private:
+    QMap<MonsterState, Animation*> m_animations;
     Animation* m_animation;    
     QPointF m_velocity; 
     QString monsterType;
+    MonsterState m_currentState; 
 };
 
+enum class DeadMonsterState {
+    Dying, 
+    Dead   
+};
+
+class DeadMonsterEntity : public Entity {
+    Q_OBJECT
+public:
+    explicit DeadMonsterEntity(const QString& monsterType, QObject* parent = nullptr);
+    explicit DeadMonsterEntity(const MonsterEntity& monserentity);
+    ~DeadMonsterEntity() override;
+    void update(double deltaTime) override;
+    void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
+    void setState(DeadMonsterState newState) { m_currentState = newState; }
+    bool ShouldbeRemove() { return m_lingerTimer <= 0; }
+private:
+    Animation* m_animation;
+    QString monsterType;
+    DeadMonsterState m_currentState;
+    double m_lingerTimer;
+};
 
 #endif // ENTITY_H

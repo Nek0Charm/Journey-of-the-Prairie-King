@@ -7,6 +7,7 @@ public:
     void update(double deltaTime);
     const QString& getCurrentFrameName() const;
     void reset();
+    bool isFinished() const;
 
 private:
     QList<QString> m_frameNames; 

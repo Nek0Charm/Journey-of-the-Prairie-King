@@ -84,7 +84,7 @@ void EnemyManager::damageEnemy(int bulletId,int enemyId)
                 enemy.isActive = false;
                 emit enemyCountChanged(getActiveEnemyCount());
                 qDebug() << "Enemy destroyed, ID:" << enemyId;
-                
+                emit enemyDestroyed(enemy.id);
             }
             break;
         }
