@@ -25,7 +25,6 @@ GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent)
     player = new PlayerEntity();
     setFocusPolicy(Qt::StrongFocus); 
     startTimer(1000/60);
-
     m_maxTime = MAX_GAMETIME; 
     m_currentTime = MAX_GAMETIME; 
     m_timer = new QTimer(this); // 临时时钟
@@ -67,11 +66,22 @@ void GameWidget::playerPositionChanged() {
 void GameWidget::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, false);
-    paintMap(&painter);
-    paintUi(&painter);
-    player->paint(&painter, m_spriteSheet);
+    QPointF viewOffset(0, 0);
+     if (m_gameMap && m_gameMap->getWidth() > 0) {
+        double worldContentWidth = (m_gameMap->getWidth() * 16) * SCALE;
+        double worldContentHeight = (m_gameMap->getHeight() * 16) * SCALE;
+        double offsetX = (this->width() - worldContentWidth) / 2.0;
+        double offsetY = (this->height() - worldContentHeight) / 2.0;
+        viewOffset.setX(offsetX);
+        viewOffset.setY(offsetY);
+    }
+    painter.fillRect(rect(), Qt::black); 
+
+    paintMap(&painter, viewOffset);
+    paintUi(&painter, viewOffset);
+    player->paint(&painter, m_spriteSheet, viewOffset);
     for (MonsterEntity* monster : m_monsters) {
-        monster->paint(&painter, m_spriteSheet); 
+        monster->paint(&painter, m_spriteSheet, viewOffset); 
     }
     if (m_viewModel && m_viewModel->getPlayer()) {
         const auto& bullets = m_viewModel->getPlayer()->getActiveBullets();
@@ -79,17 +89,18 @@ void GameWidget::paintEvent(QPaintEvent *event) {
         if (!bulletSourceRect.isNull()) {
             for (const auto& bullet : bullets) {
                 qDebug() << "bullet";
-                QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(UI_LEFT, UI_UP) + QPointF(10, 10)) * (SCALE, SCALE);
+                QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(10, 10)) * (SCALE, SCALE);
                 qDebug() << bullet.position;
                 QSizeF scaledSize(bulletSourceRect.width() * SCALE, bulletSourceRect.height() * SCALE);
                 QRectF destRect(topLeft, scaledSize);
+                destRect.translate(viewOffset);
                 painter.drawPixmap(destRect, m_spriteSheet, bulletSourceRect);
             }
         }
     }
 }
 
-void GameWidget::paintMap(QPainter *painter) {
+void GameWidget::paintMap(QPainter *painter, const QPointF& viewOffset) {
     painter->setRenderHint(QPainter::Antialiasing, false);
     if (m_gameMap && m_gameMap->getWidth() > 0) {
         for (int row = 0; row < m_gameMap->getHeight(); ++row) {
@@ -98,9 +109,10 @@ void GameWidget::paintMap(QPainter *painter) {
                 QString spriteName = m_gameMap->getTileSpriteName(tileId);
                 QRect sourceRect = SpriteManager::instance().getSpriteRect(spriteName);
                 if (sourceRect.isNull()) continue;
-                double destX = (col * sourceRect.width() + UI_LEFT)* SCALE;
-                double destY = (row * sourceRect.height() + UI_UP)* SCALE;
+                double destX = (col * sourceRect.width())* SCALE;
+                double destY = (row * sourceRect.height())* SCALE;
                 QRectF destRect(destX, destY, sourceRect.width() * SCALE, sourceRect.height() * SCALE);
+                destRect.translate(viewOffset);
                 painter->drawPixmap(destRect, m_spriteSheet, sourceRect);
             }
         }
@@ -109,29 +121,31 @@ void GameWidget::paintMap(QPainter *painter) {
     }
 }
 
-void GameWidget::paintUi(QPainter *painter) {
+void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     int healthCount = m_viewModel->getPlayerLives();
     int moneyCount = 5; 
     double ui_margin = 3.0;
     
     QRect circleRect = SpriteManager::instance().getSpriteRect("ui_circle");
-    QRectF circleRectF(UI_LEFT*SCALE, 0, 
-        circleRect.width()*SCALE , circleRect.height()*SCALE);
+    QRectF circleRectF(0, -(circleRect.height()+ui_margin/4)*SCALE, circleRect.width()*SCALE , circleRect.height()*SCALE);
+    circleRectF.translate(viewOffset);
     painter->drawPixmap(circleRectF, m_spriteSheet, circleRect);
 
     QRect itemRect = SpriteManager::instance().getSpriteRect("ui_item_ground");
-    QRectF itemRectF(ui_margin*SCALE, UI_UP*SCALE, 
-        itemRect.width()*SCALE, itemRect.height()*SCALE);
+    QRectF itemRectF(-(itemRect.width() + ui_margin)*SCALE, 0, itemRect.width()*SCALE, itemRect.height()*SCALE);
+    QPointF itemBottomLeft = itemRectF.bottomLeft();
+    itemRectF.translate(viewOffset);
     painter->drawPixmap(itemRectF, m_spriteSheet, itemRect);
 
     QRect healthRect = SpriteManager::instance().getSpriteRect("ui_helth");
-    QRectF healthRectF((ui_margin-2)*SCALE, itemRectF.bottom()+ui_margin*SCALE, 
-        healthRect.width()*SCALE, healthRect.height()*SCALE);
+    QRectF healthRectF(itemBottomLeft.x(), (itemBottomLeft.y() + ui_margin*SCALE), healthRect.width()*SCALE, healthRect.height()*SCALE);
+    QPointF healthBottomLeft = healthRectF.bottomLeft();
+    healthRectF.translate(viewOffset);
     painter->drawPixmap(healthRectF, m_spriteSheet, healthRect);
 
     QRect moneyRect = SpriteManager::instance().getSpriteRect("ui_money");
-    QRectF moneyRectF((ui_margin-2)*SCALE, healthRectF.bottom()+ui_margin*SCALE, 
-        moneyRect.width()*SCALE, moneyRect.height()*SCALE);
+    QRectF moneyRectF(healthBottomLeft.x(), (healthBottomLeft.y() + ui_margin*SCALE), moneyRect.width()*SCALE, moneyRect.height()*SCALE);
+    moneyRectF.translate(viewOffset);
     painter->drawPixmap(moneyRectF, m_spriteSheet, moneyRect);
 
     if (m_maxTime > 0) { 
@@ -141,7 +155,7 @@ void GameWidget::paintUi(QPainter *painter) {
         QColor barFillColor = Qt::green;
 
         QPointF barTopLeft(
-            circleRectF.right() + (ui_margin-2)*SCALE, 
+            circleRectF.right() + (ui_margin)*SCALE, 
             circleRectF.center().y() - barHeight / 2.0 + 3*SCALE
         );
         QRectF barBackgroundRect(barTopLeft, QSizeF(barWidth, barHeight));
@@ -160,7 +174,7 @@ void GameWidget::paintUi(QPainter *painter) {
     painter->setFont(Hfont);
     painter->setPen(Qt::white);
     QPointF healthtextPos(
-        healthRectF.right() + (ui_margin-1) * SCALE, 
+        healthRectF.right() + (ui_margin/2) * SCALE, 
         healthRectF.center().y() + Hfont.pointSize() / 2.0 
     );
     painter->drawText(healthtextPos, healthText);
@@ -171,7 +185,7 @@ void GameWidget::paintUi(QPainter *painter) {
     painter->setFont(Mfont);
     painter->setPen(Qt::white); 
     QPointF moneyTextPos(
-        moneyRectF.right() + (ui_margin-1) * SCALE, 
+        moneyRectF.right() + (ui_margin/2) * SCALE, 
         moneyRectF.center().y() + Mfont.pointSize() / 2.0 
     );
     painter->drawText(moneyTextPos, moneyText);

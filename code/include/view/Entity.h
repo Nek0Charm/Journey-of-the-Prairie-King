@@ -14,7 +14,7 @@ public:
     virtual ~Entity();
 
     virtual void update(double deltaTime);
-    virtual void paint(QPainter* painter, const QPixmap& spriteSheet);
+    virtual void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset);
 
     void setPosition(const QPointF& pos) { m_position = pos; }
     const QPointF& getPosition() const { return m_position; }
@@ -40,7 +40,7 @@ class PlayerEntity : public Entity {
 public:
     PlayerEntity(QObject* parent = nullptr);
     ~PlayerEntity() override;
-    void paint(QPainter* painter, const QPixmap& spriteSheet) override;
+    void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
     void setState(PlayerState newState);
     void update(double deltaTime);
 private:
@@ -55,7 +55,7 @@ public:
     explicit MonsterEntity(const QString& monsterType, QObject* parent = nullptr);
     ~MonsterEntity() override;
     void update(double deltaTime) override;
-    void paint(QPainter* painter, const QPixmap& spriteSheet) override;
+    void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
     
     void setVelocity(const QPointF& velocity);
 

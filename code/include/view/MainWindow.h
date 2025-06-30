@@ -8,6 +8,7 @@
 #include <QString>
 #include <QKeyEvent>
 #include <iostream>
+#include <QScreen>
 using namespace std;
 class GameWidget;
 class StartWidget;

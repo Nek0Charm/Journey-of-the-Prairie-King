@@ -12,14 +12,8 @@ public:
     GameMap();
 
     bool loadFromFile(const QString& path, const QString& mapName, const QString& layoutName);
-
-    // 获取指定行列的图块ID
     int getTileIdAt(int row, int col) const;
-
-    // 根据图块ID获取它对应的精灵名字
     QString getTileSpriteName(int tileId) const;
-
-    // 获取地图的宽度（列数）和高度（行数）
     int getWidth() const;
     int getHeight() const;
 

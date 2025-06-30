@@ -21,8 +21,8 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *event) override;
-    void paintMap(QPainter *painter);
-    void paintUi(QPainter *painter);
+    void paintMap(QPainter *painter, const QPointF& viewOffset);
+    void paintUi(QPainter *painter, const QPointF& viewOffset);
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
