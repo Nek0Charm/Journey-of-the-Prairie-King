@@ -26,6 +26,7 @@ void PlayerViewModel::shoot(const QPointF& direction)
         m_stats.shootingDirection = direction;
         m_bulletViewModel->createBullet(m_stats.position, direction, 300);
         m_currentShootCooldown = m_stats.shootCooldown;
+        emit shot(direction);
     }
 }
 

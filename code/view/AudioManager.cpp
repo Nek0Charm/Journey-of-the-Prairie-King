@@ -4,20 +4,27 @@
 #include <QDebug>
 #include <QDir>
 #include <QCoreApplication>
-#include <QSoundEffect>
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QUrl>
 #include <QMap>
 #include <memory>
+#include <QFile>
 
 AudioManager::AudioManager(QObject *parent)
     : QObject(parent)
-    , m_musicPlayer(std::make_unique<QMediaPlayer>())
+    , m_musicPlayer(std::make_shared<QMediaPlayer>())
     , m_audioOutput(new QAudioOutput(this))
 {
     m_musicPlayer->setAudioOutput(m_audioOutput);
-    connect(m_musicPlayer.get(), &QMediaPlayer::playbackStateChanged, this, &AudioManager::onMusicPlaybackStateChanged);
+    connect(m_musicPlayer.get(), &QMediaPlayer::playbackStateChanged, 
+            this, [this](QMediaPlayer::PlaybackState state) {
+                onMusicPlaybackStateChanged(static_cast<int>(state));
+            });
+    connect(m_musicPlayer.get(), &QMediaPlayer::errorOccurred, 
+            this, [this](QMediaPlayer::Error error, const QString& errorString) {
+                onMediaPlayerError(static_cast<int>(error), errorString);
+            });
 }
 
 AudioManager& AudioManager::instance()
@@ -44,77 +51,114 @@ void AudioManager::loadSoundEffects()
 {
     qDebug() << "Loading sound effects...";
     
-    // 创建音效映射
-    QMap<SoundType, QString> soundPaths = {
-        {SHOOT, ":/assert/sound/Cowboy_gunshot.mp3"},
-        {HIT, ":/assert/sound/cowboy_monsterhit.mp3"},
-        {ENEMY_DEATH, ":/assert/sound/cowboy_gopher.mp3"},
-        {PLAYER_HURT, ":/assert/sound/cowboy_dead.mp3"},
-        {POWERUP, ":/assert/sound/cowboy_powerup.mp3"},
-        {EXPLOSION, ":/assert/sound/cowboy_explosion.mp3"},
-        {FOOTSTEP, ":/assert/sound/Cowboy_Footstep.mp3"},
-        {GUNLOAD, ":/assert/sound/cowboy_gunload.mp3"},
-        {SECRET, ":/assert/sound/Cowboy_Secret.mp3"},
-        {UNDEAD, ":/assert/sound/cowboy_undead.mp3"},
-        {COIN_PICKUP, ":/assert/sound/Pickup_Coin15.mp3"},
-        {BUTTON_CLICK, ":/assert/sound/Cowboy_gunshot.mp3"} // 使用射击音效作为按钮音效
-    };
+    // 清理旧的音效播放器
+    m_soundPlayers.clear();
     
-    // 加载每个音效
-    for (auto it = soundPaths.begin(); it != soundPaths.end(); ++it) {
-        auto soundEffect = new QSoundEffect();
-        soundEffect->setSource(QUrl(it.value()));
-        soundEffect->setVolume(m_soundVolume / 100.0);
-        soundEffect->setLoopCount(1);
-        
-        if (soundEffect->status() == QSoundEffect::Error) {
-             qWarning("Failed to load sound effect: %s, error: %d", 
-                    it.value().toStdString().c_str(), 
-                    soundEffect->status());
-            delete soundEffect;
-        } else {
-            m_soundEffects[it.key()] = soundEffect;
-            qDebug() << "Loaded sound effect:" << it.value();
+    // 为每个音效类型创建独立的播放器
+    for (int i = SHOOT; i <= BUTTON_CLICK; ++i) {
+        SoundType type = static_cast<SoundType>(i);
+        QString path = getSoundPath(type);
+        if (path.isEmpty()) {
+            qWarning() << "No path for sound type" << type;
+            continue;
         }
+
+        // 检查文件是否存在
+        QFile file(path);
+        if (!file.exists()) {
+            qWarning() << "Sound file does not exist:" << path;
+            continue;
+        }
+
+        // 检查文件大小
+        qint64 fileSize = file.size();
+        qDebug() << "Sound file size for type" << type << ":" << fileSize << "bytes";
+
+        // 创建新的播放器和音频输出
+        auto soundPlayer = std::make_shared<SoundPlayer>();
+        soundPlayer->player = std::make_shared<QMediaPlayer>();
+        soundPlayer->output = std::make_shared<QAudioOutput>();
+        
+        // 设置音频输出
+        soundPlayer->player->setAudioOutput(soundPlayer->output.get());
+        soundPlayer->output->setVolume(m_soundVolume / 100.0f);
+        
+        // 设置音频源
+        QUrl url = QUrl::fromLocalFile(path);
+        soundPlayer->player->setSource(url);
+        
+        // 检查设置后的状态
+        qDebug() << "Created sound player for type:" << type 
+                 << "from path:" << path
+                 << "source:" << soundPlayer->player->source()
+                 << "error:" << soundPlayer->player->error();
+        
+        m_soundPlayers[type] = std::move(soundPlayer);
     }
     
-    qDebug() << "Loaded" << m_soundEffects.size() << "sound effects";
+    qDebug() << "Created" << m_soundPlayers.size() << "sound players";
 }
 
 void AudioManager::loadMusic()
 {
     qDebug() << "Loading music...";
     
-    // 设置音乐播放器
-    m_musicPlayer->setSource(QUrl(getMusicPath(m_currentMusic)));
-
-    if (m_musicPlayer->error() != QMediaPlayer::NoError) {
-        qFatal("Failed to load music. Error: %d, Message: %s", 
-               m_musicPlayer->error(), 
-               m_musicPlayer->errorString().toStdString().c_str());
-    }
+    m_musicPlayer->setSource(QUrl::fromLocalFile(getMusicPath(m_currentMusic)));
 }
 
 void AudioManager::playSound(SoundType type)
 {
+    qDebug() << "[playSound] called, type:" << type
+             << "enabled:" << m_soundEnabled
+             << "muted:" << m_muted
+             << "volume:" << m_soundVolume;
     if (!m_soundEnabled || m_muted) {
+        qDebug() << "[playSound] skipped due to disabled or muted.";
         return;
     }
-    
-    auto it = m_soundEffects.find(type);
-    if (it != m_soundEffects.end() && it.value()) {
-        it.value()->play();
-        qDebug() << "Playing sound:" << type;
+    auto it = m_soundPlayers.find(type);
+    if (it != m_soundPlayers.end() && it.value()) {
+        auto& soundPlayer = it.value();
+        
+        // 检查音频输出状态
+        if (soundPlayer->output) {
+            qDebug() << "[playSound] Audio output volume:" << soundPlayer->output->volume()
+                     << "muted:" << soundPlayer->output->isMuted();
+        } else {
+            qWarning() << "[playSound] Audio output is null!";
+        }
+        
+        // 检查播放器状态
+        qDebug() << "[playSound] Player state before:" << soundPlayer->player->playbackState()
+                 << "error:" << soundPlayer->player->error()
+                 << "source:" << soundPlayer->player->source();
+        
+        // 如果正在播放，先停止再播放
+        if (soundPlayer->player->playbackState() == QMediaPlayer::PlayingState) {
+            soundPlayer->player->stop();
+        }
+        
+        // 重新设置源文件以确保从头播放
+        soundPlayer->player->setPosition(0);
+        soundPlayer->player->play();
+        
+        qDebug() << "[playSound] triggered play, QMediaPlayer state:" << soundPlayer->player->playbackState()
+                 << "error:" << soundPlayer->player->error();
+                 
+        // 检查播放后的状态
+        if (soundPlayer->player->error() != QMediaPlayer::NoError) {
+            qWarning() << "[playSound] Playback error:" << soundPlayer->player->errorString();
+        }
     } else {
-        qWarning() << "Sound effect not found:" << type;
+        qWarning() << "[playSound] Sound player not found for type:" << type;
     }
 }
 
 void AudioManager::stopSound(SoundType type)
 {
-    auto it = m_soundEffects.find(type);
-    if (it != m_soundEffects.end() && it.value()) {
-        it.value()->stop();
+    auto it = m_soundPlayers.find(type);
+    if (it != m_soundPlayers.end() && it.value()) {
+        it.value()->player->stop();
     }
 }
 
@@ -122,10 +166,10 @@ void AudioManager::setSoundVolume(int volume)
 {
     m_soundVolume = qBound(0, volume, 100);
     
-    // 更新所有音效的音量
-    for (auto it = m_soundEffects.begin(); it != m_soundEffects.end(); ++it) {
-        if (it.value()) {
-            it.value()->setVolume(m_soundVolume / 100.0);
+    // 更新所有音效播放器的音量
+    for (auto& soundPlayer : m_soundPlayers) {
+        if (soundPlayer && soundPlayer->output) {
+            soundPlayer->output->setVolume(m_soundVolume / 100.0f);
         }
     }
     
@@ -140,25 +184,28 @@ int AudioManager::getSoundVolume() const
 
 void AudioManager::playMusic(MusicType type)
 {
+    qDebug() << "[playMusic] called, type:" << type
+             << "enabled:" << m_musicEnabled
+             << "muted:" << m_muted
+             << "volume:" << m_musicVolume;
     if (!m_musicEnabled || m_muted) {
+        qDebug() << "[playMusic] skipped due to disabled or muted.";
         return;
     }
-    
     QString musicPath = getMusicPath(type);
     if (musicPath.isEmpty()) {
-        qWarning() << "Music path not found for type:" << type;
+        qWarning() << "[playMusic] Music path not found for type:" << type;
         return;
     }
-    
-    // 如果当前正在播放相同的音乐，不重复播放
-    if (m_currentMusic == type && m_musicPlayer->playbackState() == QMediaPlayer::PlayingState) {
+    if (m_currentMusic == type && m_musicPlayer->playbackState() != QMediaPlayer::StoppedState) {
+        qDebug() << "[playMusic] already playing this music.";
         return;
     }
-    
     m_currentMusic = type;
-    m_musicPlayer->setSource(QUrl(musicPath));
+    m_musicPlayer->setSource(QUrl::fromLocalFile(musicPath));
     m_musicPlayer->play();
-    
+    qDebug() << "[playMusic] triggered play, QMediaPlayer state:" << m_musicPlayer->playbackState()
+             << "error:" << m_musicPlayer->error();
     qDebug() << "Playing music:" << musicPath;
 }
 
@@ -201,12 +248,10 @@ void AudioManager::setMuted(bool muted)
     m_muted = muted;
     
     if (muted) {
-        // 静音时停止音乐
         if (m_musicPlayer->playbackState() == QMediaPlayer::PlayingState) {
             m_musicPlayer->pause();
         }
     } else {
-        // 取消静音时恢复音乐
         if (m_musicEnabled && m_musicPlayer->playbackState() == QMediaPlayer::PausedState) {
             m_musicPlayer->play();
         }
@@ -231,13 +276,6 @@ void AudioManager::setSoundEnabled(bool enabled)
 void AudioManager::setMusicEnabled(bool enabled)
 {
     m_musicEnabled = enabled;
-    
-    if (!enabled) {
-        m_musicPlayer->pause();
-    } else if (!m_muted) {
-        m_musicPlayer->play();
-    }
-    
     emit musicEnabledChanged(m_musicEnabled);
     qDebug() << "Music enabled set to:" << m_musicEnabled;
 }
@@ -254,49 +292,105 @@ bool AudioManager::isMusicEnabled() const
 
 QString AudioManager::getSoundPath(SoundType type) const
 {
-    QMap<SoundType, QString> soundPaths = {
-        {SHOOT, ":/assert/sound/Cowboy_gunshot.mp3"},
-        {HIT, ":/assert/sound/cowboy_monsterhit.mp3"},
-        {ENEMY_DEATH, ":/assert/sound/cowboy_gopher.mp3"},
-        {PLAYER_HURT, ":/assert/sound/cowboy_dead.mp3"},
-        {POWERUP, ":/assert/sound/cowboy_powerup.mp3"},
-        {EXPLOSION, ":/assert/sound/cowboy_explosion.mp3"},
-        {FOOTSTEP, ":/assert/sound/Cowboy_Footstep.mp3"},
-        {GUNLOAD, ":/assert/sound/cowboy_gunload.mp3"},
-        {SECRET, ":/assert/sound/Cowboy_Secret.mp3"},
-        {UNDEAD, ":/assert/sound/cowboy_undead.mp3"},
-        {COIN_PICKUP, ":/assert/sound/Pickup_Coin15.mp3"},
-        {BUTTON_CLICK, ":/assert/sound/Cowboy_gunshot.mp3"}
-    };
+    // 获取项目根目录（可执行文件的上级目录）
+    QString appDir = QCoreApplication::applicationDirPath();
+    QString projectRoot = appDir;
     
-    return soundPaths.value(type, QString());
+    // 如果在Debug或Release子目录中，需要向上两级到项目根目录
+    if (projectRoot.contains("/Debug") || projectRoot.contains("/Release") || 
+        projectRoot.contains("\\Debug") || projectRoot.contains("\\Release")) {
+        QDir dir(projectRoot);
+        if (dir.cdUp()) {
+            if (dir.cdUp()) {
+                projectRoot = dir.absolutePath();
+            }
+        }
+    }
+    
+    QString basePath = projectRoot + "/assert/sound";
+    
+    // 添加调试信息
+    qDebug() << "Sound base path:" << basePath;
+
+    switch (type) {
+        case SHOOT:       return basePath + "/Cowboy_gunshot.wav";
+        case HIT:         return basePath + "/cowboy_monsterhit.wav";
+        case ENEMY_DEATH: return basePath + "/cowboy_gopher.wav";
+        case PLAYER_HURT: return basePath + "/cowboy_dead.wav";
+        case POWERUP:     return basePath + "/cowboy_powerup.wav";
+        case EXPLOSION:   return basePath + "/cowboy_explosion.wav";
+        case FOOTSTEP:    return basePath + "/Cowboy_Footstep.wav";
+        case GUNLOAD:     return basePath + "/cowboy_gunload.wav";
+        case SECRET:      return basePath + "/Cowboy_Secret.wav";
+        case UNDEAD:      return basePath + "/cowboy_undead.wav";
+        case COIN_PICKUP: return basePath + "/Pickup_Coin15.wav";
+        case BUTTON_CLICK:return basePath + "/Cowboy_gunshot.wav"; 
+        default:          return "";
+    }
 }
 
 QString AudioManager::getMusicPath(MusicType type) const
 {
-    QMap<MusicType, QString> musicPaths = {
-        {OVERWORLD, ":/assert/music/Overworld.mp3"},
-        {THE_OUTLAW, ":/assert/music/TheOutlaw.mp3"},
-        {FINAL_BOSS, ":/assert/music/FinalBossEnding.mp3"},
-        {MENU, ":/assert/music/Overworld.mp3"}
-    };
+    // 获取项目根目录（可执行文件的上级目录）
+    QString appDir = QCoreApplication::applicationDirPath();
+    QString projectRoot = appDir;
     
-    return musicPaths.value(type, QString());
+    // 如果在Debug或Release子目录中，需要向上两级到项目根目录
+    if (projectRoot.contains("/Debug") || projectRoot.contains("/Release") || 
+        projectRoot.contains("\\Debug") || projectRoot.contains("\\Release")) {
+        QDir dir(projectRoot);
+        if (dir.cdUp()) {
+            if (dir.cdUp()) {
+                projectRoot = dir.absolutePath();
+            }
+        }
+    }
+    
+    QString basePath = projectRoot + "/assert/music";
+    
+    // 添加调试信息
+    qDebug() << "Music base path:" << basePath;
+
+    switch (type) {
+        case OVERWORLD:   return basePath + "/Overworld.wav";
+        case THE_OUTLAW:  return basePath + "/TheOutlaw.wav";
+        case FINAL_BOSS:  return basePath + "/FinalBossEnding.wav";
+        case MENU:        return basePath + "/Overworld.wav"; 
+        default:          return "";
+    }
 }
 
-void AudioManager::onMusicPlaybackStateChanged(QMediaPlayer::PlaybackState state)
+void AudioManager::onMusicPlaybackStateChanged(int state)
 {
-    if (state == QMediaPlayer::StoppedState) {
-        if (m_musicPlayer->position() > 0) { // 确保不是因为错误而停止
-            m_musicPlayer->play();
-        }
+    auto playbackState = static_cast<QMediaPlayer::PlaybackState>(state);
+    if (playbackState == QMediaPlayer::StoppedState) {
+        qDebug() << "Music finished, replaying.";
+        m_musicPlayer->play();
+    } else if (playbackState == QMediaPlayer::PlayingState) {
+        m_musicLoaded = true;
+    }
+}
+
+void AudioManager::onMediaPlayerError(int error, const QString &errorString)
+{
+    qWarning() << "Music player error:" << error << errorString;
+    // 尝试重新加载
+    if (!errorString.contains("internal service error")) {
+        playMusic(m_currentMusic);
     }
 }
 
 AudioManager::~AudioManager()
 {
-    qDeleteAll(m_soundEffects);
-    m_soundEffects.clear();
+    // 停止所有音效
+    for (auto& soundPlayer : m_soundPlayers) {
+        if (soundPlayer && soundPlayer->player) {
+            soundPlayer->player->stop();
+        }
+    }
+    
+    // 清理音效播放器
+    m_soundPlayers.clear();
     
     // m_musicPlayer 是 unique_ptr，会自动清理
     qDebug() << "AudioManager destroyed";

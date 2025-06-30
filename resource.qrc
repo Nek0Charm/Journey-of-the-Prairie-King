@@ -6,21 +6,21 @@
         <file>assert/gamemap.json</file>
 
         <!-- 音效资源 -->
-        <file>assert/sound/cowboy_dead.mp3</file>
-        <file>assert/sound/cowboy_explosion.mp3</file>
-        <file>assert/sound/Cowboy_Footstep.mp3</file>
-        <file>assert/sound/cowboy_gopher.mp3</file>
-        <file>assert/sound/cowboy_gunload.mp3</file>
-        <file>assert/sound/Cowboy_gunshot.mp3</file>
-        <file>assert/sound/cowboy_monsterhit.mp3</file>
-        <file>assert/sound/cowboy_powerup.mp3</file>
-        <file>assert/sound/Cowboy_Secret.mp3</file>
-        <file>assert/sound/cowboy_undead.mp3</file>
-        <file>assert/sound/Pickup_Coin15.mp3</file>
+        <file>assert/sound/cowboy_dead.wav</file>
+        <file>assert/sound/cowboy_explosion.wav</file>
+        <file>assert/sound/Cowboy_Footstep.wav</file>
+        <file>assert/sound/cowboy_gopher.wav</file>
+        <file>assert/sound/cowboy_gunload.wav</file>
+        <file>assert/sound/Cowboy_gunshot.wav</file>
+        <file>assert/sound/cowboy_monsterhit.wav</file>
+        <file>assert/sound/cowboy_powerup.wav</file>
+        <file>assert/sound/Cowboy_Secret.wav</file>
+        <file>assert/sound/cowboy_undead.wav</file>
+        <file>assert/sound/Pickup_Coin15.wav</file>
         
         <!-- 音乐资源 -->
-        <file>assert/music/TheOutlaw.mp3</file>
-        <file>assert/music/FinalBossEnding.mp3</file>
-        <file>assert/music/Overworld.mp3</file>
+        <file>assert/music/TheOutlaw.wav</file>
+        <file>assert/music/FinalBossEnding.wav</file>
+        <file>assert/music/Overworld.wav</file>
     </qresource>
 </RCC>

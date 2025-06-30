@@ -59,6 +59,7 @@ signals:
     void playerDied();
     void livesChanged();
     void positionChanged(const QPointF& position);
+    void shot(const QPointF& direction);
     
     
 private:

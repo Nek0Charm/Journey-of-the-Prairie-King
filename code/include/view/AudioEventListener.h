@@ -44,6 +44,9 @@ private slots:
     
     // 玩家事件音效槽函数
     void onPlayerMove();
+    
+    // 射击事件音效槽函数
+    void onPlayerShot(const QPointF& direction);
 
 private:
     GameViewModel* m_gameViewModel;

@@ -1,5 +1,7 @@
 #include "app/Application.h"
 #include "view/AudioManager.h"
+#include "view/AudioEventListener.h"
+#include "viewmodel/GameViewModel.h"
 #include <QDebug>
 
 Application::Application(int &argc, char **argv)
@@ -17,6 +19,11 @@ Application::Application(int &argc, char **argv)
 void Application::setupGameLoop() {
     m_viewModel = std::make_shared<GameViewModel>(this);
     m_view = std::make_unique<MainWindow>(m_viewModel.get());
+    
+    // 创建并设置AudioEventListener
+    m_audioEventListener = std::make_unique<AudioEventListener>(this);
+    m_audioEventListener->setGameViewModel(m_viewModel.get());
+    
     /*
     TODO: 在MainWindow中设置游戏试图模型（可能需要）
     m_view->setGameViewModel(m_viewModel);
@@ -62,5 +69,27 @@ void Application::calculateDeltaTime() {
 }
 
 void Application::onGameStateChanged() {
-    return;
+    if (!m_viewModel) return;
+    
+    GameViewModel::GameState state = m_viewModel->getGameState();
+    qDebug() << "[Application] Game state changed to:" << state;
+    
+    switch (state) {
+        case GameViewModel::MENU:
+            // 菜单音乐
+            AudioManager::instance().playMusic(OVERWORLD);
+            break;
+        case GameViewModel::PLAYING:
+            // 游戏进行中的音乐
+            AudioManager::instance().playMusic(OVERWORLD);
+            break;
+        case GameViewModel::PAUSED:
+            // 暂停时暂停音乐
+            AudioManager::instance().pauseMusic();
+            break;
+        case GameViewModel::GAME_OVER:
+            // 游戏结束时的音乐
+            AudioManager::instance().playMusic(THE_OUTLAW);
+            break;
+    }
 }
