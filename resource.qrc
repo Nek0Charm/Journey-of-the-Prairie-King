@@ -22,5 +22,6 @@
         <file>assert/music/TheOutlaw.wav</file>
         <file>assert/music/FinalBossEnding.wav</file>
         <file>assert/music/Overworld.wav</file>
+        <file>assert/gameover.png</file>
     </qresource>
 </RCC>

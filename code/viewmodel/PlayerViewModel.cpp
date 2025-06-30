@@ -15,6 +15,8 @@ void PlayerViewModel::move(double deltaTime)
 
     if(m_stats.moving)
         m_stats.position += m_stats.movingDirection * m_stats.moveSpeed * deltaTime;
+    m_stats.position.setX(std::clamp(m_stats.position.x(), 16.0, static_cast<double>(MAP_WIDTH)-32.0));
+    m_stats.position.setY(std::clamp(m_stats.position.y(), 16.0, static_cast<double>(MAP_HEIGHT)-32.0));
     if(orig_pos != m_stats.position) {
         emit positionChanged(m_stats.position);
     }

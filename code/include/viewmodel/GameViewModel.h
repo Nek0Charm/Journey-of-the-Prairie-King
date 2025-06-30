@@ -31,6 +31,7 @@ public:
     EnemyManager* getEnemyManager() const { return m_enemyManager.get(); }
     QPointF getPlayerPosition() const { return m_player->getPosition();}
     int getPlayerLives() const { return m_player->getLives();}
+    double getGameTime() const { return m_gameTime;}
     
     
     void updateGame(double deltaTime);
@@ -50,6 +51,7 @@ private:
     std::unique_ptr<PlayerViewModel> m_player;
     std::unique_ptr<EnemyManager> m_enemyManager;
     std::unique_ptr<CollisionSystem> m_collisionSystem;
+    double m_gameTime = 0.0;   
     
     void checkGameState();
     void handlePlayerDeath();

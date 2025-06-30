@@ -51,9 +51,9 @@ signals:
     void enemyHitByBullet(int bulletId, int enemyId);
 
 private:
-    double m_playerCollisionRadius = 20.0;
-    double m_enemyCollisionRadius = 20.0;
-    double m_bulletCollisionRadius = 5.0;
+    double m_playerCollisionRadius = 9.0;
+    double m_enemyCollisionRadius = 9.0;
+    double m_bulletCollisionRadius = 3.0;
 
     double calculateDistance(const QPointF& pos1, const QPointF& pos2) const;
     bool isCollision(const QPointF& pos1, const QPointF& pos2, double radius1, double radius2) const;
