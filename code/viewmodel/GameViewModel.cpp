@@ -64,7 +64,15 @@ void GameViewModel::setPlayerMoveDirection(const QPointF& direciton, bool isMovi
 void GameViewModel::updateGame(double deltaTime)
 {
     // qDebug() << "Updating game state, deltaTime:" << deltaTime;
+    
     if (m_gameState != PLAYING) {
+        return;
+    }
+
+    m_gameTime += deltaTime;
+    if(m_gameTime > MAX_GAMETIME) {
+        m_gameTime = 0.0; 
+        endGame();
         return;
     }
     
@@ -136,6 +144,7 @@ void GameViewModel::initializeComponents()
 
 void GameViewModel::resetGame()
 {
+    m_gameTime = 0.0;
     if (m_player) {
         m_player->reset();
     }

@@ -19,4 +19,6 @@
 #define MAP_WIDTH 256
 #define MAP_HEIGHT 256
 
+#define MAX_GAMETIME 60.0
+
 #endif

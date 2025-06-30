@@ -26,8 +26,8 @@ GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent)
     setFocusPolicy(Qt::StrongFocus); 
     startTimer(1000/60);
 
-    m_maxTime = 60.0; 
-    m_currentTime = 60.0; 
+    m_maxTime = MAX_GAMETIME; 
+    m_currentTime = MAX_GAMETIME; 
     m_timer = new QTimer(this); // 临时时钟
     connect(m_timer, &QTimer::timeout, this, &GameWidget::gameLoop);
     connect(m_viewModel, &GameViewModel::playerPositonChanged, this, &GameWidget::playerPositionChanged);
@@ -48,11 +48,7 @@ void GameWidget::gameLoop() {
     if (player) {
         player->update(deltaTime);
     }
-    if (m_currentTime > 0) {
-        m_currentTime -= deltaTime;
-    } else {
-        m_currentTime = 0;
-    }
+    m_currentTime =60-m_viewModel->getGameTime();
     for (MonsterEntity* monster : m_monsters) {
         monster->update(deltaTime);
     }
