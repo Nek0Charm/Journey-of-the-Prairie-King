@@ -23,10 +23,6 @@ GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent)
         qWarning() << "GameWidget: 地图未能加载，地图将不会被绘制。";
     }
     player = new PlayerEntity();
-    // m_entity.append(new Entity("orc_walk")); 
-    // Entity* another_orc = new Entity("orc_walk");
-    // another_orc->setPosition(QPointF(200, 200));
-    // m_entity.append(another_orc);
     setFocusPolicy(Qt::StrongFocus); 
     startTimer(1000/60);
 
@@ -40,23 +36,25 @@ GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent)
 }
 
 GameWidget::~GameWidget() {
-    // delete m_animation;
+    delete player;
+    qDeleteAll(m_monsters);
+    m_monsters.clear();
     delete m_gameMap;
 }
 
 void GameWidget::gameLoop() {
     double deltaTime = m_elapsedTimer.restart() / 1000.0;
+    syncEnemies(); 
     if (player) {
         player->update(deltaTime);
     }
-    // m_animation->update(deltaTime);
     if (m_currentTime > 0) {
         m_currentTime -= deltaTime;
     } else {
         m_currentTime = 0;
     }
-    for (Entity* enemy : m_entity) {
-        enemy->update(deltaTime);
+    for (MonsterEntity* monster : m_monsters) {
+        monster->update(deltaTime);
     }
     this->update();
 }
@@ -76,10 +74,9 @@ void GameWidget::paintEvent(QPaintEvent *event) {
     paintMap(&painter);
     paintUi(&painter);
     player->paint(&painter, m_spriteSheet);
-    for (Entity* enemy : m_entity) {
-        enemy->paint(&painter, m_spriteSheet); 
+    for (MonsterEntity* monster : m_monsters) {
+        monster->paint(&painter, m_spriteSheet); 
     }
-
     if (m_viewModel && m_viewModel->getPlayer()) {
         const auto& bullets = m_viewModel->getPlayer()->getActiveBullets();
         QRect bulletSourceRect = SpriteManager::instance().getSpriteRect("player_bullet");
@@ -94,7 +91,6 @@ void GameWidget::paintEvent(QPaintEvent *event) {
             }
         }
     }
-
 }
 
 void GameWidget::paintMap(QPainter *painter) {
@@ -118,7 +114,7 @@ void GameWidget::paintMap(QPainter *painter) {
 }
 
 void GameWidget::paintUi(QPainter *painter) {
-    int healthCount = 3;
+    int healthCount = m_viewModel->getPlayerLives();
     int moneyCount = 5; 
     double ui_margin = 3.0;
     
@@ -173,7 +169,7 @@ void GameWidget::paintUi(QPainter *painter) {
     );
     painter->drawText(healthtextPos, healthText);
 
-    QString moneyText = QString("x%1").arg(healthCount);
+    QString moneyText = QString("x%1").arg(moneyCount);
     QFont Mfont = painter->font();
     Mfont.setPointSize(21); 
     painter->setFont(Mfont);
@@ -265,4 +261,27 @@ void GameWidget::timerEvent(QTimerEvent* event) {
     }
 }
 
-
+void GameWidget::syncEnemies() {
+    if (!m_viewModel || !m_viewModel->getEnemyManager()) return;
+    const auto& enemyDataList = m_viewModel->getEnemyManager()->getEnemies();
+    QSet<int> liveEnemyIds;
+    for (const auto& data : enemyDataList) {
+        liveEnemyIds.insert(data.id);
+    }
+    for (auto it = m_monsters.begin(); it != m_monsters.end(); ) {
+        if (!liveEnemyIds.contains(it.key())) {
+            delete it.value();
+            it = m_monsters.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    for (const auto& data : enemyDataList) {
+        if (!m_monsters.contains(data.id)) {
+            MonsterEntity* newMonster = new MonsterEntity("orc");
+            m_monsters[data.id] = newMonster;
+        }
+        m_monsters[data.id]->setPosition(data.position);
+        m_monsters[data.id]->setVelocity(data.velocity);
+    }
+}

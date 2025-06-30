@@ -3,9 +3,6 @@
 
 CollisionSystem::CollisionSystem(QObject *parent)
     : QObject(parent)
-    , m_playerCollisionRadius(20.0)
-    , m_enemyCollisionRadius(20.0)
-    , m_bulletCollisionRadius(5.0)
 {
 }
 

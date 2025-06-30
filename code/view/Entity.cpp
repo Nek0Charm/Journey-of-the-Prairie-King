@@ -1,5 +1,6 @@
 #include "view/Entity.h"
 #include "view/SpriteManager.h"
+#include "Entity.h"
 
 Entity::Entity(QObject* parent) : QObject(parent), m_position(0, 0) {};
 
@@ -70,3 +71,48 @@ void PlayerEntity::paint(QPainter* painter, const QPixmap& spriteSheet) {
     }
 }
 
+MonsterEntity::MonsterEntity(const QString &monsterType, QObject *parent) : Entity(parent), monsterType(monsterType) {
+    m_velocity = QPointF(0, 0);
+    if (monsterType == "orc") {
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_walk"));
+    }
+}
+
+MonsterEntity::~MonsterEntity() {
+    delete m_animation;
+}
+
+void MonsterEntity::setVelocity(const QPointF& velocity) {
+    m_velocity = velocity;
+}
+
+void MonsterEntity::update(double deltaTime) {
+    m_position += m_velocity * deltaTime;
+    if (m_animation) {
+        m_animation->update(deltaTime);
+    }
+}
+
+void MonsterEntity::paint(QPainter* painter, const QPixmap& spriteSheet) {
+    if (!m_animation) return;
+
+    const QString& currentFrameName = m_animation->getCurrentFrameName();
+    QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
+    double scale = 5.0; 
+    QPointF destinationAnchor((m_position.x() + 27)*scale, (m_position.y() + 16)*scale);
+
+    if (!parts.isEmpty()) {
+        for (const auto& part : parts) {
+            QRect sourceRect = SpriteManager::instance().getSpriteRect(part.frameName);
+            QPointF finalPos = destinationAnchor + (part.offset * scale);
+            QRectF destRect(finalPos, sourceRect.size() * scale);
+            painter->drawPixmap(destRect, spriteSheet, sourceRect);
+        }
+    } else {
+        QRect sourceRect = SpriteManager::instance().getSpriteRect(currentFrameName);
+        if (!sourceRect.isNull()) {
+            QRectF destinationRect(destinationAnchor, sourceRect.size() * scale);
+            painter->drawPixmap(destinationRect, spriteSheet, sourceRect);
+        }
+    }
+}

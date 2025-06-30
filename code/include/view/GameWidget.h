@@ -26,6 +26,7 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
+    void syncEnemies();
 
 public slots:
     // void onStateUpdated();
@@ -41,7 +42,7 @@ private:
     GameMap* m_gameMap;
     QPixmap m_spriteSheet;
     PlayerEntity* player;
-    QList<Entity*> m_entity;
+    QMap<int, MonsterEntity*> m_monsters; 
     GameViewModel *m_viewModel;      
     double m_maxTime;      
     double m_currentTime;  

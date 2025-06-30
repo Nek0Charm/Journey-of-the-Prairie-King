@@ -49,4 +49,21 @@ private:
     Animation* m_currentAnimation;
 };
 
+class MonsterEntity : public Entity {
+    Q_OBJECT
+public:
+    explicit MonsterEntity(const QString& monsterType, QObject* parent = nullptr);
+    ~MonsterEntity() override;
+    void update(double deltaTime) override;
+    void paint(QPainter* painter, const QPixmap& spriteSheet) override;
+    
+    void setVelocity(const QPointF& velocity);
+
+private:
+    Animation* m_animation;    
+    QPointF m_velocity; 
+    QString monsterType;
+};
+
+
 #endif // ENTITY_H
