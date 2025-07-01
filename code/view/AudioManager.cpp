@@ -11,28 +11,36 @@
 #include <memory>
 #include <QFile>
 
+// 构造函数 - 初始化音频管理器
 AudioManager::AudioManager(QObject *parent)
     : QObject(parent)
     , m_musicPlayer(std::make_shared<QMediaPlayer>())
     , m_audioOutput(new QAudioOutput(this))
 {
+    // 设置背景音乐播放器的音频输出
     m_musicPlayer->setAudioOutput(m_audioOutput);
+    
+    // 连接音乐播放状态变化信号
     connect(m_musicPlayer.get(), &QMediaPlayer::playbackStateChanged, 
             this, [this](QMediaPlayer::PlaybackState state) {
                 onMusicPlaybackStateChanged(static_cast<int>(state));
             });
+    
+    // 连接媒体播放器错误信号
     connect(m_musicPlayer.get(), &QMediaPlayer::errorOccurred, 
             this, [this](QMediaPlayer::Error error, const QString& errorString) {
                 onMediaPlayerError(static_cast<int>(error), errorString);
             });
 }
 
+// 获取AudioManager单例实例
 AudioManager& AudioManager::instance()
 {
     static AudioManager instance;
     return instance;
 }
 
+// 初始化音频系统 - 加载所有音效文件和背景音乐文件
 bool AudioManager::initialize()
 {
     qDebug() << "AudioManager::initialize() - Start";
@@ -47,6 +55,7 @@ bool AudioManager::initialize()
     return true;
 }
 
+// 加载所有音效文件 - 为每个音效类型创建独立的播放器和音频输出
 void AudioManager::loadSoundEffects()
 {
     qDebug() << "Loading sound effects...";
@@ -99,6 +108,7 @@ void AudioManager::loadSoundEffects()
     qDebug() << "Created" << m_soundPlayers.size() << "sound players";
 }
 
+// 加载背景音乐文件
 void AudioManager::loadMusic()
 {
     qDebug() << "Loading music...";
@@ -106,14 +116,10 @@ void AudioManager::loadMusic()
     m_musicPlayer->setSource(QUrl::fromLocalFile(getMusicPath(m_currentMusic)));
 }
 
+// 播放指定类型音效
 void AudioManager::playSound(SoundType type)
 {
-    qDebug() << "[playSound] called, type:" << type
-             << "enabled:" << m_soundEnabled
-             << "muted:" << m_muted
-             << "volume:" << m_soundVolume;
     if (!m_soundEnabled || m_muted) {
-        qDebug() << "[playSound] skipped due to disabled or muted.";
         return;
     }
     auto it = m_soundPlayers.find(type);
@@ -121,17 +127,9 @@ void AudioManager::playSound(SoundType type)
         auto& soundPlayer = it.value();
         
         // 检查音频输出状态
-        if (soundPlayer->output) {
-            qDebug() << "[playSound] Audio output volume:" << soundPlayer->output->volume()
-                     << "muted:" << soundPlayer->output->isMuted();
-        } else {
+        if (!soundPlayer->output) {
             qWarning() << "[playSound] Audio output is null!";
         }
-        
-        // 检查播放器状态
-        qDebug() << "[playSound] Player state before:" << soundPlayer->player->playbackState()
-                 << "error:" << soundPlayer->player->error()
-                 << "source:" << soundPlayer->player->source();
         
         // 如果正在播放，先停止再播放
         if (soundPlayer->player->playbackState() == QMediaPlayer::PlayingState) {
@@ -141,9 +139,6 @@ void AudioManager::playSound(SoundType type)
         // 重新设置源文件以确保从头播放
         soundPlayer->player->setPosition(0);
         soundPlayer->player->play();
-        
-        qDebug() << "[playSound] triggered play, QMediaPlayer state:" << soundPlayer->player->playbackState()
-                 << "error:" << soundPlayer->player->error();
                  
         // 检查播放后的状态
         if (soundPlayer->player->error() != QMediaPlayer::NoError) {
@@ -154,6 +149,7 @@ void AudioManager::playSound(SoundType type)
     }
 }
 
+// 停止指定类型音效
 void AudioManager::stopSound(SoundType type)
 {
     auto it = m_soundPlayers.find(type);
@@ -162,6 +158,7 @@ void AudioManager::stopSound(SoundType type)
     }
 }
 
+// 设置全局音效音量 (0-100)
 void AudioManager::setSoundVolume(int volume)
 {
     m_soundVolume = qBound(0, volume, 100);
@@ -182,14 +179,36 @@ int AudioManager::getSoundVolume() const
     return m_soundVolume;
 }
 
+// 设置特定音效的音量 (0-100)
+void AudioManager::setSoundTypeVolume(SoundType type, int volume)
+{
+    int soundVolume = qBound(0, volume, 100);
+    
+    // 找到指定音效的播放器并设置音量
+    auto it = m_soundPlayers.find(type);
+    if (it != m_soundPlayers.end() && it.value() && it.value()->output) {
+        it.value()->output->setVolume(soundVolume / 100.0f);
+        qDebug() << "Sound type" << type << "volume set to:" << soundVolume;
+    } else {
+        qWarning() << "Sound player not found for type:" << type;
+    }
+}
+
+// 获取特定音效的音量
+int AudioManager::getSoundTypeVolume(SoundType type) const
+{
+    // 找到指定音效的播放器并获取音量
+    auto it = m_soundPlayers.find(type);
+    if (it != m_soundPlayers.end() && it.value() && it.value()->output) {
+        return static_cast<int>(it.value()->output->volume() * 100);
+    }
+    return m_soundVolume; // 如果找不到，返回全局音效音量
+}
+
+// 播放指定类型背景音乐
 void AudioManager::playMusic(MusicType type)
 {
-    qDebug() << "[playMusic] called, type:" << type
-             << "enabled:" << m_musicEnabled
-             << "muted:" << m_muted
-             << "volume:" << m_musicVolume;
     if (!m_musicEnabled || m_muted) {
-        qDebug() << "[playMusic] skipped due to disabled or muted.";
         return;
     }
     QString musicPath = getMusicPath(type);
@@ -198,14 +217,11 @@ void AudioManager::playMusic(MusicType type)
         return;
     }
     if (m_currentMusic == type && m_musicPlayer->playbackState() != QMediaPlayer::StoppedState) {
-        qDebug() << "[playMusic] already playing this music.";
         return;
     }
     m_currentMusic = type;
     m_musicPlayer->setSource(QUrl::fromLocalFile(musicPath));
     m_musicPlayer->play();
-    qDebug() << "[playMusic] triggered play, QMediaPlayer state:" << m_musicPlayer->playbackState()
-             << "error:" << m_musicPlayer->error();
     qDebug() << "Playing music:" << musicPath;
 }
 
@@ -229,6 +245,7 @@ void AudioManager::resumeMusic()
     }
 }
 
+// 设置背景音乐音量 (0-100)
 void AudioManager::setMusicVolume(int volume)
 {
     m_musicVolume = qBound(0, volume, 100);
@@ -243,6 +260,7 @@ int AudioManager::getMusicVolume() const
     return m_musicVolume;
 }
 
+// 设置全局静音状态
 void AudioManager::setMuted(bool muted)
 {
     m_muted = muted;
@@ -290,6 +308,7 @@ bool AudioManager::isMusicEnabled() const
     return m_musicEnabled;
 }
 
+// 获取音效文件路径
 QString AudioManager::getSoundPath(SoundType type) const
 {
     // 获取项目根目录（可执行文件的上级目录）
@@ -329,6 +348,7 @@ QString AudioManager::getSoundPath(SoundType type) const
     }
 }
 
+// 获取背景音乐文件路径
 QString AudioManager::getMusicPath(MusicType type) const
 {
     // 获取项目根目录（可执行文件的上级目录）
@@ -360,6 +380,7 @@ QString AudioManager::getMusicPath(MusicType type) const
     }
 }
 
+// 音乐播放状态变化处理 - 当音乐播放结束时自动重新播放
 void AudioManager::onMusicPlaybackStateChanged(int state)
 {
     auto playbackState = static_cast<QMediaPlayer::PlaybackState>(state);
@@ -371,6 +392,7 @@ void AudioManager::onMusicPlaybackStateChanged(int state)
     }
 }
 
+// 媒体播放器错误处理 - 处理播放器错误，尝试重新加载音乐
 void AudioManager::onMediaPlayerError(int error, const QString &errorString)
 {
     qWarning() << "Music player error:" << error << errorString;
@@ -380,6 +402,7 @@ void AudioManager::onMediaPlayerError(int error, const QString &errorString)
     }
 }
 
+// 析构函数 - 清理音频资源
 AudioManager::~AudioManager()
 {
     // 停止所有音效
