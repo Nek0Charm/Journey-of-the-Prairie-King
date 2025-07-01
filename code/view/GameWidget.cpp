@@ -115,7 +115,7 @@ void GameWidget::paintEvent(QPaintEvent *event) {
         if (!bulletSourceRect.isNull()) {
             for (const auto& bullet : bullets) {
                 // qDebug() << "bullet";
-                QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(10, 10)) * SCALE;
+                QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(UI_LEFT, UI_UP) + QPointF(10, 10)) * (SCALE, SCALE);
                 // qDebug() << bullet.position;
                 QSizeF scaledSize(bulletSourceRect.width() * SCALE, bulletSourceRect.height() * SCALE);
                 QRectF destRect(topLeft, scaledSize);

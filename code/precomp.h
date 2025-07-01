@@ -31,6 +31,9 @@
 #include <QMediaPlayer>
 #include <QAudioOutput>
 
+#include <QList>
+#include <QRandomGenerator>
+#include <QMap>
 
 #define MAP_WIDTH 256
 #define MAP_HEIGHT 256
