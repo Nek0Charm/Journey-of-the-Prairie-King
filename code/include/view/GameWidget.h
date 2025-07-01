@@ -17,22 +17,24 @@ class GameWidget : public QWidget {
 
 public:
     GameWidget(GameViewModel *viewModel, QWidget *parent = nullptr);
+    void clearKeys() {keys.clear();};
     ~GameWidget();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
-    void paintMap(QPainter *painter);
-    void paintUi(QPainter *painter);
+    void paintUi(QPainter *painter, const QPointF& viewOffset);
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
-    void timerEvent(QTimerEvent *event) override;
+    void timerEvent();
     void syncEnemies();
 
 public slots:
     // void onStateUpdated();
 private slots:
+    void die(int id);
     void gameLoop(); // 临时函数
     void playerPositionChanged();
+    void playerLivesChanged();
 
 private:
     QTimer* keyRespondTimer;
@@ -43,6 +45,7 @@ private:
     QPixmap m_spriteSheet;
     PlayerEntity* player;
     QMap<int, MonsterEntity*> m_monsters; 
+    QMap<int, DeadMonsterEntity*> m_deadmonsters;
     GameViewModel *m_viewModel;      
     double m_maxTime;      
     double m_currentTime;  

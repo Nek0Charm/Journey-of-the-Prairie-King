@@ -7,7 +7,7 @@ Entity::Entity(QObject* parent) : QObject(parent), m_position(0, 0) {};
 Entity::~Entity() {}
 
 void Entity::update(double deltaTime) {}
-void Entity::paint(QPainter* painter, const QPixmap& spriteSheet) {}
+void Entity::paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) {}
 
 PlayerEntity::PlayerEntity(QObject *parent) : Entity(parent) {
     m_currentState = PlayerState::Idle;
@@ -42,44 +42,69 @@ void PlayerEntity::setState(PlayerState newState) {
     }
 }
 
+bool PlayerEntity::isVisible() const {
+    if (!m_isInvincible) {
+        return true;
+    }
+    return static_cast<int>(m_invincibilityTimer / 10) % 2 == 0;
+}
+
 void PlayerEntity::update(double deltaTime) {
+    if (m_isInvincible) {
+        m_invincibilityTimer -= deltaTime; 
+        if (m_invincibilityTimer <= 0) {
+            m_isInvincible = false; 
+            m_invincibilityTimer = 0;
+            // qDebug() << "无敌时间结束。";
+        }
+    }
     if (m_currentAnimation) {
         m_currentAnimation->update(deltaTime);
     }
 }
 
-void PlayerEntity::paint(QPainter* painter, const QPixmap& spriteSheet) {
+void PlayerEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) {
     if (!m_currentAnimation) return;
+    if (!isVisible()) return;
     const QString& currentFrameName = m_currentAnimation->getCurrentFrameName();
     QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
     double scale = 5.0; 
-    QPointF destinationAnchor((m_position.x() + 27)*scale, (m_position.y() + 16)*scale);
+    QPointF destinationAnchor(m_position.x()*scale, m_position.y()*scale);
 
     if (!parts.isEmpty()) {
         for (const SpritePart& part : parts) {
             QRect sourceRect = SpriteManager::instance().getSpriteRect(part.frameName);
             QPointF finalPos = destinationAnchor + (part.offset * scale);
             QRectF destinationRect(finalPos, sourceRect.size() * scale);
+            destinationRect.translate(viewOffset);
             painter->drawPixmap(destinationRect, spriteSheet, sourceRect);
         }
     } else {
         QRect sourceRect = SpriteManager::instance().getSpriteRect(currentFrameName);
         if (!sourceRect.isNull()) {
             QRectF destinationRect(destinationAnchor, sourceRect.size() * scale);
+            destinationRect.translate(viewOffset);
             painter->drawPixmap(destinationRect, spriteSheet, sourceRect);
         }
     }
 }
 
 MonsterEntity::MonsterEntity(const QString &monsterType, QObject *parent) : Entity(parent), monsterType(monsterType) {
+    m_currentState = MonsterState::Walking;
     m_velocity = QPointF(0, 0);
     if (monsterType == "orc") {
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_walk"));
+        m_animations[MonsterState::Walking] = new Animation(SpriteManager::instance().getAnimationSequence("orc_walk"), 8.0, true);
+        m_animations[MonsterState::Dying] = new Animation(
+            SpriteManager::instance().getAnimationSequence("orc_die"),
+            5.0,
+            false
+        );
     }
+    m_animation = m_animations.value(m_currentState, nullptr);
 }
 
 MonsterEntity::~MonsterEntity() {
-    delete m_animation;
+    qDeleteAll(m_animations);
 }
 
 void MonsterEntity::setVelocity(const QPointF& velocity) {
@@ -87,31 +112,100 @@ void MonsterEntity::setVelocity(const QPointF& velocity) {
 }
 
 void MonsterEntity::update(double deltaTime) {
-    m_position += m_velocity * deltaTime;
+    // if (shouldBeRemoved()) return;
+     switch (m_currentState) {
+        case MonsterState::Walking:
+            m_position += m_velocity * deltaTime;
+            break;
+    }
     if (m_animation) {
         m_animation->update(deltaTime);
     }
 }
 
-void MonsterEntity::paint(QPainter* painter, const QPixmap& spriteSheet) {
+void MonsterEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) {
     if (!m_animation) return;
 
     const QString& currentFrameName = m_animation->getCurrentFrameName();
     QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
     double scale = 5.0; 
-    QPointF destinationAnchor((m_position.x() + 27)*scale, (m_position.y() + 16)*scale);
+    QPointF destinationAnchor(m_position.x()*scale, m_position.y()*scale);
 
     if (!parts.isEmpty()) {
         for (const auto& part : parts) {
             QRect sourceRect = SpriteManager::instance().getSpriteRect(part.frameName);
             QPointF finalPos = destinationAnchor + (part.offset * scale);
             QRectF destRect(finalPos, sourceRect.size() * scale);
+            destRect.translate(viewOffset);
             painter->drawPixmap(destRect, spriteSheet, sourceRect);
         }
     } else {
         QRect sourceRect = SpriteManager::instance().getSpriteRect(currentFrameName);
         if (!sourceRect.isNull()) {
             QRectF destinationRect(destinationAnchor, sourceRect.size() * scale);
+            destinationRect.translate(viewOffset);
+            painter->drawPixmap(destinationRect, spriteSheet, sourceRect);
+        }
+    }
+}
+
+DeadMonsterEntity::DeadMonsterEntity(const QString &monsterType, QObject *parent) : Entity(parent), monsterType(monsterType) {
+    m_lingerTimer = 10;
+    m_currentState = DeadMonsterState::Dying;
+    if (monsterType == "orc") {
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_die"), 8.0, false);
+    }
+}
+
+DeadMonsterEntity::DeadMonsterEntity(const MonsterEntity &monserentity) 
+    : m_lingerTimer(20), m_currentState(DeadMonsterState::Dying), monsterType(monserentity.getType()){
+    m_position = monserentity.getPosition();
+    if (monsterType == "orc") {
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_die"), 8.0, false);
+    }
+}
+
+DeadMonsterEntity::~DeadMonsterEntity() {
+    delete m_animation;
+}
+
+void DeadMonsterEntity::update(double deltaTime) {
+    switch (m_currentState) {
+        case DeadMonsterState::Dying:
+            if (m_animation->isFinished()) {
+                setState(DeadMonsterState::Dead);
+            }
+            break;
+        case DeadMonsterState::Dead:
+            if (m_lingerTimer >= 0) {
+                m_lingerTimer -= deltaTime;
+            }
+        default:
+            break;
+    }
+    m_animation->update(deltaTime);
+}
+
+void DeadMonsterEntity::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
+    if (!m_animation) return;
+    const QString& currentFrameName = m_animation->getCurrentFrameName();
+    QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
+    double scale = 5.0; 
+    QPointF destinationAnchor(m_position.x()*scale, m_position.y()*scale);
+
+    if (!parts.isEmpty()) {
+        for (const auto& part : parts) {
+            QRect sourceRect = SpriteManager::instance().getSpriteRect(part.frameName);
+            QPointF finalPos = destinationAnchor + (part.offset * scale);
+            QRectF destRect(finalPos, sourceRect.size() * scale);
+            destRect.translate(viewOffset);
+            painter->drawPixmap(destRect, spriteSheet, sourceRect);
+        }
+    } else {
+        QRect sourceRect = SpriteManager::instance().getSpriteRect(currentFrameName);
+        if (!sourceRect.isNull()) {
+            QRectF destinationRect(destinationAnchor, sourceRect.size() * scale);
+            destinationRect.translate(viewOffset);
             painter->drawPixmap(destinationRect, spriteSheet, sourceRect);
         }
     }

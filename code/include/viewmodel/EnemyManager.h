@@ -46,7 +46,7 @@ public:
     
 signals:
     void enemySpawned(const EnemyData& enemy);
-    void enemyDestroyed(QPointF position);
+    void enemyDestroyed(int id);
     void enemyReachedPlayer(int enemyId);
     void enemyDamaged(int enemyId, int remainingHealth);
     void enemyCountChanged(int count);
@@ -57,7 +57,7 @@ private:
     double m_spawnTimer = 0.0;
     double m_spawnInterval = 2.0;
     int m_maxEnemies = 10;
-    double m_enemyMoveSpeed = 50.0;
+    double m_enemyMoveSpeed = 40.0;
 
     static constexpr double ENEMY_WIDTH = 15.0;
     

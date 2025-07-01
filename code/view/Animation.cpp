@@ -9,6 +9,13 @@ Animation::Animation(const QList<QString>& frameNames, double frameRate, bool lo
     }
 }
 
+bool Animation::isFinished() const {
+    if (!m_loops && m_currentIndex >= m_frameNames.count() - 1) {
+        return true;
+    }
+    return false;
+}
+
 void Animation::update(double deltaTime) {
     if (m_frameDuration == 0.0 || m_frameNames.isEmpty()) return;
     m_elapsedTime += deltaTime;

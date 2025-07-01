@@ -2,6 +2,7 @@
 #include <QRandomGenerator>
 #include <QDebug>
 #include <cmath>
+#include "../../precomp.h"
 
 EnemyManager::EnemyManager(QObject *parent)
     : QObject(parent)
@@ -83,7 +84,7 @@ void EnemyManager::damageEnemy(int bulletId,int enemyId)
             if (enemy.health <= 0) {
                 enemy.isActive = false;
                 qDebug() << "Enemy destroyed, ID:" << enemyId;
-                emit enemyDestroyed(enemy.position);
+                emit enemyDestroyed(enemy.id);
             }
             break;
         }

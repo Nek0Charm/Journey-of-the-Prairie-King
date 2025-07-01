@@ -1,22 +1,36 @@
 #ifndef __PRECOMP_H__
 #define __PRECOMP_H__
 
-#include <QApplication>
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QMovie>
-#include <QString>
-#include <QPushButton>
+// Qt Core
 #include <QObject>
+#include <QDebug>
+#include <QString>
+#include <QList>
+#include <QMap>
+#include <QPointF>
 #include <QTimer>
 #include <QElapsedTimer>
-#include <QStackedWidget>
-#include <QDebug>
-#include <QPointF>
+#include <QDir>
+#include <QFile>
+#include <QCoreApplication>
+#include <QUrl>
+
+// Qt Widgets
+#include <QApplication>
 #include <QWidget>
-#include <QList>
-#include <QRandomGenerator>
-#include <QMap>
+#include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QStackedWidget>
+
+// Qt GUI
+#include <QMovie>
+
+// Qt Multimedia
+#include <QSoundEffect>
+#include <QMediaPlayer>
+#include <QAudioOutput>
+
 
 #define MAP_WIDTH 256
 #define MAP_HEIGHT 256
