@@ -2,7 +2,7 @@
 
 #define UI_LEFT 27
 #define UI_UP 16
-#define SCALE 5
+#define SCALE 3
 
 GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent) 
     : QWidget(parent), m_viewModel(viewModel) {
@@ -30,6 +30,7 @@ GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent)
     connect(m_viewModel, &GameViewModel::playerPositonChanged, this, &GameWidget::playerPositionChanged);
     connect(m_viewModel, &GameViewModel::playerLivesChanged, this, &GameWidget::playerLivesChanged);
     connect(m_viewModel->getEnemyManager(), &EnemyManager::enemyDestroyed, this, &GameWidget::die);
+    connect(m_viewModel, &GameViewModel::itemPicked, this, &GameWidget::itemPicked);
     m_timer->start(16);
     m_elapsedTimer.start();
     
@@ -60,6 +61,9 @@ void GameWidget::gameLoop() {
         it->update(deltaTime);
     }
     syncItems();
+    for (auto item : m_items) {
+        item->update(deltaTime);
+    }
     for (auto it = m_deadmonsters.begin(); it != m_deadmonsters.end(); ) {
         DeadMonsterEntity* deadMonster = it.value();
         int monsterId = it.key();
@@ -124,11 +128,7 @@ void GameWidget::paintEvent(QPaintEvent *event) {
         if (!bulletSourceRect.isNull()) {
             for (const auto& bullet : bullets) {
                 // qDebug() << "bullet";
-<<<<<<< HEAD
-                QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(UI_LEFT, UI_UP) + QPointF(10, 10)) * (SCALE, SCALE);
-=======
                 QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(10, 10)) * SCALE;
->>>>>>> origin/feature/view
                 // qDebug() << bullet.position;
                 QSizeF scaledSize(bulletSourceRect.width() * SCALE, bulletSourceRect.height() * SCALE);
                 QRectF destRect(topLeft, scaledSize);
@@ -141,7 +141,7 @@ void GameWidget::paintEvent(QPaintEvent *event) {
 
 void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     int healthCount = m_viewModel->getPlayerLives() - 1;
-    int moneyCount = 5; 
+    int moneyCount = 0; 
     double ui_margin = 3.0;
     
     QRect circleRect = SpriteManager::instance().getSpriteRect("ui_circle");
@@ -188,7 +188,7 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
 
     QString healthText = QString("x%1").arg(healthCount);
     QFont Hfont = painter->font();
-    Hfont.setPointSize(21); 
+    Hfont.setPointSize(16); 
     painter->setFont(Hfont);
     painter->setPen(Qt::white);
     QPointF healthtextPos(
@@ -199,7 +199,7 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
 
     QString moneyText = QString("x%1").arg(0);
     QFont Mfont = painter->font();
-    Mfont.setPointSize(21); 
+    Mfont.setPointSize(16); 
     painter->setFont(Mfont);
     painter->setPen(Qt::white); 
     QPointF moneyTextPos(
@@ -307,7 +307,7 @@ void GameWidget::syncItems() {
         activeItemIds.insert(data.id);
     }
     for (auto it = m_items.begin(); it != m_items.end();) {
-        if (!activeItemIds.contains(it.key())) {
+        if (!activeItemIds.contains(it.key()) && it.value()->getState() != ItemState::Picked) {
             delete it.value();
             it = m_items.erase(it);
         } else {
@@ -323,7 +323,9 @@ void GameWidget::syncItems() {
         } else {
             item = m_items[data.id];
         }
-        item->setPosition(data.position);
+        if (item->getState() != ItemState::Picked) {
+            item->setPosition(data.position);
+        }
     }
     
 }
@@ -334,4 +336,10 @@ void GameWidget::die(int id) {
         DeadMonsterEntity* deadm = new DeadMonsterEntity(*m_monsters.value(id));
         m_deadmonsters.insert(id, deadm);
     }
+}
+
+void GameWidget::itemPicked(int itemType) {
+    ItemEntity* item = new ItemEntity(itemType);
+    item->setState(ItemState::Picked);
+    m_items[-2] = item;
 }

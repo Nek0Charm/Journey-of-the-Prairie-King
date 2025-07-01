@@ -21,7 +21,7 @@ MainWindow::MainWindow(GameViewModel *viewModel, QWidget *parent)
 }
 
 void MainWindow::setupUi() {
-    resize(1550, 1450); 
+    resize(1080, 1080); 
     this->setStyleSheet("background-color: black;");  
 }
 

@@ -54,12 +54,12 @@ void ItemViewModel::updateItems(double deltaTime, const QPointF& playerPosition)
         for (int i = 0; i < m_items.size(); ++i) {
             if (m_items[i].id == m_itemPositions[positionPair] && m_items[i].isActive) {
                 itemIndex = i;
+                qDebug() << "捡到道具 ID:" << m_items[i].id;
                 break;
             }
         }
-        
         if (itemIndex != -1) {
-            ItemData pickedItem = m_items[itemIndex];
+            ItemData& pickedItem = m_items[itemIndex];
             pickedItem.isActive = false;
             
             if (!m_possessingItem) {

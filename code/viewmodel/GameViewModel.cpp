@@ -136,6 +136,7 @@ void GameViewModel::setupConnections()
     // 连接道具立即使用信号
     connect(m_item.get(), &ItemViewModel::itemUsedImmediately,
             this, &GameViewModel::handleItemUsedImmediately);
+    
 }
 
 void GameViewModel::initializeComponents()
@@ -218,7 +219,12 @@ void GameViewModel::useItem() {
     } 
 }
 
-void GameViewModel::handleItemUsedImmediately(int itemType) {
+void GameViewModel::pickItem(int itemtype) {
+    emit pickItem(itemtype);
+}
+
+void GameViewModel::handleItemUsedImmediately(int itemType)
+{
     // 处理道具立即使用效果
     switch(itemType) {
         case ItemViewModel::coin:

@@ -40,6 +40,7 @@ public:
     QList<ItemViewModel::ItemData> getActiveItems() const {return m_item->getActiveItems();}
     int getPossessedItemType() const {return m_item->getPossessedItemType();}
     void useItem();
+    void pickItem(int itemType);
         
     GameState getGameState() const { return m_gameState; }
     bool isGameActive() const { return m_gameState == PLAYING; }
@@ -50,6 +51,7 @@ signals:
     void playerLivesChanged();
     void playerPositonChanged(const QPointF& position);
     void itemUsed(int itemType); // 道具使用信号
+    void itemPicked(int itemType);
     
 private:
     GameState m_gameState = MENU;
@@ -66,7 +68,7 @@ private:
     void resetGame();
     void handlePlayerHitByEnemy(int enemyId);
     void handleEnemyHitByBullet(int bulletId, int enemyId);
-    void handleCreateItem(const QPointF& position);
+    void handleCreateItem(const int id);
     void handleItemUsedImmediately(int itemType);
 };
 

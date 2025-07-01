@@ -73,6 +73,7 @@ void GameMap::update(double deltaTime) {
 }
 
 void GameMap::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
+    double scale = 3.0;
     painter->setRenderHint(QPainter::Antialiasing, false);
     if (getWidth() > 0) {
         for (int row = 0; row < getHeight(); ++row) {
@@ -90,9 +91,9 @@ void GameMap::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF
             }
 
             if (sourceRect.isNull()) continue;
-                double destX = (col * sourceRect.width())* 5;
-                double destY = (row * sourceRect.height())* 5;
-                QRectF destRect(destX, destY, sourceRect.width() * 5, sourceRect.height() * 5);
+                double destX = (col * sourceRect.width())* scale;
+                double destY = (row * sourceRect.height())* scale;
+                QRectF destRect(destX, destY, sourceRect.width() * scale, sourceRect.height() * scale);
                 destRect.translate(viewOffset);
                 painter->drawPixmap(destRect, spriteSheet, sourceRect);
             }
