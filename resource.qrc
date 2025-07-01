@@ -1,9 +1,10 @@
 <!DOCTYPE RCC>
 <RCC>
     <qresource prefix="/">
-        <file>assert/sprite.png</file>
-        <file>assert/sprite.json</file>
-        <file>assert/gamemap.json</file>
+        <file>assert/picture/sprite.png</file>
+        <file>assert/picture/sprite.json</file>
+        <file>assert/picture/gamemap.json</file>
+        <file>assert/picture/gameover.png</file>
 
         <!-- 音效资源 -->
         <file>assert/sound/cowboy_dead.wav</file>
@@ -22,6 +23,5 @@
         <file>assert/music/TheOutlaw.wav</file>
         <file>assert/music/FinalBossEnding.wav</file>
         <file>assert/music/Overworld.wav</file>
-        <file>assert/gameover.png</file>
     </qresource>
 </RCC>

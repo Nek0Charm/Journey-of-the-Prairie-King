@@ -70,5 +70,7 @@ void Application::calculateDeltaTime() {
 
 void Application::onGameStateChanged() {
     m_view->update();
-    return;
+    m_view->update();
+    // 音乐播放逻辑已移至AudioEventListener中处理
+    qDebug() << "[Application] Game state changed, music handled by AudioEventListener";
 }

@@ -7,19 +7,19 @@
 
 GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent) 
     : QWidget(parent), m_viewModel(viewModel) {
-    bool isLoaded = SpriteManager::instance().loadFromFile(":/assert/sprite.json");
+    bool isLoaded = SpriteManager::instance().loadFromFile(":/assert/picture/sprite.json");
     if (!isLoaded) {
-        qDebug() << "错误：加载 :/assert/sprite.json 文件失败！";
+        qDebug() << "错误：加载 :/assert/picture/sprite.json 文件失败！";
         return;
     } else {
-        qDebug() << "成功加载 :/assert/sprite.json 文件。";
+        qDebug() << "成功加载 :/assert/picture/sprite.json 文件。";
     }
-    m_spriteSheet.load(":/assert/sprite.png");
+    m_spriteSheet.load(":/assert/picture/sprite.png");
     if (m_spriteSheet.isNull()) {
-        qDebug() << "错误：加载 :/assert/sprite.png 文件失败！";
+        qDebug() << "错误：加载 :/assert/picture/sprite.png 文件失败！";
     }
     m_gameMap = new GameMap();
-    if (!m_gameMap->loadFromFile(":/assert/gamemap.json", "map_1", "1")) { 
+    if (!m_gameMap->loadFromFile(":/assert/picture/gamemap.json", "map_1", "1")) { 
         qWarning() << "GameWidget: 地图未能加载，地图将不会被绘制。";
     }
     player = new PlayerEntity();
@@ -205,7 +205,7 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     );
     painter->drawText(healthtextPos, healthText);
 
-    QString moneyText = QString("x%1").arg(moneyCount);
+    QString moneyText = QString("x%1").arg(0);
     QFont Mfont = painter->font();
     Mfont.setPointSize(21); 
     painter->setFont(Mfont);
