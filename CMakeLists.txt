@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(MaodieAdventure)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Multimedia)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

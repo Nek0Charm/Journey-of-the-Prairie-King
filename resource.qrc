@@ -19,9 +19,6 @@
         <file>assert/sound/cowboy_undead.wav</file>
         <file>assert/sound/Pickup_Coin15.wav</file>
         
-        <!-- 音乐资源 -->
-        <file>assert/music/TheOutlaw.wav</file>
-        <file>assert/music/FinalBossEnding.wav</file>
-        <file>assert/music/Overworld.wav</file>
+        
     </qresource>
 </RCC>
