@@ -18,7 +18,7 @@ GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent)
     if (m_spriteSheet.isNull()) {
         qDebug() << "错误：加载 :/assert/picture/sprite.png 文件失败！";
     }
-    m_gameMap = new GameMap();
+    m_gameMap = new GameMap("map_1");
     if (!m_gameMap->loadFromFile(":/assert/picture/gamemap.json", "map_1", "1")) { 
         qWarning() << "GameWidget: 地图未能加载，地图将不会被绘制。";
     }
@@ -67,7 +67,10 @@ void GameWidget::gameLoop() {
         } else {
             ++it;
         }
-    }       
+    }    
+    if(m_gameMap) {
+        m_gameMap->update(deltaTime);
+    }   
     this->update();
 }
 
@@ -99,7 +102,7 @@ void GameWidget::paintEvent(QPaintEvent *event) {
     }
     painter.fillRect(rect(), Qt::black); 
 
-    paintMap(&painter, viewOffset);
+    m_gameMap->paint(&painter, m_spriteSheet, viewOffset);
     paintUi(&painter, viewOffset);
     for (auto it: m_deadmonsters) {
         it->paint(&painter, m_spriteSheet, viewOffset);
@@ -123,27 +126,6 @@ void GameWidget::paintEvent(QPaintEvent *event) {
                 painter.drawPixmap(destRect, m_spriteSheet, bulletSourceRect);
             }
         }
-    }
-}
-
-void GameWidget::paintMap(QPainter *painter, const QPointF& viewOffset) {
-    painter->setRenderHint(QPainter::Antialiasing, false);
-    if (m_gameMap && m_gameMap->getWidth() > 0) {
-        for (int row = 0; row < m_gameMap->getHeight(); ++row) {
-            for (int col = 0; col < m_gameMap->getWidth(); ++col) {
-                int tileId = m_gameMap->getTileIdAt(row, col);
-                QString spriteName = m_gameMap->getTileSpriteName(tileId);
-                QRect sourceRect = SpriteManager::instance().getSpriteRect(spriteName);
-                if (sourceRect.isNull()) continue;
-                double destX = (col * sourceRect.width())* SCALE;
-                double destY = (row * sourceRect.height())* SCALE;
-                QRectF destRect(destX, destY, sourceRect.width() * SCALE, sourceRect.height() * SCALE);
-                destRect.translate(viewOffset);
-                painter->drawPixmap(destRect, m_spriteSheet, sourceRect);
-            }
-        }
-    } else {
-        painter->fillRect(rect(), Qt::darkCyan);
     }
 }
 

@@ -1,8 +1,8 @@
 #include "view/GameMap.h"
 
-GameMap::GameMap() : m_width(16), m_height(16) {}
-
-// GameMap.cpp
+GameMap::GameMap(QString map_title) : m_width(16), m_height(16), map_title(map_title) {
+    loadFromFile(":/assert/picture/gamemap.json", "map_1", "1");
+}
 
 bool GameMap::loadFromFile(const QString& path, const QString& mapName, const QString& layoutName) {
     QFile file(path);
@@ -20,23 +20,27 @@ bool GameMap::loadFromFile(const QString& path, const QString& mapName, const QS
 
     QJsonObject root = doc.object();
 
-    // 首先进入指定的地图对象，例如 "map_1"
     QJsonObject mapObject = root[mapName].toObject();
     if (mapObject.isEmpty()) {
         qWarning() << "在JSON中找不到名为" << mapName << "的地图对象";
         return false;
     }
 
-    // 从地图对象中解析图例
     m_tileLegend.clear();
     QJsonObject legendObject = mapObject["tile_definitions"].toObject();
+    qDeleteAll(m_animations);
     for (auto it = legendObject.begin(); it != legendObject.end(); ++it) {
-        m_tileLegend[it.key().toInt()] = it.value().toString();
-    }
+            int tileId = it.key().toInt();
+            QString name = it.value().toString();
+            m_tileLegend[tileId] = name;
+            QList<QString> animFrames = SpriteManager::instance().getAnimationSequence(name);
+            if (!animFrames.isEmpty()) {
+                m_animations[name] = new Animation(animFrames, 1.0, true); 
+            }
+        }
 
-    // 从地图对象中，根据布局名解析地图布局
     m_tiles.clear();
-    m_width = 0; // 重置尺寸
+    m_width = 0; 
     m_height = 0;
     QJsonArray layoutArray = mapObject[layoutName].toArray();
     if (layoutArray.isEmpty()) {
@@ -59,6 +63,41 @@ bool GameMap::loadFromFile(const QString& path, const QString& mapName, const QS
     
     qDebug() << "地图" << mapName << "的布局" << layoutName << "加载成功，尺寸:" << m_width << "x" << m_height;
     return true;
+}
+
+
+void GameMap::update(double deltaTime) {
+    for (Animation* anim : m_animations) {
+        anim->update(deltaTime);
+    }
+}
+
+void GameMap::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    if (getWidth() > 0) {
+        for (int row = 0; row < getHeight(); ++row) {
+        for (int col = 0; col < getWidth(); ++col) {
+            int tileId = getTileIdAt(row, col);
+            QString spriteName = getTileSpriteName(tileId);
+            
+            QRect sourceRect; 
+            if (m_animations.contains(spriteName)) {
+                Animation* anim = m_animations[spriteName];
+                const QString& currentFrameName = anim->getCurrentFrameName();
+                sourceRect = SpriteManager::instance().getSpriteRect(currentFrameName);
+            } else {
+                sourceRect = SpriteManager::instance().getSpriteRect(spriteName);
+            }
+
+            if (sourceRect.isNull()) continue;
+                double destX = (col * sourceRect.width())* 5;
+                double destY = (row * sourceRect.height())* 5;
+                QRectF destRect(destX, destY, sourceRect.width() * 5, sourceRect.height() * 5);
+                destRect.translate(viewOffset);
+                painter->drawPixmap(destRect, spriteSheet, sourceRect);
+            }
+        }
+    }
 }
 
 int GameMap::getTileIdAt(int row, int col) const {
