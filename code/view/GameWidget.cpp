@@ -1,5 +1,4 @@
 #include "view/GameWidget.h"
-#include "GameWidget.h"
 
 #define UI_LEFT 27
 #define UI_UP 16
@@ -41,6 +40,8 @@ GameWidget::~GameWidget() {
     m_monsters.clear();
     qDeleteAll(m_deadmonsters);
     m_deadmonsters.clear();
+    qDeleteAll(m_items);
+    m_items.clear();
     delete m_gameMap;
 }
 
@@ -55,15 +56,14 @@ void GameWidget::gameLoop() {
     for (auto& it: m_monsters) {
         it->update(deltaTime);
     }
+    syncItems();
     for (auto it = m_deadmonsters.begin(); it != m_deadmonsters.end(); ) {
         DeadMonsterEntity* deadMonster = it.value();
         int monsterId = it.key();
-
         deadMonster->update(deltaTime);
         if (deadMonster->ShouldbeRemove()) {
             delete deadMonster;
             it = m_deadmonsters.erase(it);
-
         } else {
             ++it;
         }
@@ -105,6 +105,9 @@ void GameWidget::paintEvent(QPaintEvent *event) {
     m_gameMap->paint(&painter, m_spriteSheet, viewOffset);
     paintUi(&painter, viewOffset);
     for (auto it: m_deadmonsters) {
+        it->paint(&painter, m_spriteSheet, viewOffset);
+    }
+    for (auto it: m_items) {
         it->paint(&painter, m_spriteSheet, viewOffset);
     }
     
@@ -279,8 +282,37 @@ void GameWidget::syncEnemies() {
     }
 }
 
+void GameWidget::syncItems() {
+    if (!m_viewModel) return;
+    const auto& itemList = m_viewModel->getActiveItems();
+    QSet<int> activeItemIds;
+    for (const auto& data : itemList) {
+        activeItemIds.insert(data.id);
+    }
+    for (auto it = m_items.begin(); it != m_items.end();) {
+        if (!activeItemIds.contains(it.key())) {
+            delete it.value();
+            it = m_items.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    for (const auto& data: itemList) {
+        ItemEntity* item = nullptr;
+        if (!m_items.contains(data.id)) {
+            item = new ItemEntity(data.type);
+            m_items[data.id] = item;
+            // qDebug() << "new_item";
+        } else {
+            item = m_items[data.id];
+        }
+        item->setPosition(data.position);
+    }
+    
+}
+
 void GameWidget::die(int id) {
-    qDebug() << "ID: " << id << "die";
+    // qDebug() << "ID: " << id << "die";
     if (m_monsters.contains(id)) {
         DeadMonsterEntity* deadm = new DeadMonsterEntity(*m_monsters.value(id));
         m_deadmonsters.insert(id, deadm);

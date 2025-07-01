@@ -2,13 +2,7 @@
 #define MAINWINDOW_H
 #include "viewmodel/GameViewModel.h"
 
-#include <QMainWindow>
-#include <QPainter>
-#include <QColor>
-#include <QString>
-#include <QKeyEvent>
 #include <iostream>
-#include <QScreen>
 using namespace std;
 class GameWidget;
 class StartWidget;

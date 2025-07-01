@@ -24,6 +24,7 @@ PlayerEntity::PlayerEntity(QObject *parent) : Entity(parent) {
     m_animations[PlayerState::ShootUpWalk]    = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_up"), 8.0, true);
     m_animations[PlayerState::ShootLeftWalk]  = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_left"), 8.0, true);
     m_animations[PlayerState::ShootRightWalk] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_right"), 8.0, true);
+    m_animations[PlayerState::Dying] = new Animation(SpriteManager::instance().getAnimationSequence("player_dying"), 8.0, false);
     m_currentAnimation = m_animations.value(m_currentState, nullptr);
     m_position = QPointF(16*8, 16*8);
 }
@@ -209,4 +210,88 @@ void DeadMonsterEntity::paint(QPainter *painter, const QPixmap &spriteSheet, con
             painter->drawPixmap(destinationRect, spriteSheet, sourceRect);
         }
     }
+}
+
+ItemEntity::ItemEntity(int itemtype, QObject *parent, QPointF pos)
+: Entity(parent), m_lingerTimer(10), m_currentState(ItemState::Drop) {   
+    setPosition(pos);
+    m_itemType = static_cast<ItemType>(itemtype);
+    qDebug() << "m_itemType" << itemtype;
+}
+
+void ItemEntity::update(double deltaTime) {
+    switch (m_currentState) {
+    case ItemState::Drop:
+        if (m_lingerTimer <= 3) {
+            setState(ItemState::Flash);
+        }
+        break;
+    default:
+        break;
+    }
+    m_lingerTimer -= deltaTime;
+}
+
+void ItemEntity::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
+    // qDebug() << "position " << m_position;
+    // qDebug() << "paint a item";
+    if (!isVisible()) return;    
+    QString framename = typeToString(m_itemType);
+    // qDebug() << "paint " << framename;
+    double scale = 5.0; 
+    QPointF destinationAnchor(m_position.x()*scale, m_position.y()*scale);
+    QRect sourceRect = SpriteManager::instance().getSpriteRect(framename);
+    if (!sourceRect.isNull()) {
+        QRectF destinationRect(destinationAnchor, sourceRect.size() * scale);
+        // qDebug() << "position " << destinationRect;
+        destinationRect.translate(viewOffset);
+        painter->drawPixmap(destinationRect, spriteSheet, sourceRect);
+    }
+}
+
+bool ItemEntity::isVisible() {
+    return true;
+    return !(m_currentState == ItemState::Flash) || (static_cast<int>(m_lingerTimer * 10) % 2 == 0);
+}
+
+QString ItemEntity::typeToString(ItemType type) {
+    QString stringtype;
+    switch (type) {
+    case ItemType::coin:
+        stringtype = "coin";
+        break;
+    case ItemType::five_coins:
+        stringtype = "five_coins";
+        break;
+    case ItemType::extra_life:
+        stringtype = "extra_life";
+        break;
+    case ItemType::coffee:
+        stringtype = "coffee";
+        break;
+    case ItemType::machine_gun:
+        stringtype = "machine_gun";
+        break;
+    case ItemType::bomb:
+        stringtype = "bomb";
+        break;
+    case ItemType::shotgun:
+        stringtype = "shotgun";
+        break;
+    case ItemType::smoke_bomb:
+        stringtype = "smoke_bomb";
+        break;
+    case ItemType::tombstone:
+        stringtype = "tombstone";
+        break;
+    case ItemType::wheel:
+        stringtype = "wheel";
+        break;
+    case ItemType::badge:
+        stringtype = "badge";
+        break;
+    default:
+        break;
+    }
+    return stringtype;
 }

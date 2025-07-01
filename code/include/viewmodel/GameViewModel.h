@@ -65,7 +65,7 @@ private:
     void resetGame();
     void handlePlayerHitByEnemy(int enemyId);
     void handleEnemyHitByBullet(int bulletId, int enemyId);
-    void handleCreateItem(const QPointF& position);
+    void handleCreateItem(const int id);
 };
 
 #endif // GAMEVIEWMODEL_H

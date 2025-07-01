@@ -20,14 +20,14 @@ void ItemViewModel::createItem(const QPointF& position, QMap<int, double> itemPo
 }
 
 void ItemViewModel::createItem(const QPointF& position, int type) {
-    QPair<int, int> positionPair(static_cast<int>(position.x()/16), static_cast<int>(position.y()/16));
+    QPair<int, int> positionPair(static_cast<int>(position.x()), static_cast<int>(position.y()));
     if(m_itemPositions.find(positionPair) != m_itemPositions.end()) {
         return; 
     }
     ItemData newItem;
     newItem.type = type; 
     newItem.id = m_nextItemId++;
-    newItem.position = {static_cast<int>(position.x()/16), static_cast<int>(position.y()/16)};
+    newItem.position = {static_cast<int>(position.x()), static_cast<int>(position.y())};
     newItem.isPossessed = false;
     newItem.isActive = true;
     newItem.remainTime = 15.0; 
@@ -44,7 +44,7 @@ void ItemViewModel::updateItems(double deltaTime, const QPointF& playerPosition)
             }
         }
     }
-    QPair<int, int> positionPair(static_cast<int>(playerPosition.x()/16), static_cast<int>(playerPosition.y()/16));
+    QPair<int, int> positionPair(static_cast<int>(playerPosition.x()), static_cast<int>(playerPosition.y()));
 
     if(!m_possessingItem && m_itemPositions.find(positionPair) != m_itemPositions.end()) {
         if(m_items[m_itemPositions[positionPair]].isActive) {

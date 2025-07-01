@@ -1,12 +1,7 @@
 #ifndef GAMEWIDGET_H
 #define GAMEWIDGET_H
 
-#include <QWidget>
-#include <QTimer>
-#include <QElapsedTimer>
-#include <QPainter>
 #include <iostream>
-#include <QKeyEvent>
 #include "view/GameMap.h"
 #include "view/Animation.h"
 #include "view/SpriteManager.h"
@@ -27,6 +22,7 @@ protected:
     void keyReleaseEvent(QKeyEvent *event) override;
     void timerEvent();
     void syncEnemies();
+    void syncItems();
 
 public slots:
     // void onStateUpdated();
@@ -46,6 +42,7 @@ private:
     PlayerEntity* player;
     QMap<int, MonsterEntity*> m_monsters; 
     QMap<int, DeadMonsterEntity*> m_deadmonsters;
+    QMap<int, ItemEntity*> m_items;
     GameViewModel *m_viewModel;      
     double m_maxTime;      
     double m_currentTime;  
