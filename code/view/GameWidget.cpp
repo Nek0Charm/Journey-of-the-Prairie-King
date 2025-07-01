@@ -164,9 +164,14 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
                 QRect itemSpriteRect = SpriteManager::instance().getSpriteRect(spriteName);
                 qDebug() << "道具栏绘制 - 道具类型:" << itemType << "精灵名称:" << spriteName << "精灵矩形:" << itemSpriteRect;
                 if (!itemSpriteRect.isNull()) {
-                    // 恢复原来的大小，不进行缩放
+                    // 使用道具栏的位置，但稍微调整大小以适应道具栏
                     QRectF itemSpriteRectF = itemRectF;
-                    itemSpriteRectF.translate(viewOffset);
+                    // 调整道具图标大小，使其适合道具栏
+                    double scale = 0.8; // 缩小到80%
+                    QPointF center = itemSpriteRectF.center();
+                    QSizeF newSize = itemSpriteRectF.size() * scale;
+                    itemSpriteRectF.setSize(newSize);
+                    itemSpriteRectF.moveCenter(center);
                     painter->drawPixmap(itemSpriteRectF, m_spriteSheet, itemSpriteRect);
                     qDebug() << "道具图标绘制成功 - 位置:" << itemSpriteRectF;
                 } else {

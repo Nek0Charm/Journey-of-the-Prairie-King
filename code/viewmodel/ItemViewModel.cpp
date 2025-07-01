@@ -36,7 +36,7 @@ void ItemViewModel::createItem(const QPointF& position, int type) {
     newItem.isPossessed = false;
     newItem.isActive = true;
     newItem.remainTime = 15.0; 
-    qDebug() << "Item created at position:" << newItem.position << "with type:" << newItem.type;
+    qDebug() << "Item created at position:" << newItem.position << "with type:" << newItem.type << "是否为金币:" << (type == ItemEffectManager::coin || type == ItemEffectManager::five_coins);
     m_items.append(newItem);
     m_itemPositions[positionPair] = newItem.id;
 }
@@ -56,6 +56,8 @@ void ItemViewModel::updateItems(double deltaTime, const QPointF& playerPosition)
         
         // 计算玩家与道具的距离
         double distance = QLineF(playerPosition, QPointF(item.position.x(), item.position.y())).length();
+        
+        qDebug() << "道具拾取检测 - 道具类型:" << item.type << "道具位置:" << item.position << "玩家位置:" << playerPosition << "距离:" << distance;
         
         // 如果距离小于等于8像素（考虑SCALE=5，实际是1.6个游戏单位），则认为拾取
         if (distance <= 8.0) {
@@ -146,13 +148,19 @@ void ItemViewModel::spawnItemAtPosition(const QPointF& position) {
 }
 
 int ItemViewModel::selectRandomItemType() const {
-    // 简单的道具类型选择逻辑
+    // 更丰富的道具类型选择逻辑
     int randomValue = QRandomGenerator::global()->bounded(100);
     
-    if (randomValue < 30) return ItemEffectManager::coin;
-    if (randomValue < 50) return ItemEffectManager::five_coins;
-    if (randomValue < 70) return ItemEffectManager::extra_life;
-    if (randomValue < 90) return ItemEffectManager::coffee;
+    if (randomValue < 25) return ItemEffectManager::coin;           // 25% 金币
+    if (randomValue < 40) return ItemEffectManager::five_coins;     // 15% 五金币
+    if (randomValue < 50) return ItemEffectManager::extra_life;     // 10% 额外生命
+    if (randomValue < 60) return ItemEffectManager::coffee;         // 10% 咖啡
+    if (randomValue < 70) return ItemEffectManager::machine_gun;    // 10% 机枪
+    if (randomValue < 80) return ItemEffectManager::shotgun;        // 10% 霰弹枪
+    if (randomValue < 85) return ItemEffectManager::smoke_bomb;     // 5% 烟雾弹
+    if (randomValue < 90) return ItemEffectManager::tombstone;      // 5% 墓碑
+    if (randomValue < 95) return ItemEffectManager::wheel;          // 5% 轮子
+    if (randomValue < 100) return ItemEffectManager::badge;         // 5% 治安官徽章
     
     return ItemEffectManager::coin; // 默认返回金币
 }
