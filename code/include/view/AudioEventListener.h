@@ -36,7 +36,7 @@ private slots:
     void onPlayerShot(const QPointF& direction);       // 玩家射击音效
     
     // 敌人爆炸事件音效槽函数
-    void onEnemyExplosion(int enemyId);                // 敌人爆炸音效
+    void onEnemyExplosion(int enemyId, const QPointF& position); // 敌人爆炸音效
     
     // 游戏状态变化槽函数
     void onGameStateChanged(GameViewModel::GameState state); // 游戏状态变化（背景音乐）

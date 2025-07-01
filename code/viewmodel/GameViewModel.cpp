@@ -86,6 +86,10 @@ void GameViewModel::updateGame(double deltaTime)
                                       m_player->getActiveBullets());
     
     m_item->updateItems(deltaTime, m_player->getPosition());
+    
+    // 更新道具效果
+    m_itemEffectManager->updateEffects(deltaTime, m_player.get());
+    
     // 检查游戏状态
     checkGameState();
 }
@@ -117,6 +121,9 @@ void GameViewModel::setupConnections()
     
     connect(m_collisionSystem.get(), &CollisionSystem::enemyHitByBullet,
             this, &GameViewModel::handleEnemyHitByBullet);
+    
+    connect(m_collisionSystem.get(), &CollisionSystem::enemyHitByZombie,
+            this, &GameViewModel::handleEnemyHitByZombie);
 
     
     // 连接玩家状态变化
@@ -172,12 +179,18 @@ void GameViewModel::handleEnemyHitByBullet(int bulletId, int enemyId)
 {
     m_enemyManager->damageEnemy(bulletId, enemyId);
     m_player->removeBullet(bulletId);
-    
 }
 
-void GameViewModel::handleCreateItem(const QPointF& position)
+void GameViewModel::handleEnemyHitByZombie(int enemyId)
 {
-    // 委托给ItemViewModel处理道具生成
+    // 僵尸模式：直接击杀敌人
+    m_enemyManager->damageEnemy(0, enemyId); // 使用0作为占位符bulletId
+    qDebug() << "僵尸模式接触击杀敌人:" << enemyId;
+}
+
+void GameViewModel::handleCreateItem(int enemyId, const QPointF& position)
+{
+    // 直接使用传递的位置参数生成道具
     m_item->spawnItemAtPosition(position);
 }
 

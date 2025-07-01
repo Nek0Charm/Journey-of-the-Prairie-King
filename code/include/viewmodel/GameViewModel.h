@@ -68,7 +68,8 @@ private:
     void resetGame();
     void handlePlayerHitByEnemy(int enemyId);
     void handleEnemyHitByBullet(int bulletId, int enemyId);
-    void handleCreateItem(const QPointF& position);
+    void handleEnemyHitByZombie(int enemyId);
+    void handleCreateItem(int enemyId, const QPointF& position);
     void handleItemUsed(int itemType);
 };
 

@@ -197,7 +197,7 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     );
     painter->drawText(healthtextPos, healthText);
 
-    QString moneyText = QString("x%1").arg(0);
+    QString moneyText = QString("x%1").arg(m_viewModel->getPlayer()->getCoins());
     QFont Mfont = painter->font();
     Mfont.setPointSize(21); 
     painter->setFont(Mfont);

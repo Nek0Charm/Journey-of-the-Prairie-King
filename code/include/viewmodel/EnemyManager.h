@@ -47,7 +47,7 @@ public:
     
 signals:
     void enemySpawned(const EnemyData& enemy);
-    void enemyDestroyed(int id);
+    void enemyDestroyed(int id, const QPointF& position);
     void enemyReachedPlayer(int enemyId);
     void enemyDamaged(int enemyId, int remainingHealth);
     void enemyCountChanged(int count);
