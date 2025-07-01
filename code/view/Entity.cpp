@@ -153,7 +153,7 @@ DeadMonsterEntity::DeadMonsterEntity(const QString &monsterType, QObject *parent
     m_lingerTimer = 10;
     m_currentState = DeadMonsterState::Dying;
     if (monsterType == "orc") {
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_die"), 5.0, false);
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_die"), 8.0, false);
     }
 }
 
@@ -161,7 +161,7 @@ DeadMonsterEntity::DeadMonsterEntity(const MonsterEntity &monserentity)
     : m_lingerTimer(20), m_currentState(DeadMonsterState::Dying), monsterType(monserentity.getType()){
     m_position = monserentity.getPosition();
     if (monsterType == "orc") {
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_die"), 5.0, false);
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_die"), 8.0, false);
     }
 }
 

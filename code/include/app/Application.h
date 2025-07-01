@@ -3,6 +3,7 @@
 
 #include <view/MainWindow.h>
 #include <viewmodel/GameViewModel.h>
+#include <view/AudioEventListener.h>
 
 class Application: public QApplication {
     Q_OBJECT
@@ -22,6 +23,7 @@ private:
 
     std::unique_ptr<MainWindow> m_view;
     std::shared_ptr<GameViewModel> m_viewModel;
+    std::unique_ptr<AudioEventListener> m_audioEventListener;
 
     QTimer m_gameTimer;
     QElapsedTimer m_frameTimer;

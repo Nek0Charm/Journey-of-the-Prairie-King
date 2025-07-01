@@ -1,6 +1,6 @@
 #include "viewmodel/PlayerViewModel.h"
 #include <QDebug>
-#include <cmath>
+#include "../../precomp.h"
 
 PlayerViewModel::PlayerViewModel(QObject *parent)
     : QObject(parent)
@@ -26,8 +26,9 @@ void PlayerViewModel::shoot(const QPointF& direction)
 {
     if (canShoot() && !direction.isNull()) {
         m_stats.shootingDirection = direction;
-        m_bulletViewModel->createBullet(m_stats.position, direction, 300);
+        m_bulletViewModel->createBullet(m_stats.position, direction, 200);
         m_currentShootCooldown = m_stats.shootCooldown;
+        emit shot(direction);
     }
 }
 
@@ -57,7 +58,7 @@ void PlayerViewModel::reset()
     m_stats.lives = 4;
     m_stats.position = QPointF(MAP_WIDTH/2, MAP_HEIGHT/2);
     m_stats.shootingDirection = QPointF(1, 0);
-    m_stats.moveSpeed = 100.0;
+    m_stats.moveSpeed = 80.0;
     m_stats.shootCooldown = 0.2;
     
     m_bulletViewModel->clearAllBullets();

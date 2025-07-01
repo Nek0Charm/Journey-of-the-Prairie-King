@@ -1,6 +1,10 @@
 #ifndef __PLAYER_VIEW_MODEL_H__
 #define __PLAYER_VIEW_MODEL_H__
 
+#include <QObject>
+#include <QPointF>
+#include <QList>
+#include <memory>
 #include "viewmodel/BulletViewModel.h"
 
 class PlayerViewModel : public QObject {
@@ -14,7 +18,7 @@ public:
         QPointF shootingDirection = QPointF(1, 0);
         bool moving = false;
         double moveSpeed = 100.0;
-        double shootCooldown = 0.2;
+        double shootCooldown = 0.3;
     };
 
     
@@ -61,6 +65,7 @@ signals:
     void playerDied();
     void livesChanged();
     void positionChanged(const QPointF& position);
+    void shot(const QPointF& direction);
     
     
 private:

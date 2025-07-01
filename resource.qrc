@@ -1,8 +1,27 @@
+<!DOCTYPE RCC>
 <RCC>
     <qresource prefix="/">
-        <file>assert/sprite.png</file>
-        <file>assert/sprite.json</file>
-        <file>assert/gamemap.json</file>
-        <file>assert/gameover.png</file>
+        <file>assert/picture/sprite.png</file>
+        <file>assert/picture/sprite.json</file>
+        <file>assert/picture/gamemap.json</file>
+        <file>assert/picture/gameover.png</file>
+
+        <!-- 音效资源 -->
+        <file>assert/sound/cowboy_dead.wav</file>
+        <file>assert/sound/cowboy_explosion.wav</file>
+        <file>assert/sound/Cowboy_Footstep.wav</file>
+        <file>assert/sound/cowboy_gopher.wav</file>
+        <file>assert/sound/cowboy_gunload.wav</file>
+        <file>assert/sound/Cowboy_gunshot.wav</file>
+        <file>assert/sound/cowboy_monsterhit.wav</file>
+        <file>assert/sound/cowboy_powerup.wav</file>
+        <file>assert/sound/Cowboy_Secret.wav</file>
+        <file>assert/sound/cowboy_undead.wav</file>
+        <file>assert/sound/Pickup_Coin15.wav</file>
+        
+        <!-- 音乐资源 -->
+        <file>assert/music/TheOutlaw.wav</file>
+        <file>assert/music/FinalBossEnding.wav</file>
+        <file>assert/music/Overworld.wav</file>
     </qresource>
 </RCC>

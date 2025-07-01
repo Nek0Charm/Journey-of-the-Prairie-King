@@ -1,6 +1,10 @@
 #ifndef __BULLET_VIEW_MODEL_H__
 #define __BULLET_VIEW_MODEL_H__
 
+#include <QObject>
+#include <QPointF>
+#include <QList>
+
 class BulletViewModel : public QObject {
     Q_OBJECT
 public:

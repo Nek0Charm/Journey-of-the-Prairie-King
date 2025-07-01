@@ -5,7 +5,7 @@ EndWidget::EndWidget(QWidget *parent) : QWidget(parent)
     int scaleFactor = 2;
     this->setStyleSheet("background-color: black;"); 
     m_gameOverLabel = new QLabel(this);
-    QPixmap gameOverPixmap(":/assert/gameover.png");
+    QPixmap gameOverPixmap(":/assert/picture/gameover.png");
     if (gameOverPixmap.isNull()) {
         qWarning("错误：无法加载 gameover.png！");
         m_gameOverLabel->setText("GAME OVER");
