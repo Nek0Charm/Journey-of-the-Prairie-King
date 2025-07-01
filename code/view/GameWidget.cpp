@@ -33,6 +33,9 @@ GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent)
     connect(m_viewModel->getEnemyManager(), &EnemyManager::enemyDestroyed, this, &GameWidget::die);
     m_timer->start(16);
     m_elapsedTimer.start();
+    
+    // 初始化道具使用相关
+    m_spaceKeyPressed = false;
 }
 
 GameWidget::~GameWidget() {
@@ -248,6 +251,16 @@ void GameWidget::timerEvent() {
         else if (moveDirection.y() > 0)  player->setState(PlayerState::WalkDown);
     } else {
         player->setState(PlayerState::Idle);
+    }
+    
+    // 处理道具使用
+    if (keys[Qt::Key_Space] && !m_spaceKeyPressed) {
+        m_spaceKeyPressed = true;
+        if (m_viewModel) {
+            m_viewModel->useItem();
+        }
+    } else if (!keys[Qt::Key_Space]) {
+        m_spaceKeyPressed = false;
     }
 }
 

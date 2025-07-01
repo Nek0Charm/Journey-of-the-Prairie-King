@@ -132,6 +132,10 @@ void GameViewModel::setupConnections()
     
     connect(m_enemyManager.get(), &EnemyManager::enemyDestroyed,
             this, &GameViewModel::handleCreateItem);
+    
+    // 连接道具立即使用信号
+    connect(m_item.get(), &ItemViewModel::itemUsedImmediately,
+            this, &GameViewModel::handleItemUsedImmediately);
 }
 
 void GameViewModel::initializeComponents()
@@ -181,8 +185,8 @@ void GameViewModel::handleCreateItem(const QPointF& position)
 
 void GameViewModel::useItem() {
     if(m_item->hasPossessedItem()) {
-       int type = m_item->getPossessedItemType();
-       switch(type) {
+        int type = m_item->getPossessedItemType();
+        switch(type) {
             case ItemViewModel::coin:
                 qDebug() << "coin";
                 break;
@@ -207,8 +211,53 @@ void GameViewModel::useItem() {
                 m_enemyManager->clearAllEnemies();
                 qDebug() << "bomb";
                 break;
-                
-
-       }
+        }
+        
+        // 发出道具使用信号
+        emit itemUsed(type);
     } 
+}
+
+void GameViewModel::handleItemUsedImmediately(int itemType) {
+    // 处理道具立即使用效果
+    switch(itemType) {
+        case ItemViewModel::coin:
+            qDebug() << "立即使用金币";
+            // 金币效果：增加分数或金钱
+            break;
+        case ItemViewModel::five_coins:
+            qDebug() << "立即使用五个金币";
+            // 五个金币效果：增加更多分数或金钱
+            break;
+        case ItemViewModel::extra_life:
+            m_player->addLife();
+            qDebug() << "立即使用额外生命";
+            break;
+        case ItemViewModel::coffee:
+            m_player->setMoveSpeed(m_player->getMoveSpeed() * 1.2);
+            qDebug() << "立即使用咖啡";
+            break;
+        case ItemViewModel::machine_gun:
+            m_player->setShootCooldown(0.1);
+            qDebug() << "立即使用机枪";
+            break;
+        case ItemViewModel::bomb:
+            m_enemyManager->clearAllEnemies();
+            qDebug() << "立即使用炸弹";
+            break;
+        case ItemViewModel::shotgun:
+            m_player->setShootCooldown(0.15);
+            qDebug() << "立即使用霰弹枪";
+            break;
+        case ItemViewModel::wheel:
+            m_player->setMoveSpeed(m_player->getMoveSpeed() * 1.5);
+            qDebug() << "立即使用轮子";
+            break;
+        default:
+            qDebug() << "立即使用未知道具:" << itemType;
+            break;
+    }
+    
+    // 发出道具使用信号
+    emit itemUsed(itemType);
 }

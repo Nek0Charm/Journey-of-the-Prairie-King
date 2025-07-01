@@ -48,7 +48,10 @@ private:
     QMap<int, DeadMonsterEntity*> m_deadmonsters;
     GameViewModel *m_viewModel;      
     double m_maxTime;      
-    double m_currentTime;  
+    double m_currentTime;
+    
+    // 道具使用相关
+    bool m_spaceKeyPressed = false;  // 防止空格键重复触发  
 };
 
 #endif

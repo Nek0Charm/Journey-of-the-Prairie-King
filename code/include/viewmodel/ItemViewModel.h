@@ -44,13 +44,19 @@ public:
         {extra_life, 0.2},
         {coffee, 0.3}
     };
-    private:
+    
+signals:
+    void itemPickedUp(int itemType); // 道具拾取信号
+    void itemUsedImmediately(int itemType); // 道具立即使用信号
+    
+private:
     QList<ItemData> m_items;
     ItemData m_possessedItem;
     int m_nextItemId = 0; 
     bool m_possessingItem = false;
     QMap<QPair<int, int>, int> m_itemPositions;
     
+    void useItemImmediately(const ItemData& item); // 立即使用道具
 };
 
 #endif

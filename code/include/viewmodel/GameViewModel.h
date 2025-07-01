@@ -49,6 +49,7 @@ signals:
     void playerDied();
     void playerLivesChanged();
     void playerPositonChanged(const QPointF& position);
+    void itemUsed(int itemType); // 道具使用信号
     
 private:
     GameState m_gameState = MENU;
@@ -66,6 +67,7 @@ private:
     void handlePlayerHitByEnemy(int enemyId);
     void handleEnemyHitByBullet(int bulletId, int enemyId);
     void handleCreateItem(const QPointF& position);
+    void handleItemUsedImmediately(int itemType);
 };
 
 #endif // GAMEVIEWMODEL_H
