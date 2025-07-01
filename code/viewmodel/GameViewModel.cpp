@@ -1,5 +1,5 @@
 #include "viewmodel/GameViewModel.h"
-
+#include <QRandomGenerator>
 #include <QDebug>
 
 GameViewModel::GameViewModel(QObject *parent)
@@ -170,12 +170,12 @@ void GameViewModel::handleEnemyHitByBullet(int bulletId, int enemyId)
     
 }
 
-void GameViewModel::handleCreateItem(const QPointF& position)
+void GameViewModel::handleCreateItem(const int id)
 {
     int rand = QRandomGenerator::global()->bounded(10);
     qDebug() << "rand: " << rand;
     if(rand < 2) {
-        m_item->createItem(position, m_item->m_itemPossibilities);
+        m_item->createItem(m_enemyManager->getEnemyPosition(id) ,m_item->m_itemPossibilities);
     }
 }
 
