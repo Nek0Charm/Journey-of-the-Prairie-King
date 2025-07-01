@@ -48,14 +48,13 @@ public:
         m_stats.moving = isMoving;
     }
 
-    void removeBullet(int bulletId) {
-        m_bulletViewModel->removeBullet(bulletId);
-    }
+    void removeBullet(int bulletId) { m_bulletViewModel->removeBullet(bulletId);}
 
-    void setPositon(const QPointF& position) {
-        m_stats.position = position;
-        emit positionChanged(m_stats.position);
-    }
+    void setPositon(const QPointF& position) { m_stats.position = position; emit positionChanged(m_stats.position);}
+
+    void setMoveSpeed(double speed) {m_stats.moveSpeed = speed;}
+
+    void setShootCooldown(double cooldown) {m_stats.shootCooldown = cooldown;}
 
 signals:
     void playerDied();

@@ -86,7 +86,7 @@ void GameViewModel::updateGame(double deltaTime)
                                       m_enemyManager->getEnemies(),
                                       m_player->getActiveBullets());
     
-    
+    m_item->updateItems(deltaTime, m_player->getPosition());
     // 检查游戏状态
     checkGameState();
 }
@@ -130,14 +130,15 @@ void GameViewModel::setupConnections()
     connect(m_player.get(), &PlayerViewModel::positionChanged,
             this, &GameViewModel::playerPositonChanged);
     
-    // 连接游戏状态变化
+    connect(m_enemyManager.get(), &EnemyManager::enemyDestroyed,
+            this, &GameViewModel::handleCreateItem);
 }
 
 void GameViewModel::initializeComponents()
 {
 
     m_player = std::make_unique<PlayerViewModel>(this);
-
+    m_item = std::make_unique<ItemViewModel>(this);
     m_enemyManager = std::make_unique<EnemyManager>(this);
     m_collisionSystem = std::make_unique<CollisionSystem>(this);
 }
@@ -167,4 +168,47 @@ void GameViewModel::handleEnemyHitByBullet(int bulletId, int enemyId)
     m_enemyManager->damageEnemy(bulletId, enemyId);
     m_player->removeBullet(bulletId);
     
+}
+
+void GameViewModel::handleCreateItem(const QPointF& position)
+{
+    int rand = QRandomGenerator::global()->bounded(10);
+    qDebug() << "rand: " << rand;
+    if(rand < 2) {
+        m_item->createItem(position, m_item->m_itemPossibilities);
+    }
+}
+
+void GameViewModel::useItem() {
+    if(m_item->hasPossessedItem()) {
+       int type = m_item->getPossessedItemType();
+       switch(type) {
+            case ItemViewModel::coin:
+                qDebug() << "coin";
+                break;
+            case ItemViewModel::five_coins:
+                qDebug() << "five_coins";
+                break;
+
+            case ItemViewModel::extra_life:
+                m_player->addLife();
+                qDebug() << "extra_life";
+                break;
+            case ItemViewModel::coffee:
+                m_player->setMoveSpeed(m_player->getMoveSpeed() * 1.2);
+                qDebug() << "coffee";
+                break;
+            case ItemViewModel::machine_gun:
+                m_player->setShootCooldown(0.1);
+                qDebug() << "machine_gun";
+                break;
+
+            case ItemViewModel::bomb:
+                m_enemyManager->clearAllEnemies();
+                qDebug() << "bomb";
+                break;
+                
+
+       }
+    } 
 }

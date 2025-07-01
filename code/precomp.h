@@ -15,6 +15,8 @@
 #include <QPointF>
 #include <QWidget>
 #include <QList>
+#include <QRandomGenerator>
+#include <QMap>
 
 #define MAP_WIDTH 256
 #define MAP_HEIGHT 256

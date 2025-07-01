@@ -57,7 +57,7 @@ void GameWidget::gameLoop() {
 
 void GameWidget::playerPositionChanged() {
     player->setPosition(m_viewModel->getPlayerPosition());
-    qDebug() << m_viewModel->getPlayerPosition();
+    // qDebug() << m_viewModel->getPlayerPosition();
 }
 
 // void GameWidget::onStateUpdated() {
@@ -78,9 +78,9 @@ void GameWidget::paintEvent(QPaintEvent *event) {
         QRect bulletSourceRect = SpriteManager::instance().getSpriteRect("player_bullet");
         if (!bulletSourceRect.isNull()) {
             for (const auto& bullet : bullets) {
-                qDebug() << "bullet";
+                // qDebug() << "bullet";
                 QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(UI_LEFT, UI_UP) + QPointF(10, 10)) * (SCALE, SCALE);
-                qDebug() << bullet.position;
+                // qDebug() << bullet.position;
                 QSizeF scaledSize(bulletSourceRect.width() * SCALE, bulletSourceRect.height() * SCALE);
                 QRectF destRect(topLeft, scaledSize);
                 painter.drawPixmap(destRect, m_spriteSheet, bulletSourceRect);
