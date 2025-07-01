@@ -220,18 +220,16 @@ ItemEntity::ItemEntity(int itemtype, QObject *parent, QPointF pos)
 }
 
 void ItemEntity::update(double deltaTime) {
-    if (m_currentState != ItemState::Picked) {
-        if (m_lingerTimer > 0) {
-            m_lingerTimer -= deltaTime;
-        }
-        if (m_currentState == ItemState::Drop && m_lingerTimer <= 3.0) {
-            setState(ItemState::Flash);
-        }
+    if (m_lingerTimer > 0) {
+        m_lingerTimer -= deltaTime;
+    }
+    if (m_currentState == ItemState::Drop && m_lingerTimer <= 3.0) {
+        setState(ItemState::Flash);
     }
 }
 
 void ItemEntity::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
-    if (!isVisible()) return;    
+    if (!isVisible()) return;     
     QString framename = typeToString(m_itemType);
     // qDebug() << "paint " << framename;
     double scale = 3.0; 

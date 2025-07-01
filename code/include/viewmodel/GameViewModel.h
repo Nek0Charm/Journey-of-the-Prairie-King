@@ -27,7 +27,7 @@ public:
     void endGame();
     void updateGame(double deltaTime);
 
-    
+    ItemViewModel* getItemViewModel() const { return m_item.get(); }
     EnemyManager* getEnemyManager() const { return m_enemyManager.get(); }
     void playerAttack(const QPointF& direction);
     void setPlayerMoveDirection(const QPointF& direction, bool isMoving);

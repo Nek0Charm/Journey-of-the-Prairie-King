@@ -31,7 +31,6 @@ private slots:
     void gameLoop(); // 临时函数
     void playerPositionChanged();
     void playerLivesChanged();
-    void itemPicked(int itemType);
 
 private:
     QTimer* keyRespondTimer;

@@ -134,7 +134,7 @@ public:
     ItemState getState() { return m_currentState; }
     bool ShouldbeRemove() { return m_lingerTimer <= 0 ; }
     bool isVisible();
-    QString typeToString(ItemType type);
+    static QString typeToString(ItemType type);
 private:
     ItemType m_itemType;
     ItemState m_currentState;

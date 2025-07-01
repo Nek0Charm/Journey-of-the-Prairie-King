@@ -30,7 +30,6 @@ GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent)
     connect(m_viewModel, &GameViewModel::playerPositonChanged, this, &GameWidget::playerPositionChanged);
     connect(m_viewModel, &GameViewModel::playerLivesChanged, this, &GameWidget::playerLivesChanged);
     connect(m_viewModel->getEnemyManager(), &EnemyManager::enemyDestroyed, this, &GameWidget::die);
-    connect(m_viewModel, &GameViewModel::itemPicked, this, &GameWidget::itemPicked);
     m_timer->start(16);
     m_elapsedTimer.start();
     
@@ -154,6 +153,15 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     QPointF itemBottomLeft = itemRectF.bottomLeft();
     itemRectF.translate(viewOffset);
     painter->drawPixmap(itemRectF, m_spriteSheet, itemRect);
+  if (m_viewModel && m_viewModel->getItemViewModel() && m_viewModel->getItemViewModel()->hasPossessedItem()) {
+        int possessedItemType = m_viewModel->getItemViewModel()->getPossessedItemType();
+        QString itemSpriteName = ItemEntity::typeToString(static_cast<ItemType>(possessedItemType));
+        QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemSpriteName);
+        if (!itemSourceRect.isNull()) {
+            painter->drawPixmap(itemRectF, m_spriteSheet, itemSourceRect);
+        }
+    }
+
 
     QRect healthRect = SpriteManager::instance().getSpriteRect("ui_helth");
     QRectF healthRectF(itemBottomLeft.x(), (itemBottomLeft.y() + ui_margin*SCALE), healthRect.width()*SCALE, healthRect.height()*SCALE);
@@ -336,10 +344,4 @@ void GameWidget::die(int id) {
         DeadMonsterEntity* deadm = new DeadMonsterEntity(*m_monsters.value(id));
         m_deadmonsters.insert(id, deadm);
     }
-}
-
-void GameWidget::itemPicked(int itemType) {
-    ItemEntity* item = new ItemEntity(itemType);
-    item->setState(ItemState::Picked);
-    m_items[-2] = item;
 }
