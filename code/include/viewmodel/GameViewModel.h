@@ -8,6 +8,7 @@
 #include "viewmodel/EnemyManager.h"
 #include "viewmodel/CollisionSystem.h"
 #include "viewmodel/ItemViewModel.h"
+#include "viewmodel/ItemEffectManager.h"
 
 class GameViewModel : public QObject {
     Q_OBJECT
@@ -37,9 +38,9 @@ public:
 
     double getGameTime() const { return m_gameTime;}
 
-    QList<ItemViewModel::ItemData> getActiveItems() const {return m_item->getActiveItems();}
-    int getPossessedItemType() const {return m_item->getPossessedItemType();}
-    void useItem();
+    // 道具相关接口 
+    ItemViewModel* getItemViewModel() const { return m_item.get(); }
+   void useItem() { if(m_item) m_item->usePossessedItem(); }
         
     GameState getGameState() const { return m_gameState; }
     bool isGameActive() const { return m_gameState == PLAYING; }
@@ -57,6 +58,7 @@ private:
     std::unique_ptr<EnemyManager> m_enemyManager;
     std::unique_ptr<CollisionSystem> m_collisionSystem;
     std::unique_ptr<ItemViewModel> m_item;
+    std::unique_ptr<ItemEffectManager> m_itemEffectManager;
     double m_gameTime = 0.0;   
     
     void checkGameState();
@@ -67,7 +69,7 @@ private:
     void handlePlayerHitByEnemy(int enemyId);
     void handleEnemyHitByBullet(int bulletId, int enemyId);
     void handleCreateItem(const QPointF& position);
-    void handleItemUsedImmediately(int itemType);
+    void handleItemUsed(int itemType);
 };
 
 #endif // GAMEVIEWMODEL_H

@@ -1,5 +1,8 @@
 #include "viewmodel/ItemViewModel.h"
+#include "viewmodel/ItemEffectManager.h"
 #include <QDebug>
+#include <algorithm>
+#include <QRandomGenerator>
 
 ItemViewModel::ItemViewModel(QObject *parent)
     : QObject(parent) {
@@ -17,7 +20,7 @@ void ItemViewModel::createItem(const QPointF& position, QMap<int, double> itemPo
         }
     }
 
-    createItem(position, coin); 
+    createItem(position, ItemEffectManager::coin); 
 }
 
 void ItemViewModel::createItem(const QPointF& position, int type) {
@@ -62,15 +65,23 @@ void ItemViewModel::updateItems(double deltaTime, const QPointF& playerPosition)
             ItemData pickedItem = m_items[itemIndex];
             pickedItem.isActive = false;
             
-            if (!m_possessingItem) {
-                // 道具栏为空，拾取道具到道具栏
+            // 检查是否为需要立即使用的道具类型
+            bool shouldUseImmediately = (pickedItem.type == ItemEffectManager::coin || 
+                                        pickedItem.type == ItemEffectManager::five_coins);
+            
+            if (shouldUseImmediately) {
+                // 需要立即使用的道具，不论道具栏状态都立即使用
+                useItemImmediately(pickedItem);
+                qDebug() << "道具立即使用:" << pickedItem.type;
+            } else if (!m_possessingItem) {
+                // 非金币道具且道具栏为空，拾取道具到道具栏
                 m_possessingItem = true;
                 m_possessedItem = pickedItem;
                 m_possessedItem.isPossessed = true;
                 emit itemPickedUp(pickedItem.type);
                 qDebug() << "道具被拾取到道具栏:" << pickedItem.type;
             } else {
-                // 道具栏已有道具，立即使用新道具
+                // 非金币道具且道具栏已有道具，立即使用新道具
                 useItemImmediately(pickedItem);
                 qDebug() << "道具栏已有道具，立即使用新道具:" << pickedItem.type;
             }
@@ -100,8 +111,46 @@ void ItemViewModel::clearAllItems() {
     m_possessingItem = false;
 }
 
+void ItemViewModel::usePossessedItem() {
+    if (m_possessingItem) {
+        int itemType = m_possessedItem.type;
+        m_possessingItem = false;
+        emit itemUsed(itemType);
+        qDebug() << "使用道具栏中的道具:" << itemType;
+    }
+}
+
 void ItemViewModel::useItemImmediately(const ItemData& item) {
     // 发出立即使用信号
     emit itemUsedImmediately(item.type);
     qDebug() << "道具立即使用:" << item.type;
+}
+
+void ItemViewModel::spawnItemAtPosition(const QPointF& position) {
+    // 检查是否应该生成道具
+    double randomValue = QRandomGenerator::global()->bounded(1.0);
+    if (randomValue > m_spawnProbability) {
+        return; // 不生成道具
+    }
+    
+    // 选择随机道具类型
+    int itemType = selectRandomItemType();
+    
+    // 生成道具
+    createItem(position, itemType);
+    
+    qDebug() << "在位置" << position << "生成道具类型:" << itemType;
+    emit itemSpawned(itemType, position);
+}
+
+int ItemViewModel::selectRandomItemType() const {
+    // 简单的道具类型选择逻辑
+    int randomValue = QRandomGenerator::global()->bounded(100);
+    
+    if (randomValue < 30) return ItemEffectManager::coin;
+    if (randomValue < 50) return ItemEffectManager::five_coins;
+    if (randomValue < 70) return ItemEffectManager::extra_life;
+    if (randomValue < 90) return ItemEffectManager::coffee;
+    
+    return ItemEffectManager::coin; // 默认返回金币
 }
