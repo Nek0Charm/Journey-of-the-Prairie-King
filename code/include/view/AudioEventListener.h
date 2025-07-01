@@ -1,8 +1,6 @@
 #ifndef AUDIOEVENTLISTENER_H
 #define AUDIOEVENTLISTENER_H
 
-#include <QObject>
-#include <QPointF>
 #include "viewmodel/GameViewModel.h"
 
 // 前向声明

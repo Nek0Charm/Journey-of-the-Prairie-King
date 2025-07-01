@@ -20,8 +20,14 @@
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
+#include <QPainter>
+#include <QKeyEvent>
 #include <QVBoxLayout>
 #include <QStackedWidget>
+#include <QScreen>
+#include <QMainWindow>
+#include <QColor>
+#include <QRect>
 
 // Qt GUI
 #include <QMovie>

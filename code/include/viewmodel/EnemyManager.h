@@ -15,7 +15,7 @@ public:
         int health = 1;
         QPointF position;
         QPointF velocity;
-        double moveSpeed = 50.0;
+        double moveSpeed = 40.0;
         bool isActive = true;
     };
     
@@ -38,6 +38,7 @@ public:
     int getEnemyCount() const { return m_enemies.size(); }
     int getActiveEnemyCount() const;
     bool hasEnemies() const { return !m_enemies.isEmpty(); }
+    QPointF getEnemyPosition(int id) const;
     
     // 配置设置
     void setSpawnInterval(double interval) { m_spawnInterval = interval; }
@@ -46,7 +47,7 @@ public:
     
 signals:
     void enemySpawned(const EnemyData& enemy);
-    void enemyDestroyed(QPointF position);
+    void enemyDestroyed(int id);
     void enemyReachedPlayer(int enemyId);
     void enemyDamaged(int enemyId, int remainingHealth);
     void enemyCountChanged(int count);

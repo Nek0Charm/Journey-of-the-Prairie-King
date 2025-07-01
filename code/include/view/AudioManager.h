@@ -1,11 +1,7 @@
 #ifndef AUDIOMANAGER_H
 #define AUDIOMANAGER_H
 
-#include <QObject>
-#include <QMap>
-#include <QString>
 #include <memory>
-#include <QMediaPlayer>
 
 // Forward declarations
 class QMediaPlayer;

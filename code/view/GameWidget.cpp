@@ -1,5 +1,4 @@
 #include "view/GameWidget.h"
-#include "GameWidget.h"
 
 #define UI_LEFT 27
 #define UI_UP 16
@@ -44,6 +43,8 @@ GameWidget::~GameWidget() {
     m_monsters.clear();
     qDeleteAll(m_deadmonsters);
     m_deadmonsters.clear();
+    qDeleteAll(m_items);
+    m_items.clear();
     delete m_gameMap;
 }
 
@@ -58,15 +59,14 @@ void GameWidget::gameLoop() {
     for (auto& it: m_monsters) {
         it->update(deltaTime);
     }
+    syncItems();
     for (auto it = m_deadmonsters.begin(); it != m_deadmonsters.end(); ) {
         DeadMonsterEntity* deadMonster = it.value();
         int monsterId = it.key();
-
         deadMonster->update(deltaTime);
         if (deadMonster->ShouldbeRemove()) {
             delete deadMonster;
             it = m_deadmonsters.erase(it);
-
         } else {
             ++it;
         }
@@ -110,6 +110,9 @@ void GameWidget::paintEvent(QPaintEvent *event) {
     for (auto it: m_deadmonsters) {
         it->paint(&painter, m_spriteSheet, viewOffset);
     }
+    for (auto it: m_items) {
+        it->paint(&painter, m_spriteSheet, viewOffset);
+    }
     
     player->paint(&painter, m_spriteSheet, viewOffset);
     for (MonsterEntity* monster : m_monsters) {
@@ -121,7 +124,11 @@ void GameWidget::paintEvent(QPaintEvent *event) {
         if (!bulletSourceRect.isNull()) {
             for (const auto& bullet : bullets) {
                 // qDebug() << "bullet";
+<<<<<<< HEAD
                 QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(UI_LEFT, UI_UP) + QPointF(10, 10)) * (SCALE, SCALE);
+=======
+                QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(10, 10)) * SCALE;
+>>>>>>> origin/feature/view
                 // qDebug() << bullet.position;
                 QSizeF scaledSize(bulletSourceRect.width() * SCALE, bulletSourceRect.height() * SCALE);
                 QRectF destRect(topLeft, scaledSize);
@@ -292,8 +299,37 @@ void GameWidget::syncEnemies() {
     }
 }
 
+void GameWidget::syncItems() {
+    if (!m_viewModel) return;
+    const auto& itemList = m_viewModel->getActiveItems();
+    QSet<int> activeItemIds;
+    for (const auto& data : itemList) {
+        activeItemIds.insert(data.id);
+    }
+    for (auto it = m_items.begin(); it != m_items.end();) {
+        if (!activeItemIds.contains(it.key())) {
+            delete it.value();
+            it = m_items.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    for (const auto& data: itemList) {
+        ItemEntity* item = nullptr;
+        if (!m_items.contains(data.id)) {
+            item = new ItemEntity(data.type);
+            m_items[data.id] = item;
+            // qDebug() << "new_item";
+        } else {
+            item = m_items[data.id];
+        }
+        item->setPosition(data.position);
+    }
+    
+}
+
 void GameWidget::die(int id) {
-    qDebug() << "ID: " << id << "die";
+    // qDebug() << "ID: " << id << "die";
     if (m_monsters.contains(id)) {
         DeadMonsterEntity* deadm = new DeadMonsterEntity(*m_monsters.value(id));
         m_deadmonsters.insert(id, deadm);

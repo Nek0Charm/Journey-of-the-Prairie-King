@@ -1,10 +1,7 @@
 #ifndef SPRITEMANAGER_H
 #define SPRITEMANAGER_H
-#include <QMap>
-#include <QRect>
 #include <QJsonObject>
 #include <QPoint>
-#include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
 

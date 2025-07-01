@@ -1,14 +1,9 @@
-#include "../precomp.h"
 #include "../include/view/AudioEventListener.h"
 #include "../include/viewmodel/GameViewModel.h"
 #include "../include/viewmodel/PlayerViewModel.h"
 #include "../include/viewmodel/EnemyManager.h"
 #include "../include/view/AudioManager.h"
 #include "../include/view/GameWidget.h"
-#include <QObject>
-#include <QDebug>
-#include <QString>
-#include <QPointF>
 // 音频事件监听器实现 - 负责监听游戏事件信号并调用AudioManager播放相应的音效
 // 遵循MVVM架构，只监听ViewModel层的信号
 

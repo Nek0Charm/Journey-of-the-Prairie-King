@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <cmath>
 #include "../../precomp.h"
+#include "viewmodel/EnemyManager.h"
 
 EnemyManager::EnemyManager(QObject *parent)
     : QObject(parent)
@@ -10,7 +11,7 @@ EnemyManager::EnemyManager(QObject *parent)
     , m_spawnTimer(0.0)
     , m_spawnInterval(2.0)
     , m_maxEnemies(10)
-    , m_enemyMoveSpeed(50.0)
+    , m_enemyMoveSpeed(40.0)
 {
 }
 
@@ -84,7 +85,7 @@ void EnemyManager::damageEnemy(int bulletId,int enemyId)
             if (enemy.health <= 0) {
                 enemy.isActive = false;
                 qDebug() << "Enemy destroyed, ID:" << enemyId;
-                emit enemyDestroyed(enemy.position);
+                emit enemyDestroyed(enemy.id);
             }
             break;
         }
@@ -117,6 +118,15 @@ int EnemyManager::getActiveEnemyCount() const
         }
     }
     return count;
+}
+
+QPointF EnemyManager::getEnemyPosition(int id) const {
+     for (const EnemyData& enemy : m_enemies) {
+        if (enemy.id == id) {
+            return enemy.position;
+        }
+    }
+    return QPointF(-1, -1); 
 }
 
 QPointF EnemyManager::getRandomSpawnPosition() const

@@ -1,15 +1,6 @@
-#include "../precomp.h"
 #include "../include/view/AudioManager.h"
-#include <QObject>
-#include <QDebug>
-#include <QDir>
-#include <QCoreApplication>
-#include <QMediaPlayer>
-#include <QAudioOutput>
 #include <QUrl>
-#include <QMap>
 #include <memory>
-#include <QFile>
 
 // 构造函数 - 初始化音频管理器
 AudioManager::AudioManager(QObject *parent)

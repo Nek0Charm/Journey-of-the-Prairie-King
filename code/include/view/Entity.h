@@ -34,7 +34,9 @@ enum class PlayerState {
     ShootDownWalk,
     ShootUpWalk,
     ShootLeftWalk,
-    ShootRightWalk
+    ShootRightWalk,
+    Dying,
+    Zombie
 };
 class PlayerEntity : public Entity {
 public:
@@ -99,6 +101,42 @@ private:
     Animation* m_animation;
     QString monsterType;
     DeadMonsterState m_currentState;
+    double m_lingerTimer;
+};
+
+enum class ItemState {
+    Drop, 
+    Flash,
+    Picked   
+};
+
+enum class ItemType {
+        coin,
+        five_coins,
+        extra_life,
+        coffee,
+        machine_gun,
+        bomb,
+        shotgun,
+        smoke_bomb,
+        tombstone,
+        wheel,
+        badge
+};
+class ItemEntity : public Entity {
+    Q_OBJECT
+public:
+    explicit ItemEntity(int itemtype, QObject* parent = nullptr, QPointF position = QPointF(0, 0));
+    ~ItemEntity() { };
+    void update(double deltaTime) override;
+    void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
+    void setState(ItemState newState) { m_currentState = newState; }
+    bool ShouldbeRemove() { return m_lingerTimer <= 0 ; }
+    bool isVisible();
+    QString typeToString(ItemType type);
+private:
+    ItemType m_itemType;
+    ItemState m_currentState;
     double m_lingerTimer;
 };
 
