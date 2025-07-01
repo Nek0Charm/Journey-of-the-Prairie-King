@@ -33,6 +33,7 @@ target_precompile_headers(MaodieAdventure PRIVATE
 target_link_libraries(MaodieAdventure PRIVATE 
     Qt6::Core 
     Qt6::Widgets 
+    Qt6::Multimedia 
 )
 
 set_target_properties(MaodieAdventure PROPERTIES
