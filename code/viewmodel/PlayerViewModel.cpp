@@ -181,8 +181,8 @@ void PlayerViewModel::teleportToRandomPosition()
 {
     // 生成随机位置，避开边界
     double margin = 50.0;
-    double x = QRandomGenerator::global()->bounded(margin, MAP_WIDTH - margin);
-    double y = QRandomGenerator::global()->bounded(margin, MAP_HEIGHT - margin);
+    double x = QRandomGenerator::global()->bounded(static_cast<int>(margin), static_cast<int>(MAP_WIDTH - margin));
+    double y = QRandomGenerator::global()->bounded(static_cast<int>(margin), static_cast<int>(MAP_HEIGHT - margin));
     
     QPointF newPosition(x, y);
     setPositon(newPosition);

@@ -93,6 +93,20 @@ void AudioManager::loadSoundEffects()
                  << "source:" << soundPlayer->player->source()
                  << "error:" << soundPlayer->player->error();
         
+        // 如果出现错误，尝试重新设置源
+        if (soundPlayer->player->error() != QMediaPlayer::NoError) {
+            qWarning() << "Error setting source for sound type" << type 
+                       << "error:" << soundPlayer->player->errorString();
+            
+            // 尝试使用相对路径
+            QUrl relativeUrl = QUrl::fromLocalFile(path);
+            soundPlayer->player->setSource(relativeUrl);
+            
+            if (soundPlayer->player->error() != QMediaPlayer::NoError) {
+                qWarning() << "Failed to set source even with relative path for type" << type;
+            }
+        }
+        
         m_soundPlayers[type] = std::move(soundPlayer);
     }
     

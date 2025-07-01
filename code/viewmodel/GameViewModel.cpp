@@ -164,6 +164,12 @@ void GameViewModel::resetGame()
     if (m_enemyManager) {
         m_enemyManager->clearAllEnemies();
     }
+    if (m_item) {
+        m_item->clearAllItems();
+    }
+    if (m_itemEffectManager) {
+        m_itemEffectManager->clearAllEffects();
+    }
 }
 
 void GameViewModel::handlePlayerHitByEnemy(int enemyId)

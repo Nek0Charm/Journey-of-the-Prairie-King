@@ -333,4 +333,19 @@ void ItemEffectManager::checkAndRemoveExpiredEffects(double currentTime, PlayerV
     for (EffectType type : expiredEffects) {
         m_activeEffects.remove(type);
     }
-} 
+}
+
+void ItemEffectManager::clearAllEffects(PlayerViewModel* player) {
+    // 恢复所有效果到原始状态
+    for (auto it = m_activeEffects.begin(); it != m_activeEffects.end(); ++it) {
+        if (player) {
+            restorePlayerFromEffect(it.key(), it.value().originalValue, player);
+        }
+    }
+    
+    // 清空所有效果
+    m_activeEffects.clear();
+    m_currentTime = 0.0;
+    
+    qDebug() << "清除所有道具效果";
+}

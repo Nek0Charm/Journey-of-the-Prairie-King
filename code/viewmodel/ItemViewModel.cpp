@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <algorithm>
 #include <QRandomGenerator>
+#include <QLineF>
 
 ItemViewModel::ItemViewModel(QObject *parent)
     : QObject(parent) {
@@ -49,21 +50,17 @@ void ItemViewModel::updateItems(double deltaTime, const QPointF& playerPosition)
             }
         }
     }
-    QPair<int, int> positionPair(static_cast<int>(playerPosition.x()), static_cast<int>(playerPosition.y()));
-
-    // 检查玩家是否踩到道具
-    if (m_itemPositions.find(positionPair) != m_itemPositions.end()) {
-        int itemIndex = -1;
-        for (int i = 0; i < m_items.size(); ++i) {
-            if (m_items[i].id == m_itemPositions[positionPair] && m_items[i].isActive) {
-                itemIndex = i;
-                break;
-            }
-        }
+    // 使用更精确的碰撞检测，检查玩家是否在道具附近
+    for (auto& item : m_items) {
+        if (!item.isActive) continue;
         
-        if (itemIndex != -1) {
-            ItemData pickedItem = m_items[itemIndex];
-            pickedItem.isActive = false;
+        // 计算玩家与道具的距离
+        double distance = QLineF(playerPosition, QPointF(item.position.x(), item.position.y())).length();
+        
+        // 如果距离小于等于8像素（考虑SCALE=5，实际是1.6个游戏单位），则认为拾取
+        if (distance <= 8.0) {
+            ItemData pickedItem = item;
+            item.isActive = false; // 标记道具为已拾取
             
             // 检查是否为需要立即使用的道具类型
             bool shouldUseImmediately = (pickedItem.type == ItemEffectManager::coin || 
@@ -85,6 +82,11 @@ void ItemViewModel::updateItems(double deltaTime, const QPointF& playerPosition)
                 useItemImmediately(pickedItem);
                 qDebug() << "道具栏已有道具，立即使用新道具:" << pickedItem.type;
             }
+            
+            // 从位置映射中移除
+            QPair<int, int> positionPair(static_cast<int>(pickedItem.position.x()), static_cast<int>(pickedItem.position.y()));
+            m_itemPositions.remove(positionPair);
+            break; // 一次只拾取一个道具
         }
     } 
     

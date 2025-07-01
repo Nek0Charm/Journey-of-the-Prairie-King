@@ -32,6 +32,7 @@ public:
         double effectValue;   // 效果值
         bool isActive;        // 是否激活
         
+        ItemEffect() : type(MOVE_SPEED_BOOST), endTime(0.0), originalValue(0.0), effectValue(0.0), isActive(false) {}
         ItemEffect(EffectType t, double end, double original, double effect)
             : type(t), endTime(end), originalValue(original), effectValue(effect), isActive(true) {}
     };
@@ -69,6 +70,7 @@ public:
     void removeEffect(EffectType type);
     bool hasEffect(EffectType type) const;
     double getEffectRemainingTime(EffectType type) const;
+    void clearAllEffects(PlayerViewModel* player = nullptr);
     
     // 获取道具效果持续时间
     static double getItemEffectDuration(int itemType);

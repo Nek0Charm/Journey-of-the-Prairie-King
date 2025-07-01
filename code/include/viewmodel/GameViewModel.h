@@ -40,7 +40,10 @@ public:
 
     // 道具相关接口 
     ItemViewModel* getItemViewModel() const { return m_item.get(); }
-   void useItem() { if(m_item) m_item->usePossessedItem(); }
+    void useItem() { if(m_item) m_item->usePossessedItem(); }
+    QList<ItemViewModel::ItemData> getActiveItems() const { 
+        return m_item ? m_item->getActiveItems() : QList<ItemViewModel::ItemData>(); 
+    }
         
     GameState getGameState() const { return m_gameState; }
     bool isGameActive() const { return m_gameState == PLAYING; }

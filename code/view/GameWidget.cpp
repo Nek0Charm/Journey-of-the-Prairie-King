@@ -124,11 +124,7 @@ void GameWidget::paintEvent(QPaintEvent *event) {
         if (!bulletSourceRect.isNull()) {
             for (const auto& bullet : bullets) {
                 // qDebug() << "bullet";
-<<<<<<< HEAD
-                QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(UI_LEFT, UI_UP) + QPointF(10, 10)) * (SCALE, SCALE);
-=======
                 QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(10, 10)) * SCALE;
->>>>>>> origin/feature/view
                 // qDebug() << bullet.position;
                 QSizeF scaledSize(bulletSourceRect.width() * SCALE, bulletSourceRect.height() * SCALE);
                 QRectF destRect(topLeft, scaledSize);
@@ -145,15 +141,47 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     double ui_margin = 3.0;
     
     QRect circleRect = SpriteManager::instance().getSpriteRect("ui_circle");
-    QRectF circleRectF(0, -(circleRect.height()+ui_margin/4)*SCALE, circleRect.width()*SCALE , circleRect.height()*SCALE);
+    QRectF circleRectF(0, 35*SCALE, circleRect.width()*SCALE , circleRect.height()*SCALE);
     circleRectF.translate(viewOffset);
     painter->drawPixmap(circleRectF, m_spriteSheet, circleRect);
 
     QRect itemRect = SpriteManager::instance().getSpriteRect("ui_item_ground");
-    QRectF itemRectF(-(itemRect.width() + ui_margin)*SCALE, 0, itemRect.width()*SCALE, itemRect.height()*SCALE);
+    QRectF itemRectF(-(itemRect.width() + ui_margin)*SCALE, 35*SCALE, itemRect.width()*SCALE, itemRect.height()*SCALE);
     QPointF itemBottomLeft = itemRectF.bottomLeft();
     itemRectF.translate(viewOffset);
     painter->drawPixmap(itemRectF, m_spriteSheet, itemRect);
+    
+    // 绘制道具栏中的道具图标
+    qDebug() << "=== 道具栏绘制调试信息 ===";
+    qDebug() << "m_viewModel存在:" << (m_viewModel != nullptr);
+    if (m_viewModel) {
+        qDebug() << "getItemViewModel存在:" << (m_viewModel->getItemViewModel() != nullptr);
+        if (m_viewModel->getItemViewModel()) {
+            qDebug() << "hasPossessedItem:" << m_viewModel->getItemViewModel()->hasPossessedItem();
+            if (m_viewModel->getItemViewModel()->hasPossessedItem()) {
+                int itemType = m_viewModel->getItemViewModel()->getPossessedItemType();
+                QString spriteName = getItemSpriteName(itemType);
+                QRect itemSpriteRect = SpriteManager::instance().getSpriteRect(spriteName);
+                qDebug() << "道具栏绘制 - 道具类型:" << itemType << "精灵名称:" << spriteName << "精灵矩形:" << itemSpriteRect;
+                if (!itemSpriteRect.isNull()) {
+                    // 恢复原来的大小，不进行缩放
+                    QRectF itemSpriteRectF = itemRectF;
+                    itemSpriteRectF.translate(viewOffset);
+                    painter->drawPixmap(itemSpriteRectF, m_spriteSheet, itemSpriteRect);
+                    qDebug() << "道具图标绘制成功 - 位置:" << itemSpriteRectF;
+                } else {
+                    qDebug() << "道具精灵矩形为空，无法绘制";
+                }
+            } else {
+                qDebug() << "道具栏中没有道具";
+            }
+        } else {
+            qDebug() << "getItemViewModel返回nullptr";
+        }
+    } else {
+        qDebug() << "m_viewModel为nullptr";
+    }
+    qDebug() << "=== 道具栏绘制调试信息结束 ===";
 
     QRect healthRect = SpriteManager::instance().getSpriteRect("ui_helth");
     QRectF healthRectF(itemBottomLeft.x(), (itemBottomLeft.y() + ui_margin*SCALE), healthRect.width()*SCALE, healthRect.height()*SCALE);
@@ -174,7 +202,7 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
 
         QPointF barTopLeft(
             circleRectF.right() + (ui_margin)*SCALE, 
-            circleRectF.center().y() - barHeight / 2.0 + 3*SCALE
+            circleRectF.center().y() - barHeight / 2.0
         );
         QRectF barBackgroundRect(barTopLeft, QSizeF(barWidth, barHeight));
         double timeRatio = m_currentTime / m_maxTime;
@@ -333,5 +361,24 @@ void GameWidget::die(int id) {
     if (m_monsters.contains(id)) {
         DeadMonsterEntity* deadm = new DeadMonsterEntity(*m_monsters.value(id));
         m_deadmonsters.insert(id, deadm);
+    }
+}
+
+QString GameWidget::getItemSpriteName(int itemType) const {
+    // 根据道具类型返回对应的精灵名称
+    // 注意：这些名称必须与sprite.json中的frames名称完全匹配
+    switch(itemType) {
+        case 0: return "coin";           // 金币
+        case 1: return "five_coins";     // 五金币
+        case 2: return "extra_life";     // 额外生命
+        case 3: return "coffee";         // 咖啡
+        case 4: return "machine_gun";    // 机枪
+        case 5: return "bomb";           // 清屏核弹
+        case 6: return "shotgun";        // 霰弹枪
+        case 7: return "smoke_bomb";     // 烟雾弹
+        case 8: return "tombstone";      // 墓碑
+        case 9: return "wheel";          // 轮子
+        case 10: return "badge";         // 治安官徽章
+        default: return "coin";          // 默认返回金币
     }
 }
