@@ -44,6 +44,7 @@ public slots:
     void updatePlayerHealth(int health);
     void updatePlayerMoney(int money);
     void updatePossessedItem(int itemType, bool hasItem); 
+    void updateZombieMode(bool isZombieMode);
 
 private:
     QTimer* keyRespondTimer;
@@ -71,6 +72,7 @@ private:
     int m_moneyCount = 0;
     int m_possessedItemType;
     bool m_hasPossessedItem;
+    bool m_isZombieMode = false;
     
     // 道具使用相关
     bool m_spaceKeyPressed = false;  // 防止空格键重复触发  

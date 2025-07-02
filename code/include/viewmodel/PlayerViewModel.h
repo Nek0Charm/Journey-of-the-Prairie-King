@@ -86,7 +86,7 @@ public:
     bool isStealthMode() const {return m_stats.stealthMode;}
     
     // 僵尸模式相关
-    void setZombieMode(bool enabled) {m_stats.zombieMode = enabled;}
+    void setZombieMode(bool enabled) {m_stats.zombieMode = enabled; emit zombieModeChanged(enabled);}
     bool isZombieMode() const {return m_stats.zombieMode;}
 
 signals:
@@ -97,6 +97,7 @@ signals:
     void shot(const QPointF& direction);
     void playerStealthModeChanged(bool enabled);
     void healthChanged(int health);
+    void zombieModeChanged(bool enabled);
     
 private:
     PlayerStats m_stats;

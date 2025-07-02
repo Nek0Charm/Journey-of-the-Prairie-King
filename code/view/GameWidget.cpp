@@ -242,11 +242,10 @@ void GameWidget::timerEvent() {
         emit shoot(shootDirection);
     }
     
-    // 检查僵尸模式状态
-    bool isZombieMode = playerVM->isZombieMode();
+
     
     // 如果处于僵尸模式，直接设置僵尸动画
-    if (isZombieMode) {
+    if (m_isZombieMode) {
         player->setState(PlayerState::Zombie);
     } else {
         // 正常状态下的动画逻辑
@@ -383,3 +382,6 @@ void GameWidget::updatePossessedItem(int itemType, bool hasItem) {
     m_hasPossessedItem = hasItem;
 }
 
+void GameWidget::updateZombieMode(bool isZombieMode) {
+    m_isZombieMode = isZombieMode;
+}
