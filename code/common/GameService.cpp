@@ -48,4 +48,7 @@ void GameService::setupConnections() {
 
     connect(m_gameViewModel->getPlayer(), &PlayerViewModel::zombieModeChanged,
             m_mainWindow->getGameWidget(), &GameWidget::updateZombieMode);
+
+    connect(m_gameViewModel->getItemViewModel(), &ItemViewModel::itemUsed,
+            m_mainWindow->getGameWidget(), &GameWidget::updateItemEffect);
 }

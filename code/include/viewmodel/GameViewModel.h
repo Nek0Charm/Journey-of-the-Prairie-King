@@ -54,7 +54,8 @@ signals:
     void playerDied();
     void playerLivesChanged();
     void playerPositonChanged(const QPointF& position);
-    void itemUsed(int itemType); // 道具使用信号
+    void itemUsed(int itemType); 
+    void boomUsed();
     void itemPicked(int itemType);
     void gameTimeChanged(double gameTime);
     void enemiesChanged(QList<EnemyData> enemies);

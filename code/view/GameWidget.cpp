@@ -1,4 +1,5 @@
 #include "view/GameWidget.h"
+#include "GameWidget.h"
 
 #define UI_LEFT 27
 #define UI_UP 16
@@ -276,11 +277,6 @@ void GameWidget::timerEvent() {
     } else if (!keys[Qt::Key_Space]) {
         m_spaceKeyPressed = false;
     }
-    if (keys[Qt::Key_B]) {
-        if (m_gameMap) {
-            m_gameMap->startExplosionSequence(10.0);
-        }
-    }
 }
 
 void GameWidget::syncEnemies() {
@@ -384,4 +380,15 @@ void GameWidget::updatePossessedItem(int itemType, bool hasItem) {
 
 void GameWidget::updateZombieMode(bool isZombieMode) {
     m_isZombieMode = isZombieMode;
+}
+
+void GameWidget::updateItemEffect(int itemType) {
+    switch (itemType)
+    {
+    case 5: // Boom
+        m_gameMap->startExplosionSequence(2.0);
+        break;
+    default:
+        break;
+    }
 }

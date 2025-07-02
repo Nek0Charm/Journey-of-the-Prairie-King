@@ -45,6 +45,7 @@ public slots:
     void updatePlayerMoney(int money);
     void updatePossessedItem(int itemType, bool hasItem); 
     void updateZombieMode(bool isZombieMode);
+    void updateItemEffect(int itemType);
 
 private:
     QTimer* keyRespondTimer;

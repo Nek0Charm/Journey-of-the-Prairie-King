@@ -36,7 +36,7 @@ bool GameMap::loadFromFile(const QString& path, const QString& mapName, const QS
             m_tileLegend[tileId] = name;
             QList<QString> animFrames = SpriteManager::instance().getAnimationSequence(name);
             if (!animFrames.isEmpty()) {
-                m_animations[name] = new Animation(animFrames, 1.5, true); 
+                m_animations[name] = new Animation(animFrames, 1.2, true); 
             }
         }
 
@@ -93,7 +93,7 @@ void GameMap::update(double deltaTime) {
         double randX = QRandomGenerator::global()->bounded((getWidth()-1) * 16);
         double randY = QRandomGenerator::global()->bounded((getHeight()-1) * 16);
         createExplosion(QPointF(randX, randY));
-        m_nextExplosionSpawnTimer = (QRandomGenerator::global()->bounded(70) + 0) / 1000.0;
+        m_nextExplosionSpawnTimer = (QRandomGenerator::global()->bounded(150) + 0) / 1000.0;
     }
 }
 
@@ -152,7 +152,7 @@ void GameMap::startExplosionSequence(double duration) {
 }
 ExplosionEffect::ExplosionEffect(const QPointF &position) {
     auto frames = SpriteManager::instance().getAnimationSequence("explode");
-    m_animation = new Animation(frames, 8.0, false); 
+    m_animation = new Animation(frames, 6.0, false); 
     m_position = position;
 }
 
