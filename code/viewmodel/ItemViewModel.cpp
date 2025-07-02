@@ -163,15 +163,21 @@ void ItemViewModel::spawnItemAtPosition(const QPointF& position) {
     emit itemSpawned(itemType, position);
 }
 
-
-
 int ItemViewModel::selectRandomItemType() const {
-    // 测试用：主要掉落烟雾弹
+    // 正常的道具生成概率分布
     int randomValue = QRandomGenerator::global()->bounded(100);
     
-    if (randomValue < 80) return ItemEffectManager::smoke_bomb;     // 80% 烟雾弹
-    if (randomValue < 90) return ItemEffectManager::extra_life;     // 10% 额外生命
-    if (randomValue < 100) return ItemEffectManager::coin;          // 10% 金币
+    if (randomValue < 30) return ItemEffectManager::coin;          // 30% 金币
+    if (randomValue < 45) return ItemEffectManager::five_coins;    // 15% 五金币
+    if (randomValue < 55) return ItemEffectManager::extra_life;    // 10% 额外生命
+    if (randomValue < 65) return ItemEffectManager::coffee;        // 10% 咖啡
+    if (randomValue < 72) return ItemEffectManager::machine_gun;   // 7% 机枪
+    if (randomValue < 78) return ItemEffectManager::bomb;          // 6% 清屏核弹
+    if (randomValue < 84) return ItemEffectManager::shotgun;       // 6% 霰弹枪
+    if (randomValue < 90) return ItemEffectManager::smoke_bomb;    // 6% 烟雾弹
+    if (randomValue < 95) return ItemEffectManager::tombstone;     // 5% 墓碑
+    if (randomValue < 98) return ItemEffectManager::wheel;         // 3% 轮子
+    if (randomValue < 100) return ItemEffectManager::badge;        // 2% 治安官徽章
     
-    return ItemEffectManager::smoke_bomb; // 默认返回烟雾弹
+    return ItemEffectManager::coin; // 默认返回金币
 }
