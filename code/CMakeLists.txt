@@ -1,6 +1,26 @@
-file(GLOB_RECURSE SOURCES 
+# 明确指定源文件，避免包含CMake生成的文件
+set(SOURCES
     "main.cpp"
-    "./*.cpp"
+    "app/application.cpp"
+    "common/playerservice.cpp"
+    "view/Animation.cpp"
+    "view/AudioEventListener.cpp"
+    "view/AudioManager.cpp"
+    "view/EndWidget.cpp"
+    "view/Entity.cpp"
+    "view/GameMap.cpp"
+    "view/GameWidget.cpp"
+    "view/MainWindow.cpp"
+    "view/playerview.cpp"
+    "view/SpriteManager.cpp"
+    "view/StartWidget.cpp"
+    "viewmodel/BulletViewModel.cpp"
+    "viewmodel/CollisionSystem.cpp"
+    "viewmodel/EnemyManager.cpp"
+    "viewmodel/GameViewModel.cpp"
+    "viewmodel/ItemEffectManager.cpp"
+    "viewmodel/ItemViewModel.cpp"
+    "viewmodel/PlayerViewModel.cpp"
 )
 
 # 收集头文件
