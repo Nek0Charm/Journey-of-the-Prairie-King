@@ -75,9 +75,21 @@ void PlayerViewModel::reset()
     m_stats.shootingDirection = QPointF(1, 0);
     m_stats.moveSpeed = 80.0;
     m_stats.shootCooldown = 0.2;
-    
+    m_stats.stealthMode = false;
+    m_stats.wheelMode = false; 
+    m_stats.shotgunMode = false;
+    m_stats.zombieMode = false;
+    m_stats.moving = false;
+
+
     m_bulletViewModel->clearAllBullets();
     m_currentShootCooldown = 0.0;
+    emit positionChanged(m_stats.position);
+    emit healthChanged(m_stats.lives);
+    emit coinsChanged(m_stats.coins);
+    emit playerStealthModeChanged(m_stats.stealthMode);
+    emit zombieModeChanged(m_stats.zombieMode);
+    
     
 }
 

@@ -51,7 +51,7 @@ void GameViewModel::endGame()
 void GameViewModel::playerAttack(const QPointF& direction) {
     if (m_gameState == GameState::PLAYING && m_player) {
         m_player->shoot(direction);
-        qDebug() << "Player attacked in direction:" << direction;
+        // qDebug() << "Player attacked in direction:" << direction;
     }
 }
 
