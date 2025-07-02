@@ -28,7 +28,7 @@ public:
     void endGame();
     void updateGame(double deltaTime);
 
-    
+    ItemViewModel* getItemViewModel() const { return m_item.get(); }
     EnemyManager* getEnemyManager() const { return m_enemyManager.get(); }
     void playerAttack(const QPointF& direction);
     void setPlayerMoveDirection(const QPointF& direction, bool isMoving);
@@ -38,12 +38,19 @@ public:
 
     double getGameTime() const { return m_gameTime;}
 
+<<<<<<< HEAD
     // 道具相关接口 
     ItemViewModel* getItemViewModel() const { return m_item.get(); }
     void useItem() { if(m_item) m_item->usePossessedItem(); }
     QList<ItemViewModel::ItemData> getActiveItems() const { 
         return m_item ? m_item->getActiveItems() : QList<ItemViewModel::ItemData>(); 
     }
+=======
+    QList<ItemViewModel::ItemData> getActiveItems() const {return m_item->getActiveItems();}
+    int getPossessedItemType() const {return m_item->getPossessedItemType();}
+    void useItem();
+    void pickItem(int itemType);
+>>>>>>> origin/feature/view
         
     GameState getGameState() const { return m_gameState; }
     bool isGameActive() const { return m_gameState == PLAYING; }
@@ -54,6 +61,7 @@ signals:
     void playerLivesChanged();
     void playerPositonChanged(const QPointF& position);
     void itemUsed(int itemType); // 道具使用信号
+    void itemPicked(int itemType);
     
 private:
     GameState m_gameState = MENU;

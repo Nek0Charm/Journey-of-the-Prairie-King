@@ -143,7 +143,7 @@ void GameViewModel::setupConnections()
     connect(m_item.get(), &ItemViewModel::itemUsed,
             this, &GameViewModel::handleItemUsed);
     connect(m_item.get(), &ItemViewModel::itemUsedImmediately,
-            this, &GameViewModel::handleItemUsed);
+            this, &GameViewModel::handleItemUsedImmediately);
 }
 
 void GameViewModel::initializeComponents()
@@ -200,9 +200,46 @@ void GameViewModel::handleCreateItem(int enemyId, const QPointF& position)
     m_item->spawnItemAtPosition(position);
 }
 
-void GameViewModel::handleItemUsed(int itemType) {
-    // 使用ItemEffectManager处理道具效果
-    m_itemEffectManager->applyItemEffect(itemType, m_player.get(), m_enemyManager.get());
+void GameViewModel::handleItemUsedImmediately(int itemType) {
+    // 处理道具立即使用效果
+    switch(itemType) {
+        case ItemViewModel::coin:
+            qDebug() << "立即使用金币";
+            // 金币效果：增加分数或金钱
+            break;
+        case ItemViewModel::five_coins:
+            qDebug() << "立即使用五个金币";
+            // 五个金币效果：增加更多分数或金钱
+            break;
+        case ItemViewModel::extra_life:
+            m_player->addLife();
+            qDebug() << "立即使用额外生命";
+            break;
+        case ItemViewModel::coffee:
+            m_player->setMoveSpeed(m_player->getMoveSpeed() * 1.2);
+            qDebug() << "立即使用咖啡";
+            break;
+        case ItemViewModel::machine_gun:
+            m_player->setShootCooldown(0.1);
+            qDebug() << "立即使用机枪";
+            break;
+        case ItemViewModel::bomb:
+            m_enemyManager->clearAllEnemies();
+            qDebug() << "立即使用炸弹";
+            break;
+        case ItemViewModel::shotgun:
+            m_player->setShootCooldown(0.15);
+            qDebug() << "立即使用霰弹枪";
+            break;
+        case ItemViewModel::wheel:
+            m_player->setMoveSpeed(m_player->getMoveSpeed() * 1.5);
+            qDebug() << "立即使用轮子";
+            break;
+        default:
+            qDebug() << "立即使用未知道具:" << itemType;
+            break;
+    }
+    
     // 发出道具使用信号
     emit itemUsed(itemType);
 }

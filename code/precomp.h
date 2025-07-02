@@ -28,6 +28,7 @@
 #include <QMainWindow>
 #include <QColor>
 #include <QRect>
+#include <QRandomGenerator>
 
 // Qt GUI
 #include <QMovie>
