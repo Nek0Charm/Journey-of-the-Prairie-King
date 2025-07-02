@@ -53,7 +53,8 @@ void PlayerViewModel::update(double deltaTime) {
 void PlayerViewModel::takeDamage()
 {
     m_stats.lives--;
-    emit livesChanged();    
+    emit livesChanged();
+    emit healthChanged(m_stats.lives);    
     if (m_stats.lives < 0) {
         emit playerDied();
     }
@@ -62,6 +63,7 @@ void PlayerViewModel::takeDamage()
 void PlayerViewModel::addLife()
 {
     m_stats.lives++;
+    emit healthChanged(m_stats.lives);
     emit livesChanged();
 }
 
