@@ -60,11 +60,20 @@ void EnemyManager::spawnEnemyAtRandomPosition()
     spawnEnemy(position);
 }
 
-void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos)
+void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode)
 {
+    // 更新潜行状态
+    m_playerStealthMode = playerStealthMode;
+    
     for (auto& enemy : m_enemies) {
         if (enemy.isActive) {
-            updateEnemyAI(enemy, playerPos);
+            // 如果玩家处于潜行模式，敌人停止移动
+            if (playerStealthMode) {
+                enemy.velocity = QPointF(0, 0);
+            } else {
+                updateEnemyAI(enemy, playerPos);
+            }
+            
             if(!isPositionValid(enemy.position + enemy.velocity * deltaTime, enemy.id)) {
                 continue;
             }
@@ -164,6 +173,8 @@ QPointF EnemyManager::getRandomSpawnPosition() const
     count = 0;
     return position;
 }
+
+
 
 void EnemyManager::updateEnemyAI(EnemyData& enemy, const QPointF& playerPos)
 {

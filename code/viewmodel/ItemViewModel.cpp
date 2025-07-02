@@ -36,7 +36,7 @@ void ItemViewModel::createItem(const QPointF& position, int type) {
     newItem.isPossessed = false;
     newItem.isActive = true;
     newItem.remainTime = 15.0; 
-    qDebug() << "Item created at position:" << newItem.position << "with type:" << newItem.type << "是否为金币:" << (type == ItemEffectManager::coin || type == ItemEffectManager::five_coins);
+    qDebug() << "道具生成 - 位置:" << newItem.position << "类型:" << newItem.type;
     m_items.append(newItem);
     m_itemPositions[positionPair] = newItem.id;
 }
@@ -57,7 +57,22 @@ void ItemViewModel::updateItems(double deltaTime, const QPointF& playerPosition)
         // 计算玩家与道具的距离
         double distance = QLineF(playerPosition, QPointF(item.position.x(), item.position.y())).length();
         
-        qDebug() << "道具拾取检测 - 道具类型:" << item.type << "道具位置:" << item.position << "玩家位置:" << playerPosition << "距离:" << distance;
+        QString itemTypeName;
+        switch(item.type) {
+            case 0: itemTypeName = "金币"; break;
+            case 1: itemTypeName = "五金币"; break;
+            case 2: itemTypeName = "额外生命"; break;
+            case 3: itemTypeName = "咖啡"; break;
+            case 4: itemTypeName = "机枪"; break;
+            case 5: itemTypeName = "清屏核弹"; break;
+            case 6: itemTypeName = "霰弹枪"; break;
+            case 7: itemTypeName = "烟雾弹"; break;
+            case 8: itemTypeName = "墓碑"; break;
+            case 9: itemTypeName = "轮子"; break;
+            case 10: itemTypeName = "治安官徽章"; break;
+            default: itemTypeName = "未知道具"; break;
+        }
+        qDebug() << "道具拾取检测 - 道具类型:" << itemTypeName << "(" << item.type << ")" << "道具位置:" << item.position << "玩家位置:" << playerPosition << "距离:" << distance;
         
         // 如果距离小于等于8像素（考虑SCALE=5，实际是1.6个游戏单位），则认为拾取
         if (distance <= 8.0) {
@@ -66,7 +81,8 @@ void ItemViewModel::updateItems(double deltaTime, const QPointF& playerPosition)
             
             // 检查是否为需要立即使用的道具类型
             bool shouldUseImmediately = (pickedItem.type == ItemEffectManager::coin || 
-                                        pickedItem.type == ItemEffectManager::five_coins);
+                                        pickedItem.type == ItemEffectManager::five_coins ||
+                                        pickedItem.type == ItemEffectManager::extra_life);
             
             if (shouldUseImmediately) {
                 // 需要立即使用的道具，不论道具栏状态都立即使用
@@ -147,20 +163,15 @@ void ItemViewModel::spawnItemAtPosition(const QPointF& position) {
     emit itemSpawned(itemType, position);
 }
 
+
+
 int ItemViewModel::selectRandomItemType() const {
-    // 更丰富的道具类型选择逻辑
+    // 测试用：主要掉落烟雾弹
     int randomValue = QRandomGenerator::global()->bounded(100);
     
-    if (randomValue < 25) return ItemEffectManager::coin;           // 25% 金币
-    if (randomValue < 40) return ItemEffectManager::five_coins;     // 15% 五金币
-    if (randomValue < 50) return ItemEffectManager::extra_life;     // 10% 额外生命
-    if (randomValue < 60) return ItemEffectManager::coffee;         // 10% 咖啡
-    if (randomValue < 70) return ItemEffectManager::machine_gun;    // 10% 机枪
-    if (randomValue < 80) return ItemEffectManager::shotgun;        // 10% 霰弹枪
-    if (randomValue < 85) return ItemEffectManager::smoke_bomb;     // 5% 烟雾弹
-    if (randomValue < 90) return ItemEffectManager::tombstone;      // 5% 墓碑
-    if (randomValue < 95) return ItemEffectManager::wheel;          // 5% 轮子
-    if (randomValue < 100) return ItemEffectManager::badge;         // 5% 治安官徽章
+    if (randomValue < 80) return ItemEffectManager::smoke_bomb;     // 80% 烟雾弹
+    if (randomValue < 90) return ItemEffectManager::extra_life;     // 10% 额外生命
+    if (randomValue < 100) return ItemEffectManager::coin;          // 10% 金币
     
-    return ItemEffectManager::coin; // 默认返回金币
+    return ItemEffectManager::smoke_bomb; // 默认返回烟雾弹
 }

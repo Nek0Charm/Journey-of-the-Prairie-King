@@ -78,8 +78,8 @@ void GameViewModel::updateGame(double deltaTime)
     // 更新玩家
     m_player->update(deltaTime);
     
-    // 更新敌人
-    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition());
+    // 更新敌人（传递玩家潜行状态）
+    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition(), m_player->isStealthMode());
 
     m_collisionSystem->checkCollisions(*m_player, 
                                       m_enemyManager->getEnemies(),

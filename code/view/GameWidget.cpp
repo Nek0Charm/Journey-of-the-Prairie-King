@@ -1,4 +1,5 @@
 #include "view/GameWidget.h"
+#include "viewmodel/EnemyManager.h"
 
 #define UI_LEFT 27
 #define UI_UP 16
@@ -152,41 +153,22 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     painter->drawPixmap(itemRectF, m_spriteSheet, itemRect);
     
     // 绘制道具栏中的道具图标
-    qDebug() << "=== 道具栏绘制调试信息 ===";
-    qDebug() << "m_viewModel存在:" << (m_viewModel != nullptr);
-    if (m_viewModel) {
-        qDebug() << "getItemViewModel存在:" << (m_viewModel->getItemViewModel() != nullptr);
-        if (m_viewModel->getItemViewModel()) {
-            qDebug() << "hasPossessedItem:" << m_viewModel->getItemViewModel()->hasPossessedItem();
-            if (m_viewModel->getItemViewModel()->hasPossessedItem()) {
-                int itemType = m_viewModel->getItemViewModel()->getPossessedItemType();
-                QString spriteName = getItemSpriteName(itemType);
-                QRect itemSpriteRect = SpriteManager::instance().getSpriteRect(spriteName);
-                qDebug() << "道具栏绘制 - 道具类型:" << itemType << "精灵名称:" << spriteName << "精灵矩形:" << itemSpriteRect;
-                if (!itemSpriteRect.isNull()) {
-                    // 使用道具栏的位置，但稍微调整大小以适应道具栏
-                    QRectF itemSpriteRectF = itemRectF;
-                    // 调整道具图标大小，使其适合道具栏
-                    double scale = 0.8; // 缩小到80%
-                    QPointF center = itemSpriteRectF.center();
-                    QSizeF newSize = itemSpriteRectF.size() * scale;
-                    itemSpriteRectF.setSize(newSize);
-                    itemSpriteRectF.moveCenter(center);
-                    painter->drawPixmap(itemSpriteRectF, m_spriteSheet, itemSpriteRect);
-                    qDebug() << "道具图标绘制成功 - 位置:" << itemSpriteRectF;
-                } else {
-                    qDebug() << "道具精灵矩形为空，无法绘制";
-                }
-            } else {
-                qDebug() << "道具栏中没有道具";
-            }
-        } else {
-            qDebug() << "getItemViewModel返回nullptr";
+    if (m_viewModel && m_viewModel->getItemViewModel() && m_viewModel->getItemViewModel()->hasPossessedItem()) {
+        int itemType = m_viewModel->getItemViewModel()->getPossessedItemType();
+        QString spriteName = getItemSpriteName(itemType);
+        QRect itemSpriteRect = SpriteManager::instance().getSpriteRect(spriteName);
+        if (!itemSpriteRect.isNull()) {
+            // 使用道具栏的位置，但稍微调整大小以适应道具栏
+            QRectF itemSpriteRectF = itemRectF;
+            // 调整道具图标大小，使其适合道具栏
+            double scale = 0.8; // 缩小到80%
+            QPointF center = itemSpriteRectF.center();
+            QSizeF newSize = itemSpriteRectF.size() * scale;
+            itemSpriteRectF.setSize(newSize);
+            itemSpriteRectF.moveCenter(center);
+            painter->drawPixmap(itemSpriteRectF, m_spriteSheet, itemSpriteRect);
         }
-    } else {
-        qDebug() << "m_viewModel为nullptr";
     }
-    qDebug() << "=== 道具栏绘制调试信息结束 ===";
 
     QRect healthRect = SpriteManager::instance().getSpriteRect("ui_helth");
     QRectF healthRectF(itemBottomLeft.x(), (itemBottomLeft.y() + ui_margin*SCALE), healthRect.width()*SCALE, healthRect.height()*SCALE);
@@ -329,6 +311,10 @@ void GameWidget::syncEnemies() {
         }
         monster->setPosition(data.position);
         monster->setVelocity(data.velocity);
+        
+        // 根据玩家潜行状态设置敌人是否冻结
+        bool playerStealthMode = m_viewModel->getPlayer() ? m_viewModel->getPlayer()->isStealthMode() : false;
+        monster->setFrozen(playerStealthMode);
     }
 }
 

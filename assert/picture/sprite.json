@@ -202,6 +202,10 @@
       "player_dying_4",
       "player_dying_5"
     ],
+    "player_zombie": [
+      "player_zombie_1",
+      "player_zombie_2"
+    ],
     "orc_walk": [
       "orc_walk_1",
       "orc_walk_2"
