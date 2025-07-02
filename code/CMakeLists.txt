@@ -2,7 +2,7 @@
 set(SOURCES
     "main.cpp"
     "app/application.cpp"
-    "common/playerservice.cpp"
+    "common/GameService.cpp"
     "view/Animation.cpp"
     "view/AudioEventListener.cpp"
     "view/AudioManager.cpp"

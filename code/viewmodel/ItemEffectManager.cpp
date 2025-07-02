@@ -3,6 +3,7 @@
 #include "viewmodel/EnemyManager.h"
 #include <QDebug>
 #include <QMap>
+#include <algorithm>
 
 ItemEffectManager::ItemEffectManager(QObject *parent)
     : QObject(parent)
@@ -113,13 +114,15 @@ void ItemEffectManager::applyExtraLifeEffect(PlayerViewModel* player, EnemyManag
 
 void ItemEffectManager::applyCoffeeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
     // 咖啡效果：提升移动速度20%，持续10秒
-    double originalSpeed = player->getMoveSpeed();
-    double newSpeed = originalSpeed * 1.2;
+    // 基于基础速度计算，避免无限叠加
+    double baseSpeed = 100.0; // 基础移动速度
+    double currentSpeed = player->getMoveSpeed();
+    double newSpeed = std::max(currentSpeed, baseSpeed * 1.2); // 取当前速度和基础速度120%的较大值
     double duration = getItemEffectDuration(coffee);
     
-    addEffect(MOVE_SPEED_BOOST, duration, originalSpeed, newSpeed);
+    addEffect(MOVE_SPEED_BOOST, duration, currentSpeed, newSpeed);
     applyEffectToPlayer(MOVE_SPEED_BOOST, newSpeed, player);
-    qDebug() << "咖啡效果：移动速度提升20%，持续" << duration << "秒";
+    qDebug() << "咖啡效果：移动速度提升至" << newSpeed << "，持续" << duration << "秒";
 }
 
 void ItemEffectManager::applyMachineGunEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
@@ -173,19 +176,21 @@ void ItemEffectManager::applySmokeBombEffect(PlayerViewModel* player, EnemyManag
 
 void ItemEffectManager::applyTombstoneEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
     // 墓碑效果：转变成僵尸，获得接触击杀能力，持续8秒
-    double originalSpeed = player->getMoveSpeed();
-    double newSpeed = originalSpeed * 1.3; // 僵尸模式移动速度提升30%
+    // 基于基础速度计算，避免无限叠加
+    double baseSpeed = 100.0; // 基础移动速度
+    double currentSpeed = player->getMoveSpeed();
+    double newSpeed = std::max(currentSpeed, baseSpeed * 1.3); // 取当前速度和基础速度130%的较大值
     double duration = getItemEffectDuration(tombstone);
     
     // 添加移动速度效果
-    addEffect(MOVE_SPEED_BOOST, duration, originalSpeed, newSpeed);
+    addEffect(MOVE_SPEED_BOOST, duration, currentSpeed, newSpeed);
     applyEffectToPlayer(MOVE_SPEED_BOOST, newSpeed, player);
     
     // 添加僵尸模式效果
     addEffect(ZOMBIE_MODE, duration, 0.0, 1.0);
     applyEffectToPlayer(ZOMBIE_MODE, 1.0, player);
     
-    qDebug() << "墓碑效果：转变成僵尸，移动速度提升30%，获得接触击杀能力，持续" << duration << "秒";
+    qDebug() << "墓碑效果：转变成僵尸，移动速度提升至" << newSpeed << "，获得接触击杀能力，持续" << duration << "秒";
 }
 
 void ItemEffectManager::applyWheelEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
@@ -199,21 +204,23 @@ void ItemEffectManager::applyWheelEffect(PlayerViewModel* player, EnemyManager* 
 
 void ItemEffectManager::applyBadgeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
     // 治安官徽章效果：提高开火速率和移动速率，持续15秒
-    double originalSpeed = player->getMoveSpeed();
+    // 基于基础速度计算，避免无限叠加
+    double baseSpeed = 100.0; // 基础移动速度
+    double currentSpeed = player->getMoveSpeed();
     double originalCooldown = player->getShootCooldown();
-    double newSpeed = originalSpeed * 1.15;
+    double newSpeed = std::max(currentSpeed, baseSpeed * 1.15); // 取当前速度和基础速度115%的较大值
     double newCooldown = 0.12;
     double duration = getItemEffectDuration(badge);
     
     // 添加移动速度效果
-    addEffect(MOVE_SPEED_BOOST, duration, originalSpeed, newSpeed);
+    addEffect(MOVE_SPEED_BOOST, duration, currentSpeed, newSpeed);
     applyEffectToPlayer(MOVE_SPEED_BOOST, newSpeed, player);
     
     // 添加射击速度效果
     addEffect(SHOOT_SPEED_BOOST, duration, originalCooldown, newCooldown);
     applyEffectToPlayer(SHOOT_SPEED_BOOST, newCooldown, player);
     
-    qDebug() << "治安官徽章效果：提高开火速率和移动速率，持续" << duration << "秒";
+    qDebug() << "治安官徽章效果：移动速度提升至" << newSpeed << "，提高开火速率，持续" << duration << "秒";
 }
 
 // 效果管理方法实现

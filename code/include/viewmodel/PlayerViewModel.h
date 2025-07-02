@@ -6,6 +6,7 @@
 #include <QList>
 #include <memory>
 #include "viewmodel/BulletViewModel.h"
+#include <algorithm>
 
 class PlayerViewModel : public QObject {
     Q_OBJECT
@@ -24,6 +25,10 @@ public:
         bool shotgunMode = false;  // 霰弹枪模式
         bool stealthMode = false;  // 潜行模式
         bool zombieMode = false;   // 僵尸模式
+        
+        // 移动速度限制
+        static constexpr double BASE_MOVE_SPEED = 100.0;  // 基础移动速度
+        static constexpr double MAX_MOVE_SPEED = 200.0;   // 最大移动速度上限
     };
 
     
@@ -65,7 +70,10 @@ public:
     // 传送方法
     void teleportToRandomPosition();
 
-    void setMoveSpeed(double speed) {m_stats.moveSpeed = speed;}
+    void setMoveSpeed(double speed) {
+        // 限制移动速度在合理范围内
+        m_stats.moveSpeed = std::clamp(speed, PlayerStats::BASE_MOVE_SPEED, PlayerStats::MAX_MOVE_SPEED);
+    }
 
     void setShootCooldown(double cooldown) {m_stats.shootCooldown = cooldown;}
     void addCoins(int amount) {m_stats.coins += amount; emit coinsChanged(m_stats.coins);}
