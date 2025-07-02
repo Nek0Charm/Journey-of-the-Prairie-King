@@ -92,6 +92,7 @@ public:
 signals:
     void playerDied();
     void livesChanged();
+    void livesDown();
     void coinsChanged(int coins);
     void positionChanged(const QPointF& position);
     void shot(const QPointF& direction);

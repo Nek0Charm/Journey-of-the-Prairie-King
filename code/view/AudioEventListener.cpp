@@ -64,7 +64,7 @@ void AudioEventListener::connectGameEvents()
     
     // 连接实际存在的游戏事件信号
     bool connected1 = connect(m_gameViewModel, &GameViewModel::playerDied, this, &AudioEventListener::onPlayerHit);
-    bool connected2 = connect(m_gameViewModel, &GameViewModel::playerLivesChanged, this, &AudioEventListener::onPlayerHit);
+    bool connected2 = connect(m_gameViewModel, &GameViewModel::playerLivesDown, this, &AudioEventListener::onPlayerHit);
     
     // 连接敌人爆炸事件信号
     bool connected6 = connect(m_gameViewModel->getEnemyManager(), &EnemyManager::enemyDestroyed, this, &AudioEventListener::onEnemyExplosion);
@@ -89,7 +89,7 @@ void AudioEventListener::disconnectGameEvents()
     
     // 断开实际存在的游戏事件信号
     disconnect(m_gameViewModel, &GameViewModel::playerDied, this, &AudioEventListener::onPlayerHit);
-    disconnect(m_gameViewModel, &GameViewModel::playerLivesChanged, this, &AudioEventListener::onPlayerHit);
+    disconnect(m_gameViewModel, &GameViewModel::playerLivesDown, this, &AudioEventListener::onPlayerHit);
     
     // 断开敌人爆炸事件信号
     if (m_gameViewModel->getEnemyManager()) {

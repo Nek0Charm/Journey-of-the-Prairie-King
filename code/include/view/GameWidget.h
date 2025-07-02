@@ -22,6 +22,7 @@ protected:
     void timerEvent();
     void syncEnemies();
     void syncItems();
+    void playerLivesDown();
 
 signals:
     void setMovingDirection(QPointF direction, bool isMoving);
@@ -34,7 +35,6 @@ public slots:
     void die(int id);
     void gameLoop(); // 临时函数
     void playerPositionChanged(QPointF position);
-    void playerLivesChanged();
     // GameViewModel的游戏时间是已游玩时间，而GameWidget的游戏时间是剩余时间
     void updateGameTime(double gameTime);
     void updateBullets(QList<BulletData> bullets);

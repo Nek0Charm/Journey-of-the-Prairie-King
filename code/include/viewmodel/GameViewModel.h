@@ -53,6 +53,7 @@ signals:
     void gameStateChanged(GameState state);
     void playerDied();
     void playerLivesChanged();
+    void playerLivesDown();
     void playerPositonChanged(const QPointF& position);
     void itemUsed(int itemType); 
     void boomUsed();
