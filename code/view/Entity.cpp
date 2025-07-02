@@ -25,6 +25,7 @@ PlayerEntity::PlayerEntity(QObject *parent) : Entity(parent) {
     m_animations[PlayerState::ShootLeftWalk]  = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_left"), 8.0, true);
     m_animations[PlayerState::ShootRightWalk] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_right"), 8.0, true);
     m_animations[PlayerState::Dying] = new Animation(SpriteManager::instance().getAnimationSequence("player_dying"), 8.0, false);
+    m_animations[PlayerState::Zombie] = new Animation(SpriteManager::instance().getAnimationSequence("player_zombie"), 8.0, true);
     m_currentAnimation = m_animations.value(m_currentState, nullptr);
     m_position = QPointF(16*8, 16*8);
 }
@@ -295,3 +296,4 @@ QString ItemEntity::typeToString(ItemType type) {
     }
     return stringtype;
 }
+

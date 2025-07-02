@@ -273,8 +273,6 @@ void GameWidget::timerEvent() {
     } else {
         player->setState(PlayerState::Idle);
     }
-    
-    // 处理道具使用
     if (keys[Qt::Key_Space] && !m_spaceKeyPressed) {
         m_spaceKeyPressed = true;
         if (m_viewModel) {
@@ -282,6 +280,11 @@ void GameWidget::timerEvent() {
         }
     } else if (!keys[Qt::Key_Space]) {
         m_spaceKeyPressed = false;
+    }
+    if (keys[Qt::Key_B]) {
+        if (m_gameMap) {
+            m_gameMap->startExplosionSequence(10.0);
+        }
     }
 }
 
