@@ -64,7 +64,7 @@ void AudioEventListener::connectGameEvents()
     
     // 连接实际存在的游戏事件信号
     bool connected1 = connect(m_gameViewModel, &GameViewModel::playerDied, this, &AudioEventListener::onPlayerHit);
-    bool connected2 = connect(m_gameViewModel, &GameViewModel::playerLivesChanged, this, &AudioEventListener::onPlayerHit);
+    bool connected2 = connect(m_gameViewModel, &GameViewModel::playerLivesDown, this, &AudioEventListener::onPlayerHit);
     
     // 连接敌人爆炸事件信号
     bool connected6 = connect(m_gameViewModel->getEnemyManager(), &EnemyManager::enemyDestroyed, this, &AudioEventListener::onEnemyExplosion);
@@ -89,7 +89,7 @@ void AudioEventListener::disconnectGameEvents()
     
     // 断开实际存在的游戏事件信号
     disconnect(m_gameViewModel, &GameViewModel::playerDied, this, &AudioEventListener::onPlayerHit);
-    disconnect(m_gameViewModel, &GameViewModel::playerLivesChanged, this, &AudioEventListener::onPlayerHit);
+    disconnect(m_gameViewModel, &GameViewModel::playerLivesDown, this, &AudioEventListener::onPlayerHit);
     
     // 断开敌人爆炸事件信号
     if (m_gameViewModel->getEnemyManager()) {
@@ -125,23 +125,23 @@ void AudioEventListener::onPlayerShot(const QPointF& direction)
 }
 
 // 游戏状态变化事件音效槽函数实现
-void AudioEventListener::onGameStateChanged(GameViewModel::GameState state)
+void AudioEventListener::onGameStateChanged(GameState state)
 {
     // 根据游戏状态变化播放相应的背景音乐
     switch (state) {
-        case GameViewModel::MENU:
+        case GameState::MENU:
             qDebug() << "AudioEventListener: 播放菜单音乐";
             AudioManager::instance().playMusic(MENU);
             break;
-        case GameViewModel::PLAYING:
+        case GameState::PLAYING:
             qDebug() << "AudioEventListener: 播放游戏音乐";
             AudioManager::instance().playMusic(OVERWORLD);
             break;
-        case GameViewModel::PAUSED:
+        case GameState::PAUSED:
             qDebug() << "AudioEventListener: 暂停音乐";
             AudioManager::instance().pauseMusic();
             break;
-        case GameViewModel::GAME_OVER:
+        case GameState::GAME_OVER:
             qDebug() << "AudioEventListener: 播放游戏结束音乐";
             AudioManager::instance().playMusic(THE_OUTLAW);
             break;

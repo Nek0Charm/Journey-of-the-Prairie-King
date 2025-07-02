@@ -10,14 +10,7 @@ class EnemyManager : public QObject {
     Q_OBJECT
     
 public:
-    struct EnemyData {
-        int id;
-        int health = 1;
-        QPointF position;
-        QPointF velocity;
-        double moveSpeed = 40.0;
-        bool isActive = true;
-    };
+    
     
     explicit EnemyManager(QObject *parent = nullptr);
     ~EnemyManager() = default;
@@ -57,6 +50,7 @@ signals:
     void enemyReachedPlayer(int enemyId);
     void enemyDamaged(int enemyId, int remainingHealth);
     void enemyCountChanged(int count);
+    void enemiesChanged(const QList<EnemyData>& enemies);
     
 private:
     QList<EnemyData> m_enemies;

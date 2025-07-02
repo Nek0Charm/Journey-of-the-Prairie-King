@@ -70,7 +70,7 @@ void PlayerEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QP
     if (!isVisible()) return;
     const QString& currentFrameName = m_currentAnimation->getCurrentFrameName();
     QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
-    double scale = 5.0; 
+    double scale = 3.0; 
     QPointF destinationAnchor(m_position.x()*scale, m_position.y()*scale);
 
     if (!parts.isEmpty()) {
@@ -115,7 +115,9 @@ void MonsterEntity::setVelocity(const QPointF& velocity) {
 
 void MonsterEntity::update(double deltaTime) {
     // if (shouldBeRemoved()) return;
-    
+    if (m_animation) {
+        m_animation->update(deltaTime);
+    }
     // 如果被冻结，完全不更新
     if (m_isFrozen) {
         return;
@@ -126,10 +128,6 @@ void MonsterEntity::update(double deltaTime) {
             m_position += m_velocity * deltaTime;
             break;
     }
-    
-    if (m_animation) {
-        m_animation->update(deltaTime);
-    }
 }
 
 void MonsterEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) {
@@ -137,7 +135,7 @@ void MonsterEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const Q
 
     const QString& currentFrameName = m_animation->getCurrentFrameName();
     QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
-    double scale = 5.0; 
+    double scale = 3.0; 
     QPointF destinationAnchor(m_position.x()*scale, m_position.y()*scale);
 
     if (!parts.isEmpty()) {
@@ -199,7 +197,7 @@ void DeadMonsterEntity::paint(QPainter *painter, const QPixmap &spriteSheet, con
     if (!m_animation) return;
     const QString& currentFrameName = m_animation->getCurrentFrameName();
     QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
-    double scale = 5.0; 
+    double scale = 3.0; 
     QPointF destinationAnchor(m_position.x()*scale, m_position.y()*scale);
 
     if (!parts.isEmpty()) {
@@ -221,32 +219,26 @@ void DeadMonsterEntity::paint(QPainter *painter, const QPixmap &spriteSheet, con
 }
 
 ItemEntity::ItemEntity(int itemtype, QObject *parent, QPointF pos)
-: Entity(parent), m_lingerTimer(10), m_currentState(ItemState::Drop) {   
+: Entity(parent), m_lingerTimer(15), m_currentState(ItemState::Drop) {   
     setPosition(pos);
     m_itemType = static_cast<ItemType>(itemtype);
     qDebug() << "m_itemType" << itemtype;
 }
 
 void ItemEntity::update(double deltaTime) {
-    switch (m_currentState) {
-    case ItemState::Drop:
-        if (m_lingerTimer <= 3) {
-            setState(ItemState::Flash);
-        }
-        break;
-    default:
-        break;
+    if (m_lingerTimer > 0) {
+        m_lingerTimer -= deltaTime;
     }
-    m_lingerTimer -= deltaTime;
+    if (m_currentState == ItemState::Drop && m_lingerTimer <= 3.0) {
+        setState(ItemState::Flash);
+    }
 }
 
 void ItemEntity::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
-    // qDebug() << "position " << m_position;
-    // qDebug() << "paint a item";
-    if (!isVisible()) return;    
+    if (!isVisible()) return;     
     QString framename = typeToString(m_itemType);
     // qDebug() << "paint " << framename;
-    double scale = 5.0; 
+    double scale = 3.0; 
     QPointF destinationAnchor(m_position.x()*scale, m_position.y()*scale);
     QRect sourceRect = SpriteManager::instance().getSpriteRect(framename);
     if (!sourceRect.isNull()) {
@@ -258,8 +250,7 @@ void ItemEntity::paint(QPainter *painter, const QPixmap &spriteSheet, const QPoi
 }
 
 bool ItemEntity::isVisible() {
-    return true;
-    return !(m_currentState == ItemState::Flash) || (static_cast<int>(m_lingerTimer * 10) % 2 == 0);
+    return !(m_currentState == ItemState::Flash) || (static_cast<int>(m_lingerTimer * 6) % 2 == 0);
 }
 
 QString ItemEntity::typeToString(ItemType type) {
@@ -303,3 +294,4 @@ QString ItemEntity::typeToString(ItemType type) {
     }
     return stringtype;
 }
+

@@ -7,8 +7,8 @@ CollisionSystem::CollisionSystem(QObject *parent)
 }
 
 void CollisionSystem::checkCollisions(const PlayerViewModel& player,
-                                    const QList<EnemyManager::EnemyData>& enemies,
-                                    const QList<BulletViewModel::BulletData>& bullets)
+                                    const QList<EnemyData>& enemies,
+                                    const QList<BulletData>& bullets)
 {
     // 检查玩家与敌人的碰撞
     checkPlayerEnemyCollisions(player, enemies);
@@ -18,7 +18,7 @@ void CollisionSystem::checkCollisions(const PlayerViewModel& player,
 }
 
 void CollisionSystem::checkPlayerEnemyCollisions(const PlayerViewModel& player,
-                                               const QList<EnemyManager::EnemyData>& enemies)
+                                               const QList<EnemyData>& enemies)
 {
     QPointF playerPos = player.getStats().position;
     bool isZombieMode = player.isZombieMode();
@@ -39,8 +39,8 @@ void CollisionSystem::checkPlayerEnemyCollisions(const PlayerViewModel& player,
     }
 }
 
-void CollisionSystem::checkBulletEnemyCollisions(const QList<BulletViewModel::BulletData>& bullets,
-                                               const QList<EnemyManager::EnemyData>& enemies)
+void CollisionSystem::checkBulletEnemyCollisions(const QList<BulletData>& bullets,
+                                               const QList<EnemyData>& enemies)
 {
     for (const auto& bullet : bullets) {
         if (!bullet.isActive) continue;

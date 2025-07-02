@@ -1,6 +1,6 @@
 #include "view/GameMap.h"
-
-GameMap::GameMap(QString map_title) : m_width(16), m_height(16), map_title(map_title) {
+GameMap::GameMap(QString map_title) : m_width(16), m_height(16), map_title(map_title), m_isExplosionSequenceActive(false), 
+                                      m_explosionSequenceTimer(0.0), m_nextExplosionSpawnTimer(0.0) {
     loadFromFile(":/assert/picture/gamemap.json", "map_1", "1");
 }
 
@@ -29,13 +29,14 @@ bool GameMap::loadFromFile(const QString& path, const QString& mapName, const QS
     m_tileLegend.clear();
     QJsonObject legendObject = mapObject["tile_definitions"].toObject();
     qDeleteAll(m_animations);
+    m_animations["explode"] = new Animation(SpriteManager::instance().getAnimationSequence("explode"), 8, false); 
     for (auto it = legendObject.begin(); it != legendObject.end(); ++it) {
             int tileId = it.key().toInt();
             QString name = it.value().toString();
             m_tileLegend[tileId] = name;
             QList<QString> animFrames = SpriteManager::instance().getAnimationSequence(name);
             if (!animFrames.isEmpty()) {
-                m_animations[name] = new Animation(animFrames, 1.0, true); 
+                m_animations[name] = new Animation(animFrames, 1.2, true); 
             }
         }
 
@@ -70,16 +71,40 @@ void GameMap::update(double deltaTime) {
     for (Animation* anim : m_animations) {
         anim->update(deltaTime);
     }
+    for (auto it = m_explosions.begin(); it != m_explosions.end(); ) {
+        (*it)->update(deltaTime);
+        if ((*it)->isFinished()) {
+            delete *it;
+            it = m_explosions.erase(it);
+        } else {
+            ++it;
+        }
+    }  
+        if (!m_isExplosionSequenceActive) {
+        return; 
+    }
+    m_explosionSequenceTimer -= deltaTime;
+    if (m_explosionSequenceTimer <= 0) {
+        m_isExplosionSequenceActive = false; 
+        return;
+    }
+    m_nextExplosionSpawnTimer -= deltaTime;
+    if (m_nextExplosionSpawnTimer <= 0) {
+        double randX = QRandomGenerator::global()->bounded((getWidth()-1) * 16);
+        double randY = QRandomGenerator::global()->bounded((getHeight()-1) * 16);
+        createExplosion(QPointF(randX, randY));
+        m_nextExplosionSpawnTimer = (QRandomGenerator::global()->bounded(150) + 0) / 1000.0;
+    }
 }
 
 void GameMap::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
+    double scale = 3.0;
     painter->setRenderHint(QPainter::Antialiasing, false);
     if (getWidth() > 0) {
         for (int row = 0; row < getHeight(); ++row) {
         for (int col = 0; col < getWidth(); ++col) {
             int tileId = getTileIdAt(row, col);
             QString spriteName = getTileSpriteName(tileId);
-            
             QRect sourceRect; 
             if (m_animations.contains(spriteName)) {
                 Animation* anim = m_animations[spriteName];
@@ -88,15 +113,17 @@ void GameMap::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF
             } else {
                 sourceRect = SpriteManager::instance().getSpriteRect(spriteName);
             }
-
             if (sourceRect.isNull()) continue;
-                double destX = (col * sourceRect.width())* 5;
-                double destY = (row * sourceRect.height())* 5;
-                QRectF destRect(destX, destY, sourceRect.width() * 5, sourceRect.height() * 5);
+                double destX = (col * sourceRect.width())* scale;
+                double destY = (row * sourceRect.height())* scale;
+                QRectF destRect(destX, destY, sourceRect.width() * scale, sourceRect.height() * scale);
                 destRect.translate(viewOffset);
                 painter->drawPixmap(destRect, spriteSheet, sourceRect);
             }
         }
+    }
+    for (ExplosionEffect* explosion : m_explosions) {
+        explosion->paint(painter, spriteSheet, viewOffset);
     }
 }
 
@@ -113,3 +140,40 @@ QString GameMap::getTileSpriteName(int tileId) const {
 
 int GameMap::getWidth() const { return m_width; }
 int GameMap::getHeight() const { return m_height; }
+void GameMap::createExplosion(const QPointF &position) {
+    m_explosions.append(new ExplosionEffect(position));
+}
+
+void GameMap::startExplosionSequence(double duration) {
+    if (m_isExplosionSequenceActive) return;
+    m_isExplosionSequenceActive = true;
+    m_explosionSequenceTimer = duration;
+    m_nextExplosionSpawnTimer = 0.0;
+}
+ExplosionEffect::ExplosionEffect(const QPointF &position) {
+    auto frames = SpriteManager::instance().getAnimationSequence("explode");
+    m_animation = new Animation(frames, 6.0, false); 
+    m_position = position;
+}
+
+ExplosionEffect::~ExplosionEffect() {
+    delete m_animation;
+}
+
+void ExplosionEffect::update(double deltaTime) {
+    if (m_animation) {
+        m_animation->update(deltaTime);
+    }
+}
+
+void ExplosionEffect::paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) {
+    if (!m_animation) return;
+    const QString& frameName = m_animation->getCurrentFrameName();
+    QRect sourceRect = SpriteManager::instance().getSpriteRect(frameName);
+    if (!sourceRect.isNull()) {
+        double scale = 3.0;
+        QRectF destRect(m_position * scale, sourceRect.size() * scale);
+        destRect.translate(viewOffset);
+        painter->drawPixmap(destRect, spriteSheet, sourceRect);
+    }
+}

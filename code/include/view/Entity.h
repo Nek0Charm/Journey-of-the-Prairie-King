@@ -129,14 +129,15 @@ enum class ItemType {
 class ItemEntity : public Entity {
     Q_OBJECT
 public:
-    explicit ItemEntity(int itemtype, QObject* parent = nullptr, QPointF position = QPointF(0, 0));
+    explicit ItemEntity(int itemtype, QObject* parent = nullptr, QPointF position = QPointF(-25, 0));
     ~ItemEntity() { };
     void update(double deltaTime) override;
     void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
     void setState(ItemState newState) { m_currentState = newState; }
+    ItemState getState() { return m_currentState; }
     bool ShouldbeRemove() { return m_lingerTimer <= 0 ; }
     bool isVisible();
-    QString typeToString(ItemType type);
+    static QString typeToString(ItemType type);
 private:
     ItemType m_itemType;
     ItemState m_currentState;

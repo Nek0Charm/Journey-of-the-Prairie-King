@@ -17,13 +17,11 @@ Application::Application(int &argc, char **argv)
 
 
 void Application::setupGameLoop() {
-    m_viewModel = std::make_shared<GameViewModel>(this);
-    m_view = std::make_unique<MainWindow>(m_viewModel.get());
-    
-    // 创建并设置AudioEventListener
+    m_viewModel = std::make_unique<GameViewModel>(this);
+    m_view = std::make_unique<MainWindow>();
+    m_service = std::make_unique<GameService>(m_view.get(), m_viewModel.get());
     m_audioEventListener = std::make_unique<AudioEventListener>(this);
     m_audioEventListener->setGameViewModel(m_viewModel.get());
-    
     /*
     TODO: 在MainWindow中设置游戏试图模型（可能需要）
     m_view->setGameViewModel(m_viewModel);
