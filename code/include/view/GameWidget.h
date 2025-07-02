@@ -23,7 +23,6 @@ protected:
     void timerEvent();
     void syncEnemies();
     void syncItems();
-    QString getItemSpriteName(int itemType) const;
 
 public slots:
     // void onStateUpdated();

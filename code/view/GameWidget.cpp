@@ -1,4 +1,5 @@
 #include "view/GameWidget.h"
+#include "viewmodel/EnemyManager.h"
 
 #define UI_LEFT 27
 #define UI_UP 16
@@ -153,13 +154,18 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     QPointF itemBottomLeft = itemRectF.bottomLeft();
     itemRectF.translate(viewOffset);
     painter->drawPixmap(itemRectF, m_spriteSheet, itemRect);
-
     if (m_viewModel && m_viewModel->getItemViewModel() && m_viewModel->getItemViewModel()->hasPossessedItem()) {
         int possessedItemType = m_viewModel->getItemViewModel()->getPossessedItemType();
         QString itemSpriteName = ItemEntity::typeToString(static_cast<ItemType>(possessedItemType));
         QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemSpriteName);
         if (!itemSourceRect.isNull()) {
-            painter->drawPixmap(itemRectF, m_spriteSheet, itemSourceRect);
+            double itemScaleRatio = 0.8; 
+            double itemScaledWidth = itemRectF.width() * itemScaleRatio;
+            double itemScaledHeight = itemRectF.height() * itemScaleRatio;
+            QSizeF itemScaledSize(itemScaledWidth, itemScaledHeight);
+            QPointF itemTopLeft = itemRectF.center() - QPointF(itemScaledWidth / 2.0, itemScaledHeight / 2.0);
+            QRectF itemDestRect(itemTopLeft, itemScaledSize);
+            painter->drawPixmap(itemDestRect, m_spriteSheet, itemSourceRect);
         }
     }
 
@@ -304,6 +310,10 @@ void GameWidget::syncEnemies() {
         }
         monster->setPosition(data.position);
         monster->setVelocity(data.velocity);
+        
+        // 根据玩家潜行状态设置敌人是否冻结
+        bool playerStealthMode = m_viewModel->getPlayer() ? m_viewModel->getPlayer()->isStealthMode() : false;
+        monster->setFrozen(playerStealthMode);
     }
 }
 

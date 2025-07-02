@@ -28,7 +28,13 @@ public:
     void spawnEnemyAtRandomPosition();
     
     // 敌人管理
-    void updateEnemies(double deltaTime, const QPointF& playerPos);
+    void updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode = false);
+    
+    // 潜行状态查询
+    bool isPlayerStealthMode() const { return m_playerStealthMode; }
+    
+
+    
     void damageEnemy(int bulletId ,int enemyId);
     void removeEnemy(int enemyId);
     void clearAllEnemies();
@@ -59,6 +65,7 @@ private:
     double m_spawnInterval = 2.0;
     int m_maxEnemies = 10;
     double m_enemyMoveSpeed = 40.0;
+    bool m_playerStealthMode = false;
 
     static constexpr double ENEMY_WIDTH = 15.0;
     

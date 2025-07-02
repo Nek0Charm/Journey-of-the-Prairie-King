@@ -43,6 +43,7 @@ public:
     QList<ItemViewModel::ItemData> getActiveItems() const { 
         return m_item ? m_item->getActiveItems() : QList<ItemViewModel::ItemData>(); 
     }
+    int getPossessedItemType() const {return m_item->getPossessedItemType();}
         
     GameState getGameState() const { return m_gameState; }
     bool isGameActive() const { return m_gameState == PLAYING; }
@@ -74,6 +75,7 @@ private:
     void handleEnemyHitByZombie(int enemyId);
     void handleCreateItem(int enemyId, const QPointF& position);
     void handleItemUsed(int itemType);
+    void handleItemUsedImmediately(int itemType);
 };
 
 #endif // GAMEVIEWMODEL_H

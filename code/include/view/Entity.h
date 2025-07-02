@@ -73,13 +73,16 @@ public:
     void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
     void setState(MonsterState newState) { m_currentState = newState; }
     void setVelocity(const QPointF& velocity);
+    void setFrozen(bool frozen) { m_isFrozen = frozen; }
+    bool isFrozen() const { return m_isFrozen; }
     QString getType() const {return monsterType;}
 private:
     QMap<MonsterState, Animation*> m_animations;
     Animation* m_animation;    
     QPointF m_velocity; 
     QString monsterType;
-    MonsterState m_currentState; 
+    MonsterState m_currentState;
+    bool m_isFrozen = false; 
 };
 
 enum class DeadMonsterState {

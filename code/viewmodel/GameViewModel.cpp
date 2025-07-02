@@ -78,8 +78,8 @@ void GameViewModel::updateGame(double deltaTime)
     // 更新玩家
     m_player->update(deltaTime);
     
-    // 更新敌人
-    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition());
+    // 更新敌人（传递玩家潜行状态）
+    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition(), m_player->isStealthMode());
 
     m_collisionSystem->checkCollisions(*m_player, 
                                       m_enemyManager->getEnemies(),
@@ -143,7 +143,7 @@ void GameViewModel::setupConnections()
     connect(m_item.get(), &ItemViewModel::itemUsed,
             this, &GameViewModel::handleItemUsed);
     connect(m_item.get(), &ItemViewModel::itemUsedImmediately,
-            this, &GameViewModel::handleItemUsed);
+            this, &GameViewModel::handleItemUsedImmediately);
 }
 
 void GameViewModel::initializeComponents()
@@ -205,4 +205,7 @@ void GameViewModel::handleItemUsed(int itemType) {
     m_itemEffectManager->applyItemEffect(itemType, m_player.get(), m_enemyManager.get());
     // 发出道具使用信号
     emit itemUsed(itemType);
+}
+void GameViewModel::handleItemUsedImmediately(int itemType) {
+    handleItemUsed(itemType);
 }
