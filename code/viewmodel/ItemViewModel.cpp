@@ -112,9 +112,12 @@ void ItemViewModel::updateItems(double deltaTime, const QPointF& playerPosition)
     m_items.erase(std::remove_if(m_items.begin(), m_items.end(),
                                   [](const ItemData& item) { return !item.isActive; }),
                   m_items.end());
+
+    emit itemsChanged(m_items); // 发出道具列表变化信号
+    emit possessedItemChanged(m_possessedItem.type, m_possessingItem); // 发出道具栏变化信号
 }
 
-QList<ItemViewModel::ItemData> ItemViewModel::getActiveItems() const {
+QList<ItemData> ItemViewModel::getActiveItems() const {
     QList<ItemData> activeItems;
     for (const auto& item : m_items) {
         if (item.isActive) {

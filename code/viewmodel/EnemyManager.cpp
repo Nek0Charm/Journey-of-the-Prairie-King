@@ -83,6 +83,8 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
     spawnEnemies(deltaTime);
     
     removeInactiveEnemies();
+
+    emit enemiesChanged(m_enemies);
 }
 
 void EnemyManager::damageEnemy(int bulletId,int enemyId)

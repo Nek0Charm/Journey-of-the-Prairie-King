@@ -39,7 +39,7 @@ private slots:
     void onEnemyExplosion(int enemyId, const QPointF& position); // 敌人爆炸音效
     
     // 游戏状态变化槽函数
-    void onGameStateChanged(GameViewModel::GameState state); // 游戏状态变化（背景音乐）
+    void onGameStateChanged(GameState state); // 游戏状态变化（背景音乐）
 
 private:
     GameViewModel* m_gameViewModel;                    // 游戏视图模型指针

@@ -4,7 +4,7 @@
 
 GameViewModel::GameViewModel(QObject *parent)
     : QObject(parent)
-    , m_gameState(MENU)
+    , m_gameState(GameState::MENU)
 {
     initializeComponents();
     setupConnections();
@@ -12,9 +12,9 @@ GameViewModel::GameViewModel(QObject *parent)
 
 void GameViewModel::startGame()
 {
-    if (m_gameState != PLAYING) {
+    if (m_gameState != GameState::PLAYING) {
         resetGame();
-        m_gameState = PLAYING;
+        m_gameState = GameState::PLAYING;
         emit gameStateChanged(m_gameState);
         qDebug() << "Game started";
     }
@@ -22,8 +22,8 @@ void GameViewModel::startGame()
 
 void GameViewModel::pauseGame()
 {
-    if (m_gameState == PLAYING) {
-        m_gameState = PAUSED;
+    if (m_gameState == GameState::PLAYING) {
+        m_gameState = GameState::PAUSED;
         emit gameStateChanged(m_gameState);
         qDebug() << "Game paused";
     }
@@ -31,8 +31,8 @@ void GameViewModel::pauseGame()
 
 void GameViewModel::resumeGame()
 {
-    if (m_gameState == PAUSED) {
-        m_gameState = PLAYING;
+    if (m_gameState == GameState::PAUSED) {
+        m_gameState = GameState::PLAYING;
         emit gameStateChanged(m_gameState);
         qDebug() << "Game resumed";
     }
@@ -40,22 +40,23 @@ void GameViewModel::resumeGame()
 
 void GameViewModel::endGame()
 {
-    if (m_gameState != GAME_OVER) {
-        m_gameState = GAME_OVER;
+    if (m_gameState != GameState::GAME_OVER) {
+        m_gameState = GameState::GAME_OVER;
+        resetGame();
         emit gameStateChanged(m_gameState);
         qDebug() << "Game over";
     }
 }
 
 void GameViewModel::playerAttack(const QPointF& direction) {
-    if (m_gameState == PLAYING && m_player) {
+    if (m_gameState == GameState::PLAYING && m_player) {
         m_player->shoot(direction);
         qDebug() << "Player attacked in direction:" << direction;
     }
 }
 
 void GameViewModel::setPlayerMoveDirection(const QPointF& direciton, bool isMoving) {
-    if(m_gameState == PLAYING && m_player) {
+    if(m_gameState == GameState::PLAYING && m_player) {
         m_player->setMovingDirection(direciton, isMoving);
     }
 }
@@ -64,16 +65,18 @@ void GameViewModel::updateGame(double deltaTime)
 {
     // qDebug() << "Updating game state, deltaTime:" << deltaTime;
     
-    if (m_gameState != PLAYING) {
+    if (m_gameState != GameState::PLAYING) {
         return;
     }
 
     m_gameTime += deltaTime;
     if(m_gameTime > MAX_GAMETIME) {
         m_gameTime = 0.0; 
+        emit gameTimeChanged(m_gameTime);
         endGame();
         return;
     }
+    emit gameTimeChanged(m_gameTime);
     
     // 更新玩家
     m_player->update(deltaTime);

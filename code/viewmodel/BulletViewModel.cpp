@@ -28,6 +28,7 @@ void BulletViewModel::updateBullets(double deltaTime){
         }
     }
     removeBullets();
+    emit bulletsChanged(m_bullets);
 }
 
 void BulletViewModel::removeBullet(int bulletId) {
@@ -50,7 +51,7 @@ void BulletViewModel::clearAllBullets(){
     m_bullets.clear();
 }
 
-QList<BulletViewModel::BulletData> BulletViewModel::getActiveBullets() const{
+QList<BulletData> BulletViewModel::getActiveBullets() const{
     QList<BulletData> activeBullets;
     for (const auto& bullet : m_bullets) {
         if (bullet.isActive) {

@@ -47,8 +47,8 @@ public:
     double getShootCooldown() const { return m_stats.shootCooldown; }
     double getMoveSpeed() const { return m_stats.moveSpeed; }
     QPointF getShootingDirection() const { return m_stats.shootingDirection; }
-    
-    QList<BulletViewModel::BulletData> getActiveBullets() const {
+    BulletViewModel* getBulletViewModel() const { return m_bulletViewModel.get(); }
+    QList<BulletData> getActiveBullets() const {
         return m_bulletViewModel->getActiveBullets();
     }
     
@@ -68,7 +68,7 @@ public:
     void setMoveSpeed(double speed) {m_stats.moveSpeed = speed;}
 
     void setShootCooldown(double cooldown) {m_stats.shootCooldown = cooldown;}
-    void addCoins(int amount) {m_stats.coins += amount; emit coinsChanged();}
+    void addCoins(int amount) {m_stats.coins += amount; emit coinsChanged(m_stats.coins);}
     
     // 轮子模式相关
     void setWheelMode(bool enabled) {m_stats.wheelMode = enabled;}
@@ -79,7 +79,10 @@ public:
     bool isShotgunMode() const {return m_stats.shotgunMode;}
     
     // 潜行模式相关
-    void setStealthMode(bool enabled) {m_stats.stealthMode = enabled;}
+    void setStealthMode(bool enabled) {
+        m_stats.stealthMode = enabled; 
+        emit playerStealthModeChanged(enabled);
+    }
     bool isStealthMode() const {return m_stats.stealthMode;}
     
     // 僵尸模式相关
@@ -89,10 +92,11 @@ public:
 signals:
     void playerDied();
     void livesChanged();
-    void coinsChanged();
+    void coinsChanged(int coins);
     void positionChanged(const QPointF& position);
     void shot(const QPointF& direction);
-    
+    void playerStealthModeChanged(bool enabled);
+    void healthChanged(int health);
     
 private:
     PlayerStats m_stats;

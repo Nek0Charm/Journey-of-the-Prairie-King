@@ -47,4 +47,31 @@
 
 #define MAX_GAMETIME 60.0
 
+enum class GameState { MENU, PLAYING, PAUSED, GAME_OVER };
+
+struct BulletData {
+    int id;
+    QPointF position;
+    QPointF velocity;
+    bool isActive; // 是否处于活动状态
+};
+
+struct EnemyData {
+    int id;
+    int health = 1;
+    QPointF position;
+    QPointF velocity;
+    double moveSpeed = 40.0;
+    bool isActive = true;
+};
+
+struct ItemData {
+    int type;
+    int id;
+    QPoint position;
+    bool isPossessed;
+    bool isActive;
+    double remainTime;
+};
+
 #endif

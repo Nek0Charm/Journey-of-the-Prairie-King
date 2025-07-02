@@ -11,14 +11,7 @@ class ItemViewModel : public QObject {
 
     Q_OBJECT
 public:
-    struct ItemData {
-        int type;
-        int id;
-        QPoint position;
-        bool isPossessed;
-        bool isActive;
-        double remainTime;
-    };
+    
 
     ItemViewModel(QObject *parent = nullptr);
     
@@ -46,7 +39,9 @@ signals:
     void itemUsedImmediately(int itemType); // 道具立即使用信号
     void itemUsed(int itemType); // 道具使用信号
     void itemSpawned(int itemType, const QPointF& position); // 道具生成信号
-    
+    void itemsChanged(const QList<ItemData>& items); // 道具列表变化信号
+    void possessedItemChanged(int itemType, bool isPossessed); // 道具栏变化信号
+
 private:
     QList<ItemData> m_items;
     ItemData m_possessedItem;

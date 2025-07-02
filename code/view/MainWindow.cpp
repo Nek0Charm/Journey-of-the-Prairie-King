@@ -5,11 +5,11 @@
 #include "view/EndWidget.h"
 #include "MainWindow.h"
 
-MainWindow::MainWindow(GameViewModel *viewModel, QWidget *parent)
-    : QMainWindow(parent), m_gameViewModel(viewModel) {
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent){
     m_stackedWidget = new QStackedWidget(this);
     m_startWidget = new StartWidget(this);
-    m_gameWidget = new GameWidget(viewModel ,this);
+    m_gameWidget = new GameWidget(this);
     m_endWidget = new EndWidget(this);
     m_stackedWidget->addWidget(m_endWidget);
     m_stackedWidget->addWidget(m_startWidget);
@@ -37,16 +37,15 @@ void MainWindow::setupConnections() {
 }
 
 void MainWindow::update() {
-    if (m_stackedWidget && m_gameViewModel) {
-        qDebug() << m_gameViewModel->getGameState();
-        switch (m_gameViewModel->getGameState()) {
-            case GameViewModel::MENU:
+    if (m_stackedWidget) {
+        switch (m_gameState) {
+            case GameState::MENU:
                 m_stackedWidget->setCurrentWidget(m_startWidget);
                 break;
-            case GameViewModel::PLAYING:
+            case GameState::PLAYING:
                 m_stackedWidget->setCurrentWidget(m_gameWidget);
                 break;
-            case GameViewModel::GAME_OVER:
+            case GameState::GAME_OVER:
                 m_gameWidget->clearKeys();
                 m_stackedWidget->setCurrentWidget(m_endWidget);
                 break;
@@ -61,7 +60,7 @@ void MainWindow::update() {
 void MainWindow::onStartGameRequested()
 {
     m_stackedWidget->setCurrentWidget(m_gameWidget);
-    m_gameViewModel->startGame();
+    emit startGameRequested();
 }
 
 void MainWindow::onExitGameRequested() {
@@ -70,9 +69,14 @@ void MainWindow::onExitGameRequested() {
 
 void MainWindow::onRestartGameRequested() {
     m_stackedWidget->setCurrentWidget(m_gameWidget);
-    m_gameViewModel->startGame();
+    emit startGameRequested();
 }
 
 void MainWindow::onExitToMenuRequested() {
     QApplication::quit();
+}
+
+void MainWindow::onGameStateChanged(GameState state) {
+    m_gameState = state;
+    update();
 }

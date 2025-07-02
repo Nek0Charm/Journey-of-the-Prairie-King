@@ -8,12 +8,7 @@
 class BulletViewModel : public QObject {
     Q_OBJECT
 public:
-    struct BulletData {
-        int id;
-        QPointF position;
-        QPointF velocity;
-        bool isActive; // 是否处于活动状态
-    };
+
     BulletViewModel(QObject *parent = nullptr);
     ~BulletViewModel();
     void createBullet(const QPointF& position, const QPointF& direction, double speed);
@@ -23,6 +18,8 @@ public:
     void clearAllBullets();
     QList<BulletData> getActiveBullets() const;
     int getBulletCount() const { return m_bullets.size(); }
+signals:
+    void bulletsChanged(QList<BulletData> bullets);
 
 private:
     QList<BulletData> m_bullets; // 存储所有子弹数据

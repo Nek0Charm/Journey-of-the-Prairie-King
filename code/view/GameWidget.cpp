@@ -1,12 +1,11 @@
 #include "view/GameWidget.h"
-#include "viewmodel/EnemyManager.h"
 
 #define UI_LEFT 27
 #define UI_UP 16
 #define SCALE 3
 
-GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent) 
-    : QWidget(parent), m_viewModel(viewModel) {
+GameWidget::GameWidget(QWidget *parent) 
+    : QWidget(parent){
     bool isLoaded = SpriteManager::instance().loadFromFile(":/assert/picture/sprite.json");
     if (!isLoaded) {
         qDebug() << "错误：加载 :/assert/picture/sprite.json 文件失败！";
@@ -28,9 +27,6 @@ GameWidget::GameWidget(GameViewModel *viewModel, QWidget *parent)
     m_currentTime = MAX_GAMETIME; 
     m_timer = new QTimer(this); // 临时时钟
     connect(m_timer, &QTimer::timeout, this, &GameWidget::gameLoop);
-    connect(m_viewModel, &GameViewModel::playerPositonChanged, this, &GameWidget::playerPositionChanged);
-    connect(m_viewModel, &GameViewModel::playerLivesChanged, this, &GameWidget::playerLivesChanged);
-    connect(m_viewModel->getEnemyManager(), &EnemyManager::enemyDestroyed, this, &GameWidget::die);
     m_timer->start(16);
     m_elapsedTimer.start();
     
@@ -56,7 +52,6 @@ void GameWidget::gameLoop() {
     if (player) {
         player->update(deltaTime);
     }
-    m_currentTime =60-m_viewModel->getGameTime();
     for (auto& it: m_monsters) {
         it->update(deltaTime);
     }
@@ -81,8 +76,8 @@ void GameWidget::gameLoop() {
     this->update();
 }
 
-void GameWidget::playerPositionChanged() {
-    player->setPosition(m_viewModel->getPlayerPosition());
+void GameWidget::playerPositionChanged(QPointF position) {
+    player->setPosition(position);
     // qDebug() << m_viewModel->getPlayerPosition();
 }
 
@@ -122,26 +117,22 @@ void GameWidget::paintEvent(QPaintEvent *event) {
     for (MonsterEntity* monster : m_monsters) {
         monster->paint(&painter, m_spriteSheet, viewOffset); 
     }
-    if (m_viewModel && m_viewModel->getPlayer()) {
-        const auto& bullets = m_viewModel->getPlayer()->getActiveBullets();
-        QRect bulletSourceRect = SpriteManager::instance().getSpriteRect("player_bullet");
-        if (!bulletSourceRect.isNull()) {
-            for (const auto& bullet : bullets) {
-                // qDebug() << "bullet";
-                QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(10, 10)) * SCALE;
-                // qDebug() << bullet.position;
-                QSizeF scaledSize(bulletSourceRect.width() * SCALE, bulletSourceRect.height() * SCALE);
-                QRectF destRect(topLeft, scaledSize);
-                destRect.translate(viewOffset);
-                painter.drawPixmap(destRect, m_spriteSheet, bulletSourceRect);
-            }
+
+    QRect bulletSourceRect = SpriteManager::instance().getSpriteRect("player_bullet");
+    if (!bulletSourceRect.isNull()) {
+        for (const auto& bullet : m_bullets) {
+            // qDebug() << "bullet";
+            QPointF topLeft = (bullet.position - QPointF(bulletSourceRect.width()/2.0, bulletSourceRect.height()/2.0) + QPointF(10, 10)) * SCALE;
+            // qDebug() << bullet.position;
+            QSizeF scaledSize(bulletSourceRect.width() * SCALE, bulletSourceRect.height() * SCALE);
+            QRectF destRect(topLeft, scaledSize);
+            destRect.translate(viewOffset);
+            painter.drawPixmap(destRect, m_spriteSheet, bulletSourceRect);
         }
     }
 }
 
 void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
-    int healthCount = m_viewModel->getPlayerLives() - 1;
-    int moneyCount = 0; 
     double ui_margin = 3.0;
     
     QRect circleRect = SpriteManager::instance().getSpriteRect("ui_circle");
@@ -154,9 +145,8 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     QPointF itemBottomLeft = itemRectF.bottomLeft();
     itemRectF.translate(viewOffset);
     painter->drawPixmap(itemRectF, m_spriteSheet, itemRect);
-    if (m_viewModel && m_viewModel->getItemViewModel() && m_viewModel->getItemViewModel()->hasPossessedItem()) {
-        int possessedItemType = m_viewModel->getItemViewModel()->getPossessedItemType();
-        QString itemSpriteName = ItemEntity::typeToString(static_cast<ItemType>(possessedItemType));
+    if (m_hasPossessedItem) {
+        QString itemSpriteName = ItemEntity::typeToString(static_cast<ItemType>(m_possessedItemType));
         QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemSpriteName);
         if (!itemSourceRect.isNull()) {
             double itemScaleRatio = 0.8; 
@@ -200,7 +190,7 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
         painter->drawRect(barBackgroundRect);
     }
 
-    QString healthText = QString("x%1").arg(healthCount);
+    QString healthText = QString("x%1").arg(m_healthCount);
     QFont Hfont = painter->font();
     Hfont.setPointSize(16); 
     painter->setFont(Hfont);
@@ -211,7 +201,7 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     );
     painter->drawText(healthtextPos, healthText);
 
-    QString moneyText = QString("x%1").arg(m_viewModel->getPlayer()->getCoins());
+    QString moneyText = QString("x%1").arg(m_moneyCount);
     QFont Mfont = painter->font();
     Mfont.setPointSize(16); 
     painter->setFont(Mfont);
@@ -246,12 +236,10 @@ void GameWidget::timerEvent() {
     if (keys[Qt::Key_Down])  { shootDirection.ry() += 1; }
     if (keys[Qt::Key_Left])  { shootDirection.rx() -= 1; }
     if (keys[Qt::Key_Right]) { shootDirection.rx() += 1; }
-    PlayerViewModel* playerVM = m_viewModel->getPlayer();
-    if (!playerVM) return;
 
-    playerVM->setMovingDirection(moveDirection);
+    emit setMovingDirection(moveDirection, !moveDirection.isNull());
     if (!shootDirection.isNull()) { 
-        playerVM->shoot(shootDirection);
+        emit shoot(shootDirection);
     }
     bool isMoving = !moveDirection.isNull();
     bool isShooting = !shootDirection.isNull();
@@ -277,19 +265,15 @@ void GameWidget::timerEvent() {
     // 处理道具使用
     if (keys[Qt::Key_Space] && !m_spaceKeyPressed) {
         m_spaceKeyPressed = true;
-        if (m_viewModel) {
-            m_viewModel->useItem();
-        }
+        emit useItem();
     } else if (!keys[Qt::Key_Space]) {
         m_spaceKeyPressed = false;
     }
 }
 
 void GameWidget::syncEnemies() {
-    if (!m_viewModel || !m_viewModel->getEnemyManager()) return;
-    const auto& enemyDataList = m_viewModel->getEnemyManager()->getEnemies();
     QSet<int> liveEnemyIds;
-    for (const auto& data : enemyDataList) {
+    for (const auto& data : m_enemyDataList) {
         liveEnemyIds.insert(data.id);
     }
     for (auto it = m_monsters.begin(); it != m_monsters.end();) {
@@ -300,7 +284,7 @@ void GameWidget::syncEnemies() {
             ++it;
         }
     }
-    for (const auto& data : enemyDataList) {
+    for (const auto& data : m_enemyDataList) {
         MonsterEntity* monster = nullptr;
         if (!m_monsters.contains(data.id)) {
             monster = new MonsterEntity("orc");
@@ -312,16 +296,13 @@ void GameWidget::syncEnemies() {
         monster->setVelocity(data.velocity);
         
         // 根据玩家潜行状态设置敌人是否冻结
-        bool playerStealthMode = m_viewModel->getPlayer() ? m_viewModel->getPlayer()->isStealthMode() : false;
-        monster->setFrozen(playerStealthMode);
+        monster->setFrozen(m_playerStealthMode);
     }
 }
 
 void GameWidget::syncItems() {
-    if (!m_viewModel) return;
-    const auto& itemList = m_viewModel->getActiveItems();
     QSet<int> activeItemIds;
-    for (const auto& data : itemList) {
+    for (const auto& data : m_itemDataList) {
         activeItemIds.insert(data.id);
     }
     for (auto it = m_items.begin(); it != m_items.end();) {
@@ -332,7 +313,7 @@ void GameWidget::syncItems() {
             ++it;
         }
     }
-    for (const auto& data: itemList) {
+    for (const auto& data: m_itemDataList) {
         ItemEntity* item = nullptr;
         if (!m_items.contains(data.id)) {
             item = new ItemEntity(data.type);
@@ -355,3 +336,37 @@ void GameWidget::die(int id) {
         m_deadmonsters.insert(id, deadm);
     }
 }
+
+void GameWidget::updateGameTime(double gameTime) {
+    m_currentTime = 60 - gameTime;
+}
+
+void GameWidget::updateBullets(QList<BulletData> bullets) {
+    m_bullets = bullets;
+}
+
+void GameWidget::updateEnemies(QList<EnemyData> enemies) {
+    m_enemyDataList = enemies;
+}
+
+void GameWidget::updateItems(QList<ItemData> items) {
+    m_itemDataList = items;
+}
+
+void GameWidget::updatePlayerStealthMode(bool isStealth) {
+    m_playerStealthMode = isStealth;
+}
+
+void GameWidget::updatePlayerHealth(int health) {
+    m_healthCount = health;
+}
+
+void GameWidget::updatePlayerMoney(int money) {
+    m_moneyCount = money;
+}
+
+void GameWidget::updatePossessedItem(int itemType, bool hasItem) {
+    m_possessedItemType = itemType;
+    m_hasPossessedItem = hasItem;
+}
+
