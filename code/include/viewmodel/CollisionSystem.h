@@ -19,14 +19,14 @@ public:
 
     // 碰撞检测
     void checkCollisions(const PlayerViewModel& player,
-                        const QList<EnemyManager::EnemyData>& enemies,
-                        const QList<BulletViewModel::BulletData>& bullets);
+                        const QList<EnemyData>& enemies,
+                        const QList<BulletData>& bullets);
     
     void checkPlayerEnemyCollisions(const PlayerViewModel& player,
-                                   const QList<EnemyManager::EnemyData>& enemies);
+                                   const QList<EnemyData>& enemies);
     
-    void checkBulletEnemyCollisions(const QList<BulletViewModel::BulletData>& bullets,
-                                   const QList<EnemyManager::EnemyData>& enemies);
+    void checkBulletEnemyCollisions(const QList<BulletData>& bullets,
+                                   const QList<EnemyData>& enemies);
 
     // 碰撞查询
     bool checkPlayerEnemyCollision(const QPointF& playerPos, 
@@ -49,6 +49,7 @@ public:
 signals:
     void playerHitByEnemy(int enemyId);
     void enemyHitByBullet(int bulletId, int enemyId);
+    void enemyHitByZombie(int enemyId);  // 僵尸模式接触击杀
 
 private:
     double m_playerCollisionRadius = 9.0;

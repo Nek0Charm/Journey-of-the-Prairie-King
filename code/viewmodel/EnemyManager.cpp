@@ -2,6 +2,8 @@
 #include <QRandomGenerator>
 #include <QDebug>
 #include <cmath>
+#include "../../precomp.h"
+#include "viewmodel/EnemyManager.h"
 
 EnemyManager::EnemyManager(QObject *parent)
     : QObject(parent)
@@ -9,7 +11,7 @@ EnemyManager::EnemyManager(QObject *parent)
     , m_spawnTimer(0.0)
     , m_spawnInterval(2.0)
     , m_maxEnemies(10)
-    , m_enemyMoveSpeed(50.0)
+    , m_enemyMoveSpeed(40.0)
 {
 }
 
@@ -58,11 +60,20 @@ void EnemyManager::spawnEnemyAtRandomPosition()
     spawnEnemy(position);
 }
 
-void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos)
+void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode)
 {
+    // 更新潜行状态
+    m_playerStealthMode = playerStealthMode;
+    
     for (auto& enemy : m_enemies) {
         if (enemy.isActive) {
-            updateEnemyAI(enemy, playerPos);
+            // 如果玩家处于潜行模式，敌人停止移动
+            if (playerStealthMode) {
+                enemy.velocity = QPointF(0, 0);
+            } else {
+                updateEnemyAI(enemy, playerPos);
+            }
+            
             if(!isPositionValid(enemy.position + enemy.velocity * deltaTime, enemy.id)) {
                 continue;
             }
@@ -72,6 +83,8 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos)
     spawnEnemies(deltaTime);
     
     removeInactiveEnemies();
+
+    emit enemiesChanged(m_enemies);
 }
 
 void EnemyManager::damageEnemy(int bulletId,int enemyId)
@@ -81,9 +94,11 @@ void EnemyManager::damageEnemy(int bulletId,int enemyId)
             enemy.health -= 1;
                         
             if (enemy.health <= 0) {
+                // 在标记为非活动状态之前，先发出信号并传递位置信息
+                QPointF enemyPosition = enemy.position;
                 enemy.isActive = false;
-                qDebug() << "Enemy destroyed, ID:" << enemyId;
-                emit enemyDestroyed(enemy.position);
+                qDebug() << "Enemy destroyed, ID:" << enemyId << "at position:" << enemyPosition;
+                emit enemyDestroyed(enemy.id, enemyPosition);
             }
             break;
         }
@@ -116,6 +131,15 @@ int EnemyManager::getActiveEnemyCount() const
         }
     }
     return count;
+}
+
+QPointF EnemyManager::getEnemyPosition(int id) const {
+     for (const EnemyData& enemy : m_enemies) {
+        if (enemy.id == id) {
+            return enemy.position;
+        }
+    }
+    return QPointF(-1, -1); 
 }
 
 QPointF EnemyManager::getRandomSpawnPosition() const
@@ -151,6 +175,8 @@ QPointF EnemyManager::getRandomSpawnPosition() const
     count = 0;
     return position;
 }
+
+
 
 void EnemyManager::updateEnemyAI(EnemyData& enemy, const QPointF& playerPos)
 {

@@ -5,7 +5,7 @@ StartWidget::StartWidget(QWidget *parent) : QWidget(parent)
     this->setStyleSheet("background-color: black;"); 
 
     m_titleLabel = new QLabel(this);    
-    QPixmap fullSpriteSheet(":/assert/sprite.png"); 
+    QPixmap fullSpriteSheet(":/assert/picture/sprite.png"); 
     QRect cropRect(0, 96, 94, 55);
     QPixmap titlePixmap = fullSpriteSheet.copy(cropRect);
 

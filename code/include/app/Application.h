@@ -3,6 +3,9 @@
 
 #include <view/MainWindow.h>
 #include <viewmodel/GameViewModel.h>
+#include <view/AudioEventListener.h>
+#include <common/GameService.h>
+
 
 class Application: public QApplication {
     Q_OBJECT
@@ -21,7 +24,9 @@ private:
     void calculateDeltaTime();
 
     std::unique_ptr<MainWindow> m_view;
-    std::shared_ptr<GameViewModel> m_viewModel;
+    std::unique_ptr<GameViewModel> m_viewModel;
+    std::unique_ptr<GameService> m_service;
+    std::unique_ptr<AudioEventListener> m_audioEventListener;
 
     QTimer m_gameTimer;
     QElapsedTimer m_frameTimer;

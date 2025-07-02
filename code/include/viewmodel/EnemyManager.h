@@ -10,14 +10,7 @@ class EnemyManager : public QObject {
     Q_OBJECT
     
 public:
-    struct EnemyData {
-        int id;
-        int health = 1;
-        QPointF position;
-        QPointF velocity;
-        double moveSpeed = 50.0;
-        bool isActive = true;
-    };
+    
     
     explicit EnemyManager(QObject *parent = nullptr);
     ~EnemyManager() = default;
@@ -28,7 +21,13 @@ public:
     void spawnEnemyAtRandomPosition();
     
     // 敌人管理
-    void updateEnemies(double deltaTime, const QPointF& playerPos);
+    void updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode = false);
+    
+    // 潜行状态查询
+    bool isPlayerStealthMode() const { return m_playerStealthMode; }
+    
+
+    
     void damageEnemy(int bulletId ,int enemyId);
     void removeEnemy(int enemyId);
     void clearAllEnemies();
@@ -38,6 +37,7 @@ public:
     int getEnemyCount() const { return m_enemies.size(); }
     int getActiveEnemyCount() const;
     bool hasEnemies() const { return !m_enemies.isEmpty(); }
+    QPointF getEnemyPosition(int id) const;
     
     // 配置设置
     void setSpawnInterval(double interval) { m_spawnInterval = interval; }
@@ -46,10 +46,11 @@ public:
     
 signals:
     void enemySpawned(const EnemyData& enemy);
-    void enemyDestroyed(QPointF position);
+    void enemyDestroyed(int id, const QPointF& position);
     void enemyReachedPlayer(int enemyId);
     void enemyDamaged(int enemyId, int remainingHealth);
     void enemyCountChanged(int count);
+    void enemiesChanged(const QList<EnemyData>& enemies);
     
 private:
     QList<EnemyData> m_enemies;
@@ -57,7 +58,8 @@ private:
     double m_spawnTimer = 0.0;
     double m_spawnInterval = 2.0;
     int m_maxEnemies = 10;
-    double m_enemyMoveSpeed = 50.0;
+    double m_enemyMoveSpeed = 40.0;
+    bool m_playerStealthMode = false;
 
     static constexpr double ENEMY_WIDTH = 15.0;
     

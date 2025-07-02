@@ -1,4 +1,8 @@
 #include "app/Application.h"
+#include "view/AudioManager.h"
+#include "view/AudioEventListener.h"
+#include "viewmodel/GameViewModel.h"
+#include <QDebug>
 
 Application::Application(int &argc, char **argv)
     : QApplication(argc, argv)
@@ -6,13 +10,18 @@ Application::Application(int &argc, char **argv)
     , m_frameTimer()
     , m_deltaTime(0.0)
     , m_lastFrameTime(0) {
+    qDebug() << "Application starting up...";
+    AudioManager::instance().initialize();
     setupGameLoop();
 }
 
 
 void Application::setupGameLoop() {
-    m_viewModel = std::make_shared<GameViewModel>(this);
-    m_view = std::make_unique<MainWindow>(m_viewModel.get());
+    m_viewModel = std::make_unique<GameViewModel>(this);
+    m_view = std::make_unique<MainWindow>();
+    m_service = std::make_unique<GameService>(m_view.get(), m_viewModel.get());
+    m_audioEventListener = std::make_unique<AudioEventListener>(this);
+    m_audioEventListener->setGameViewModel(m_viewModel.get());
     /*
     TODO: 在MainWindow中设置游戏试图模型（可能需要）
     m_view->setGameViewModel(m_viewModel);
@@ -58,5 +67,8 @@ void Application::calculateDeltaTime() {
 }
 
 void Application::onGameStateChanged() {
-    return;
+    m_view->update();
+    m_view->update();
+    // 音乐播放逻辑已移至AudioEventListener中处理
+    qDebug() << "[Application] Game state changed, music handled by AudioEventListener";
 }

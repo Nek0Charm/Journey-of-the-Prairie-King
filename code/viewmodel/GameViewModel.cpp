@@ -1,21 +1,20 @@
 #include "viewmodel/GameViewModel.h"
-
+#include <QRandomGenerator>
 #include <QDebug>
 
 GameViewModel::GameViewModel(QObject *parent)
     : QObject(parent)
-    , m_gameState(MENU)
+    , m_gameState(GameState::MENU)
 {
     initializeComponents();
-
     setupConnections();
 }
 
 void GameViewModel::startGame()
 {
-    if (m_gameState != PLAYING) {
+    if (m_gameState != GameState::PLAYING) {
         resetGame();
-        m_gameState = PLAYING;
+        m_gameState = GameState::PLAYING;
         emit gameStateChanged(m_gameState);
         qDebug() << "Game started";
     }
@@ -23,8 +22,8 @@ void GameViewModel::startGame()
 
 void GameViewModel::pauseGame()
 {
-    if (m_gameState == PLAYING) {
-        m_gameState = PAUSED;
+    if (m_gameState == GameState::PLAYING) {
+        m_gameState = GameState::PAUSED;
         emit gameStateChanged(m_gameState);
         qDebug() << "Game paused";
     }
@@ -32,8 +31,8 @@ void GameViewModel::pauseGame()
 
 void GameViewModel::resumeGame()
 {
-    if (m_gameState == PAUSED) {
-        m_gameState = PLAYING;
+    if (m_gameState == GameState::PAUSED) {
+        m_gameState = GameState::PLAYING;
         emit gameStateChanged(m_gameState);
         qDebug() << "Game resumed";
     }
@@ -41,22 +40,23 @@ void GameViewModel::resumeGame()
 
 void GameViewModel::endGame()
 {
-    if (m_gameState != GAME_OVER) {
-        m_gameState = GAME_OVER;
+    if (m_gameState != GameState::GAME_OVER) {
+        m_gameState = GameState::GAME_OVER;
+        resetGame();
         emit gameStateChanged(m_gameState);
         qDebug() << "Game over";
     }
 }
 
 void GameViewModel::playerAttack(const QPointF& direction) {
-    if (m_gameState == PLAYING && m_player) {
+    if (m_gameState == GameState::PLAYING && m_player) {
         m_player->shoot(direction);
         qDebug() << "Player attacked in direction:" << direction;
     }
 }
 
 void GameViewModel::setPlayerMoveDirection(const QPointF& direciton, bool isMoving) {
-    if(m_gameState == PLAYING && m_player) {
+    if(m_gameState == GameState::PLAYING && m_player) {
         m_player->setMovingDirection(direciton, isMoving);
     }
 }
@@ -65,28 +65,34 @@ void GameViewModel::updateGame(double deltaTime)
 {
     // qDebug() << "Updating game state, deltaTime:" << deltaTime;
     
-    if (m_gameState != PLAYING) {
+    if (m_gameState != GameState::PLAYING) {
         return;
     }
 
     m_gameTime += deltaTime;
     if(m_gameTime > MAX_GAMETIME) {
         m_gameTime = 0.0; 
+        emit gameTimeChanged(m_gameTime);
         endGame();
         return;
     }
+    emit gameTimeChanged(m_gameTime);
     
     // 更新玩家
     m_player->update(deltaTime);
     
-    // 更新敌人
-    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition());
+    // 更新敌人（传递玩家潜行状态）
+    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition(), m_player->isStealthMode());
 
     m_collisionSystem->checkCollisions(*m_player, 
                                       m_enemyManager->getEnemies(),
                                       m_player->getActiveBullets());
     
     m_item->updateItems(deltaTime, m_player->getPosition());
+    
+    // 更新道具效果
+    m_itemEffectManager->updateEffects(deltaTime, m_player.get());
+    
     // 检查游戏状态
     checkGameState();
 }
@@ -118,6 +124,9 @@ void GameViewModel::setupConnections()
     
     connect(m_collisionSystem.get(), &CollisionSystem::enemyHitByBullet,
             this, &GameViewModel::handleEnemyHitByBullet);
+    
+    connect(m_collisionSystem.get(), &CollisionSystem::enemyHitByZombie,
+            this, &GameViewModel::handleEnemyHitByZombie);
 
     
     // 连接玩家状态变化
@@ -132,15 +141,21 @@ void GameViewModel::setupConnections()
     
     connect(m_enemyManager.get(), &EnemyManager::enemyDestroyed,
             this, &GameViewModel::handleCreateItem);
+    
+    // 连接道具使用信号
+    connect(m_item.get(), &ItemViewModel::itemUsed,
+            this, &GameViewModel::handleItemUsed);
+    connect(m_item.get(), &ItemViewModel::itemUsedImmediately,
+            this, &GameViewModel::handleItemUsedImmediately);
 }
 
 void GameViewModel::initializeComponents()
 {
-
     m_player = std::make_unique<PlayerViewModel>(this);
     m_item = std::make_unique<ItemViewModel>(this);
     m_enemyManager = std::make_unique<EnemyManager>(this);
     m_collisionSystem = std::make_unique<CollisionSystem>(this);
+    m_itemEffectManager = std::make_unique<ItemEffectManager>(this);
 }
 
 void GameViewModel::resetGame()
@@ -151,6 +166,12 @@ void GameViewModel::resetGame()
     }
     if (m_enemyManager) {
         m_enemyManager->clearAllEnemies();
+    }
+    if (m_item) {
+        m_item->clearAllItems();
+    }
+    if (m_itemEffectManager) {
+        m_itemEffectManager->clearAllEffects();
     }
 }
 
@@ -167,48 +188,27 @@ void GameViewModel::handleEnemyHitByBullet(int bulletId, int enemyId)
 {
     m_enemyManager->damageEnemy(bulletId, enemyId);
     m_player->removeBullet(bulletId);
-    
 }
 
-void GameViewModel::handleCreateItem(const QPointF& position)
+void GameViewModel::handleEnemyHitByZombie(int enemyId)
 {
-    int rand = QRandomGenerator::global()->bounded(10);
-    qDebug() << "rand: " << rand;
-    if(rand < 2) {
-        m_item->createItem(position, m_item->m_itemPossibilities);
-    }
+    // 僵尸模式：直接击杀敌人
+    m_enemyManager->damageEnemy(0, enemyId); // 使用0作为占位符bulletId
+    qDebug() << "僵尸模式接触击杀敌人:" << enemyId;
 }
 
-void GameViewModel::useItem() {
-    if(m_item->hasPossessedItem()) {
-       int type = m_item->getPossessedItemType();
-       switch(type) {
-            case ItemViewModel::coin:
-                qDebug() << "coin";
-                break;
-            case ItemViewModel::five_coins:
-                qDebug() << "five_coins";
-                break;
+void GameViewModel::handleCreateItem(int enemyId, const QPointF& position)
+{
+    // 直接使用传递的位置参数生成道具
+    m_item->spawnItemAtPosition(position);
+}
 
-            case ItemViewModel::extra_life:
-                m_player->addLife();
-                qDebug() << "extra_life";
-                break;
-            case ItemViewModel::coffee:
-                m_player->setMoveSpeed(m_player->getMoveSpeed() * 1.2);
-                qDebug() << "coffee";
-                break;
-            case ItemViewModel::machine_gun:
-                m_player->setShootCooldown(0.1);
-                qDebug() << "machine_gun";
-                break;
-
-            case ItemViewModel::bomb:
-                m_enemyManager->clearAllEnemies();
-                qDebug() << "bomb";
-                break;
-                
-
-       }
-    } 
+void GameViewModel::handleItemUsed(int itemType) {
+    // 使用ItemEffectManager处理道具效果
+    m_itemEffectManager->applyItemEffect(itemType, m_player.get(), m_enemyManager.get());
+    // 发出道具使用信号
+    emit itemUsed(itemType);
+}
+void GameViewModel::handleItemUsedImmediately(int itemType) {
+    handleItemUsed(itemType);
 }
