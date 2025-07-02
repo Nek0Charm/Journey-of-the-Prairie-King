@@ -115,7 +115,9 @@ void MonsterEntity::setVelocity(const QPointF& velocity) {
 
 void MonsterEntity::update(double deltaTime) {
     // if (shouldBeRemoved()) return;
-    
+    if (m_animation) {
+        m_animation->update(deltaTime);
+    }
     // 如果被冻结，完全不更新
     if (m_isFrozen) {
         return;
@@ -125,10 +127,6 @@ void MonsterEntity::update(double deltaTime) {
         case MonsterState::Walking:
             m_position += m_velocity * deltaTime;
             break;
-    }
-    
-    if (m_animation) {
-        m_animation->update(deltaTime);
     }
 }
 

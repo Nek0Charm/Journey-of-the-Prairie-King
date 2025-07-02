@@ -253,25 +253,35 @@ void GameWidget::timerEvent() {
     if (!shootDirection.isNull()) { 
         playerVM->shoot(shootDirection);
     }
-    bool isMoving = !moveDirection.isNull();
-    bool isShooting = !shootDirection.isNull();
-    if (isShooting && isMoving) {
-        if (shootDirection.x() < 0)       player->setState(PlayerState::ShootLeftWalk);
-        else if (shootDirection.x() > 0)  player->setState(PlayerState::ShootRightWalk);
-        else if (shootDirection.y() < 0)  player->setState(PlayerState::ShootUpWalk);
-        else if (shootDirection.y() > 0)  player->setState(PlayerState::ShootDownWalk);
-    } else if (isShooting) {
-        if (shootDirection.x() < 0)       player->setState(PlayerState::ShootLeft);
-        else if (shootDirection.x() > 0)  player->setState(PlayerState::ShootRight);
-        else if (shootDirection.y() < 0)  player->setState(PlayerState::ShootUp);
-        else if (shootDirection.y() > 0)  player->setState(PlayerState::ShootDown);
-    } else if (isMoving) {
-        if (moveDirection.x() < 0)       player->setState(PlayerState::WalkLeft);
-        else if (moveDirection.x() > 0)  player->setState(PlayerState::WalkRight);
-        else if (moveDirection.y() < 0)  player->setState(PlayerState::WalkUp);
-        else if (moveDirection.y() > 0)  player->setState(PlayerState::WalkDown);
+    
+    // 检查僵尸模式状态
+    bool isZombieMode = playerVM->isZombieMode();
+    
+    // 如果处于僵尸模式，直接设置僵尸动画
+    if (isZombieMode) {
+        player->setState(PlayerState::Zombie);
     } else {
-        player->setState(PlayerState::Idle);
+        // 正常状态下的动画逻辑
+        bool isMoving = !moveDirection.isNull();
+        bool isShooting = !shootDirection.isNull();
+        if (isShooting && isMoving) {
+            if (shootDirection.x() < 0)       player->setState(PlayerState::ShootLeftWalk);
+            else if (shootDirection.x() > 0)  player->setState(PlayerState::ShootRightWalk);
+            else if (shootDirection.y() < 0)  player->setState(PlayerState::ShootUpWalk);
+            else if (shootDirection.y() > 0)  player->setState(PlayerState::ShootDownWalk);
+        } else if (isShooting) {
+            if (shootDirection.x() < 0)       player->setState(PlayerState::ShootLeft);
+            else if (shootDirection.x() > 0)  player->setState(PlayerState::ShootRight);
+            else if (shootDirection.y() < 0)  player->setState(PlayerState::ShootUp);
+            else if (shootDirection.y() > 0)  player->setState(PlayerState::ShootDown);
+        } else if (isMoving) {
+            if (moveDirection.x() < 0)       player->setState(PlayerState::WalkLeft);
+            else if (moveDirection.x() > 0)  player->setState(PlayerState::WalkRight);
+            else if (moveDirection.y() < 0)  player->setState(PlayerState::WalkUp);
+            else if (moveDirection.y() > 0)  player->setState(PlayerState::WalkDown);
+        } else {
+            player->setState(PlayerState::Idle);
+        }
     }
     if (keys[Qt::Key_Space] && !m_spaceKeyPressed) {
         m_spaceKeyPressed = true;
