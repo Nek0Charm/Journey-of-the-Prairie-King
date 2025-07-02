@@ -21,11 +21,19 @@ void CollisionSystem::checkPlayerEnemyCollisions(const PlayerViewModel& player,
                                                const QList<EnemyManager::EnemyData>& enemies)
 {
     QPointF playerPos = player.getStats().position;
+    bool isZombieMode = player.isZombieMode();
     
     for (const auto& enemy : enemies) {
         if (enemy.isActive && checkPlayerEnemyCollision(playerPos, enemy.position)) {
-            emit playerHitByEnemy(enemy.id);
-            logCollision("Player-Enemy", -1, enemy.id);
+            if (isZombieMode) {
+                // 僵尸模式：接触击杀敌人
+                emit enemyHitByZombie(enemy.id);
+                logCollision("Zombie-Enemy", -1, enemy.id);
+            } else {
+                // 正常模式：玩家被敌人击中
+                emit playerHitByEnemy(enemy.id);
+                logCollision("Player-Enemy", -1, enemy.id);
+            }
             break; // 玩家只能被一个敌人击中
         }
     }

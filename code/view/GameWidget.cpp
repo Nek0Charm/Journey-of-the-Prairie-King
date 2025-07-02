@@ -153,7 +153,8 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     QPointF itemBottomLeft = itemRectF.bottomLeft();
     itemRectF.translate(viewOffset);
     painter->drawPixmap(itemRectF, m_spriteSheet, itemRect);
-  if (m_viewModel && m_viewModel->getItemViewModel() && m_viewModel->getItemViewModel()->hasPossessedItem()) {
+
+    if (m_viewModel && m_viewModel->getItemViewModel() && m_viewModel->getItemViewModel()->hasPossessedItem()) {
         int possessedItemType = m_viewModel->getItemViewModel()->getPossessedItemType();
         QString itemSpriteName = ItemEntity::typeToString(static_cast<ItemType>(possessedItemType));
         QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemSpriteName);
@@ -161,7 +162,6 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
             painter->drawPixmap(itemRectF, m_spriteSheet, itemSourceRect);
         }
     }
-
 
     QRect healthRect = SpriteManager::instance().getSpriteRect("ui_helth");
     QRectF healthRectF(itemBottomLeft.x(), (itemBottomLeft.y() + ui_margin*SCALE), healthRect.width()*SCALE, healthRect.height()*SCALE);
@@ -181,8 +181,8 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
         QColor barFillColor = Qt::green;
 
         QPointF barTopLeft(
-            circleRectF.right() + (ui_margin)*SCALE, 
-            circleRectF.center().y() - barHeight / 2.0 + 3*SCALE
+            circleRectF.right() + (ui_margin/2)*SCALE, 
+            circleRectF.center().y() - barHeight / 2.0 + 3 * SCALE
         );
         QRectF barBackgroundRect(barTopLeft, QSizeF(barWidth, barHeight));
         double timeRatio = m_currentTime / m_maxTime;
@@ -200,18 +200,18 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     painter->setFont(Hfont);
     painter->setPen(Qt::white);
     QPointF healthtextPos(
-        healthRectF.right() + (ui_margin/2) * SCALE, 
+        healthRectF.right() + (ui_margin/5) * SCALE, 
         healthRectF.center().y() + Hfont.pointSize() / 2.0 
     );
     painter->drawText(healthtextPos, healthText);
 
-    QString moneyText = QString("x%1").arg(0);
+    QString moneyText = QString("x%1").arg(m_viewModel->getPlayer()->getCoins());
     QFont Mfont = painter->font();
     Mfont.setPointSize(16); 
     painter->setFont(Mfont);
     painter->setPen(Qt::white); 
     QPointF moneyTextPos(
-        moneyRectF.right() + (ui_margin/2) * SCALE, 
+        moneyRectF.right() + (ui_margin/5) * SCALE, 
         moneyRectF.center().y() + Mfont.pointSize() / 2.0 
     );
     painter->drawText(moneyTextPos, moneyText);

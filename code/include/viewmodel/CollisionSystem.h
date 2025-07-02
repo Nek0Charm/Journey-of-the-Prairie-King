@@ -49,6 +49,7 @@ public:
 signals:
     void playerHitByEnemy(int enemyId);
     void enemyHitByBullet(int bulletId, int enemyId);
+    void enemyHitByZombie(int enemyId);  // 僵尸模式接触击杀
 
 private:
     double m_playerCollisionRadius = 9.0;

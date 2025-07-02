@@ -83,9 +83,11 @@ void EnemyManager::damageEnemy(int bulletId,int enemyId)
             enemy.health -= 1;
                         
             if (enemy.health <= 0) {
+                // 在标记为非活动状态之前，先发出信号并传递位置信息
+                QPointF enemyPosition = enemy.position;
                 enemy.isActive = false;
-                qDebug() << "Enemy destroyed, ID:" << enemyId;
-                emit enemyDestroyed(enemy.id);
+                qDebug() << "Enemy destroyed, ID:" << enemyId << "at position:" << enemyPosition;
+                emit enemyDestroyed(enemy.id, enemyPosition);
             }
             break;
         }

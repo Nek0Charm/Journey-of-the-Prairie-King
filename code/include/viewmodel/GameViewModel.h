@@ -8,6 +8,7 @@
 #include "viewmodel/EnemyManager.h"
 #include "viewmodel/CollisionSystem.h"
 #include "viewmodel/ItemViewModel.h"
+#include "viewmodel/ItemEffectManager.h"
 
 class GameViewModel : public QObject {
     Q_OBJECT
@@ -27,7 +28,6 @@ public:
     void endGame();
     void updateGame(double deltaTime);
 
-    ItemViewModel* getItemViewModel() const { return m_item.get(); }
     EnemyManager* getEnemyManager() const { return m_enemyManager.get(); }
     void playerAttack(const QPointF& direction);
     void setPlayerMoveDirection(const QPointF& direction, bool isMoving);
@@ -37,10 +37,12 @@ public:
 
     double getGameTime() const { return m_gameTime;}
 
-    QList<ItemViewModel::ItemData> getActiveItems() const {return m_item->getActiveItems();}
-    int getPossessedItemType() const {return m_item->getPossessedItemType();}
-    void useItem();
-    void pickItem(int itemType);
+    // 道具相关接口 
+    ItemViewModel* getItemViewModel() const { return m_item.get(); }
+    void useItem() { if(m_item) m_item->usePossessedItem(); }
+    QList<ItemViewModel::ItemData> getActiveItems() const { 
+        return m_item ? m_item->getActiveItems() : QList<ItemViewModel::ItemData>(); 
+    }
         
     GameState getGameState() const { return m_gameState; }
     bool isGameActive() const { return m_gameState == PLAYING; }
@@ -59,6 +61,7 @@ private:
     std::unique_ptr<EnemyManager> m_enemyManager;
     std::unique_ptr<CollisionSystem> m_collisionSystem;
     std::unique_ptr<ItemViewModel> m_item;
+    std::unique_ptr<ItemEffectManager> m_itemEffectManager;
     double m_gameTime = 0.0;   
     
     void checkGameState();
@@ -68,8 +71,9 @@ private:
     void resetGame();
     void handlePlayerHitByEnemy(int enemyId);
     void handleEnemyHitByBullet(int bulletId, int enemyId);
-    void handleCreateItem(const int id);
-    void handleItemUsedImmediately(int itemType);
+    void handleEnemyHitByZombie(int enemyId);
+    void handleCreateItem(int enemyId, const QPointF& position);
+    void handleItemUsed(int itemType);
 };
 
 #endif // GAMEVIEWMODEL_H

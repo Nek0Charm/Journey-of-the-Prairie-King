@@ -149,7 +149,7 @@ void AudioEventListener::onGameStateChanged(GameViewModel::GameState state)
 }
 
 // 敌人爆炸事件音效槽函数实现
-void AudioEventListener::onEnemyExplosion(int enemyId)
+void AudioEventListener::onEnemyExplosion(int enemyId, const QPointF& position)
 {
     AudioManager::instance().playSound(EXPLOSION);
 } 

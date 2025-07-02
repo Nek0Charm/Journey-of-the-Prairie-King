@@ -7,7 +7,6 @@ GameViewModel::GameViewModel(QObject *parent)
     , m_gameState(MENU)
 {
     initializeComponents();
-
     setupConnections();
 }
 
@@ -87,6 +86,10 @@ void GameViewModel::updateGame(double deltaTime)
                                       m_player->getActiveBullets());
     
     m_item->updateItems(deltaTime, m_player->getPosition());
+    
+    // 更新道具效果
+    m_itemEffectManager->updateEffects(deltaTime, m_player.get());
+    
     // 检查游戏状态
     checkGameState();
 }
@@ -118,6 +121,9 @@ void GameViewModel::setupConnections()
     
     connect(m_collisionSystem.get(), &CollisionSystem::enemyHitByBullet,
             this, &GameViewModel::handleEnemyHitByBullet);
+    
+    connect(m_collisionSystem.get(), &CollisionSystem::enemyHitByZombie,
+            this, &GameViewModel::handleEnemyHitByZombie);
 
     
     // 连接玩家状态变化
@@ -133,19 +139,20 @@ void GameViewModel::setupConnections()
     connect(m_enemyManager.get(), &EnemyManager::enemyDestroyed,
             this, &GameViewModel::handleCreateItem);
     
-    // 连接道具立即使用信号
+    // 连接道具使用信号
+    connect(m_item.get(), &ItemViewModel::itemUsed,
+            this, &GameViewModel::handleItemUsed);
     connect(m_item.get(), &ItemViewModel::itemUsedImmediately,
-            this, &GameViewModel::handleItemUsedImmediately);
-    
+            this, &GameViewModel::handleItemUsed);
 }
 
 void GameViewModel::initializeComponents()
 {
-
     m_player = std::make_unique<PlayerViewModel>(this);
     m_item = std::make_unique<ItemViewModel>(this);
     m_enemyManager = std::make_unique<EnemyManager>(this);
     m_collisionSystem = std::make_unique<CollisionSystem>(this);
+    m_itemEffectManager = std::make_unique<ItemEffectManager>(this);
 }
 
 void GameViewModel::resetGame()
@@ -156,6 +163,12 @@ void GameViewModel::resetGame()
     }
     if (m_enemyManager) {
         m_enemyManager->clearAllEnemies();
+    }
+    if (m_item) {
+        m_item->clearAllItems();
+    }
+    if (m_itemEffectManager) {
+        m_itemEffectManager->clearAllEffects();
     }
 }
 
@@ -172,98 +185,24 @@ void GameViewModel::handleEnemyHitByBullet(int bulletId, int enemyId)
 {
     m_enemyManager->damageEnemy(bulletId, enemyId);
     m_player->removeBullet(bulletId);
-    
 }
 
-void GameViewModel::handleCreateItem(const int id)
+void GameViewModel::handleEnemyHitByZombie(int enemyId)
 {
-    int rand = QRandomGenerator::global()->bounded(10);
-    qDebug() << "rand: " << rand;
-    if(rand < 2) {
-        m_item->createItem(m_enemyManager->getEnemyPosition(id) ,m_item->m_itemPossibilities);
-    }
+    // 僵尸模式：直接击杀敌人
+    m_enemyManager->damageEnemy(0, enemyId); // 使用0作为占位符bulletId
+    qDebug() << "僵尸模式接触击杀敌人:" << enemyId;
 }
 
-void GameViewModel::useItem() {
-    if(m_item->hasPossessedItem()) {
-        int type = m_item->getPossessedItemType();
-        switch(type) {
-            case ItemViewModel::coin:
-                qDebug() << "coin";
-                break;
-            case ItemViewModel::five_coins:
-                qDebug() << "five_coins";
-                break;
-
-            case ItemViewModel::extra_life:
-                m_player->addLife();
-                qDebug() << "extra_life";
-                break;
-            case ItemViewModel::coffee:
-                m_player->setMoveSpeed(m_player->getMoveSpeed() * 1.2);
-                qDebug() << "coffee";
-                break;
-            case ItemViewModel::machine_gun:
-                m_player->setShootCooldown(0.1);
-                qDebug() << "machine_gun";
-                break;
-
-            case ItemViewModel::bomb:
-                m_enemyManager->clearAllEnemies();
-                qDebug() << "bomb";
-                break;
-        }
-        
-        // 发出道具使用信号
-        emit itemUsed(type);
-    } 
-}
-
-void GameViewModel::pickItem(int itemtype) {
-    emit pickItem(itemtype);
-}
-
-void GameViewModel::handleItemUsedImmediately(int itemType)
+void GameViewModel::handleCreateItem(int enemyId, const QPointF& position)
 {
-    // 处理道具立即使用效果
-    switch(itemType) {
-        case ItemViewModel::coin:
-            qDebug() << "立即使用金币";
-            // 金币效果：增加分数或金钱
-            break;
-        case ItemViewModel::five_coins:
-            qDebug() << "立即使用五个金币";
-            // 五个金币效果：增加更多分数或金钱
-            break;
-        case ItemViewModel::extra_life:
-            m_player->addLife();
-            qDebug() << "立即使用额外生命";
-            break;
-        case ItemViewModel::coffee:
-            m_player->setMoveSpeed(m_player->getMoveSpeed() * 1.2);
-            qDebug() << "立即使用咖啡";
-            break;
-        case ItemViewModel::machine_gun:
-            m_player->setShootCooldown(0.1);
-            qDebug() << "立即使用机枪";
-            break;
-        case ItemViewModel::bomb:
-            m_enemyManager->clearAllEnemies();
-            qDebug() << "立即使用炸弹";
-            break;
-        case ItemViewModel::shotgun:
-            m_player->setShootCooldown(0.15);
-            qDebug() << "立即使用霰弹枪";
-            break;
-        case ItemViewModel::wheel:
-            m_player->setMoveSpeed(m_player->getMoveSpeed() * 1.5);
-            qDebug() << "立即使用轮子";
-            break;
-        default:
-            qDebug() << "立即使用未知道具:" << itemType;
-            break;
-    }
-    
+    // 直接使用传递的位置参数生成道具
+    m_item->spawnItemAtPosition(position);
+}
+
+void GameViewModel::handleItemUsed(int itemType) {
+    // 使用ItemEffectManager处理道具效果
+    m_itemEffectManager->applyItemEffect(itemType, m_player.get(), m_enemyManager.get());
     // 发出道具使用信号
     emit itemUsed(itemType);
 }
