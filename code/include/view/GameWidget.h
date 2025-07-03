@@ -51,7 +51,7 @@ private:
     QMap<int, bool> keys;
     QTimer* m_timer;            // 临时变量
     QElapsedTimer m_elapsedTimer; // 临时变量
-    GameMap* m_gameMap;
+    GameMapView* m_gameMap;
     QPixmap m_spriteSheet;
     PlayerEntity* player;
     QMap<int, MonsterEntity*> m_monsters; 

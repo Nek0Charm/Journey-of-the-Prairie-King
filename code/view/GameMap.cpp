@@ -1,10 +1,10 @@
 #include "view/GameMap.h"
-GameMap::GameMap(QString map_title) : m_width(16), m_height(16), map_title(map_title), m_isExplosionSequenceActive(false), 
+GameMapView::GameMapView(QString map_title) : m_width(16), m_height(16), map_title(map_title), m_isExplosionSequenceActive(false), 
                                       m_explosionSequenceTimer(0.0), m_nextExplosionSpawnTimer(0.0) {
     loadFromFile(":/assert/picture/gamemap.json", "map_1", "1");
 }
 
-bool GameMap::loadFromFile(const QString& path, const QString& mapName, const QString& layoutName) {
+bool GameMapView::loadFromFile(const QString& path, const QString& mapName, const QString& layoutName) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "无法打开地图文件:" << path;
@@ -67,7 +67,7 @@ bool GameMap::loadFromFile(const QString& path, const QString& mapName, const QS
 }
 
 
-void GameMap::update(double deltaTime) {
+void GameMapView::update(double deltaTime) {
     for (Animation* anim : m_animations) {
         anim->update(deltaTime);
     }
@@ -97,7 +97,7 @@ void GameMap::update(double deltaTime) {
     }
 }
 
-void GameMap::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
+void GameMapView::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
     double scale = 3.0;
     painter->setRenderHint(QPainter::Antialiasing, false);
     if (getWidth() > 0) {
@@ -127,24 +127,24 @@ void GameMap::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF
     }
 }
 
-int GameMap::getTileIdAt(int row, int col) const {
+int GameMapView::getTileIdAt(int row, int col) const {
     if (row < 0 || row >= m_height || col < 0 || col >= m_width) {
         return 0; 
     }
     return m_tiles[row][col];
 }
 
-QString GameMap::getTileSpriteName(int tileId) const {
+QString GameMapView::getTileSpriteName(int tileId) const {
     return m_tileLegend.value(tileId, "empty");
 }
 
-int GameMap::getWidth() const { return m_width; }
-int GameMap::getHeight() const { return m_height; }
-void GameMap::createExplosion(const QPointF &position) {
+int GameMapView::getWidth() const { return m_width; }
+int GameMapView::getHeight() const { return m_height; }
+void GameMapView::createExplosion(const QPointF &position) {
     m_explosions.append(new ExplosionEffect(position));
 }
 
-void GameMap::startExplosionSequence(double duration) {
+void GameMapView::startExplosionSequence(double duration) {
     if (m_isExplosionSequenceActive) return;
     m_isExplosionSequenceActive = true;
     m_explosionSequenceTimer = duration;

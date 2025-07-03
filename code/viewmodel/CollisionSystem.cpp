@@ -58,19 +58,19 @@ void CollisionSystem::checkBulletEnemyCollisions(const QList<BulletData>& bullet
 bool CollisionSystem::checkPlayerEnemyCollision(const QPointF& playerPos, 
                                               const QPointF& enemyPos) const
 {
-    return isCollision(playerPos, enemyPos, m_playerCollisionRadius, m_enemyCollisionRadius);
+    return isCollision(playerPos, enemyPos, m_playerWidth, m_enemyWidth);
 }
 
 bool CollisionSystem::checkBulletEnemyCollision(const QPointF& bulletPos, 
                                               const QPointF& enemyPos) const
 {
-    return isCollision(bulletPos, enemyPos, m_bulletCollisionRadius, m_enemyCollisionRadius);
+    return isCollision(bulletPos, enemyPos, m_bulletWidth, m_enemyWidth);
 }
 
 bool CollisionSystem::checkBulletPlayerCollision(const QPointF& bulletPos,
                                                const QPointF& playerPos) const
 {
-    return isCollision(bulletPos, playerPos, m_bulletCollisionRadius, m_playerCollisionRadius);
+    return isCollision(bulletPos, playerPos, m_bulletWidth, m_playerWidth);
 }
 
 double CollisionSystem::calculateDistance(const QPointF& pos1, const QPointF& pos2) const
@@ -81,10 +81,10 @@ double CollisionSystem::calculateDistance(const QPointF& pos1, const QPointF& po
 bool CollisionSystem::isCollision(const QPointF& pos1, const QPointF& pos2, 
                                  double radius1, double radius2) const
 {
-    double distance = calculateDistance(pos1, pos2);
-    double combinedRadius = radius1 + radius2;
-    
-    return distance <= combinedRadius;
+    return (pos1.x() < pos2.x() + radius2 
+            && pos1.x() + radius1 > pos2.x()
+            && pos1.y() < pos2.y() + radius2
+            && pos1.y() + radius1 > pos2.y());
 }
 
 void CollisionSystem::logCollision(const QString& type, int id1, int id2)

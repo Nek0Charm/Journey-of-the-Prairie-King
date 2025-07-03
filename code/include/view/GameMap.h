@@ -23,10 +23,10 @@ private:
     Animation* m_animation; 
 };
 
-class GameMap {
+class GameMapView {
 public:
-    GameMap(QString map_title);
-    ~GameMap() { qDeleteAll(m_animations); qDeleteAll(m_explosions); }
+    GameMapView(QString map_title);
+    ~GameMapView() { qDeleteAll(m_animations); qDeleteAll(m_explosions); }
     bool loadFromFile(const QString& path, const QString& mapName, const QString& layoutName);
     int getTileIdAt(int row, int col) const;
     QString getTileSpriteName(int tileId) const;

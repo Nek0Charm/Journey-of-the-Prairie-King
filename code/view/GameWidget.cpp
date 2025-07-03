@@ -17,7 +17,7 @@ GameWidget::GameWidget(QWidget *parent)
     if (m_spriteSheet.isNull()) {
         qDebug() << "错误：加载 :/assert/picture/sprite.png 文件失败！";
     }
-    m_gameMap = new GameMap("map_1");
+    m_gameMap = new GameMapView("map_1");
     if (!m_gameMap->loadFromFile(":/assert/picture/gamemap.json", "map_1", "1")) { 
         qWarning() << "GameWidget: 地图未能加载，地图将不会被绘制。";
     }

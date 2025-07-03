@@ -2,6 +2,7 @@
 #include "view/AudioManager.h"
 #include "view/AudioEventListener.h"
 #include "viewmodel/GameViewModel.h"
+#include "common/GameMap.h"
 #include <QDebug>
 
 Application::Application(int &argc, char **argv)
@@ -17,6 +18,7 @@ Application::Application(int &argc, char **argv)
 
 
 void Application::setupGameLoop() {
+    GameMap::instance().loadFromFile(":/assert/picture/gamemap.json", "map_1", "1");
     m_viewModel = std::make_unique<GameViewModel>(this);
     m_view = std::make_unique<MainWindow>();
     m_audioEventListener = std::make_unique<AudioEventListener>(this);

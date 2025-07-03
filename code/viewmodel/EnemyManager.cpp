@@ -4,6 +4,7 @@
 #include <cmath>
 #include "../../precomp.h"
 #include "viewmodel/EnemyManager.h"
+#include "common/GameMap.h"
 
 EnemyManager::EnemyManager(QObject *parent)
     : QObject(parent)
@@ -42,6 +43,7 @@ void EnemyManager::spawnEnemy(const QPointF& position)
     enemy.velocity = QPointF(0, 0);
     enemy.moveSpeed = m_enemyMoveSpeed;
     enemy.isActive = true;
+    enemy.isSmart = QRandomGenerator::global()->bounded(3) != 2; 
     
     m_enemies.append(enemy);
     
@@ -145,23 +147,22 @@ QPointF EnemyManager::getEnemyPosition(int id) const {
 QPointF EnemyManager::getRandomSpawnPosition() const
 {
     static int count = 0;
-    const int margin = 50;
     
     QPointF position;
     int side = QRandomGenerator::global()->bounded(4); // 0-3: 上右下左
     
     switch (side) {
-    case 0: // 上边
-        position = QPointF(QRandomGenerator::global()->bounded(3)*16+7*16+8, MAP_HEIGHT-8);
+    case 0: // 下边
+        position = QPointF(QRandomGenerator::global()->bounded(3)*16+7*16, MAP_HEIGHT-16);
         break;
     case 1: // 右边
-        position = QPointF(MAP_WIDTH-8, QRandomGenerator::global()->bounded(3)*16+6*16+8);
+        position = QPointF(MAP_WIDTH-16, QRandomGenerator::global()->bounded(3)*16+7*16);
         break;
-    case 2: // 下边
-        position = QPointF(QRandomGenerator::global()->bounded(3)*16+7*16+8, 8);
+    case 2: // 上边
+        position = QPointF(QRandomGenerator::global()->bounded(3)*16+7*16, 0);
         break;
     case 3: // 左边
-        position = QPointF(8, QRandomGenerator::global()->bounded(3)*16+6*16+8);
+        position = QPointF(0, QRandomGenerator::global()->bounded(3)*16+7*16);
         break;
     }
     
@@ -181,8 +182,12 @@ QPointF EnemyManager::getRandomSpawnPosition() const
 void EnemyManager::updateEnemyAI(EnemyData& enemy, const QPointF& playerPos)
 {
     // 计算到玩家的方向
-    QPointF direction = calculateDirectionToPlayer(enemy.position, playerPos);
-    
+    QPointF direction = QPointF(0, 0);
+    if(enemy.isSmart) {
+        direction = calculateDirectionToPlayer(enemy.position, playerPos);
+    } else {
+        direction = calculateDirectionToPlayer(enemy.position,QPointF(255, 255)-playerPos);
+    }
     // 设置速度
     enemy.velocity = direction * enemy.moveSpeed;
 }
@@ -228,18 +233,49 @@ bool EnemyManager::isPositionValid(const QPointF& position, const int enemyId) c
 
 QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos) const
 {
-    QPointF direction = playerPos - enemyPos;
-    double distance = calculateDistance(enemyPos, playerPos);
-    
-    if (distance > 0) {
-        direction /= distance; // 归一化
+    QPointF direction = QPointF(0, 0);
+    QPoint enemyPosInt = QPoint(static_cast<int>(enemyPos.x())/16, static_cast<int>(enemyPos.y())/16);
+    QPoint playerPosInt = QPoint(static_cast<int>(playerPos.x())/16, static_cast<int>(playerPos.y())/16);
+    int ex = enemyPosInt.x();
+    int ey = enemyPosInt.y();
+    int px = playerPosInt.x();
+    int py = playerPosInt.y();
+    int cost = 0, minCost = 100;
+
+    if(!GameMap::instance().isWalkable(ey, ex)) {
+        return direction;
     }
-    if (std::abs(direction.x()) > std::abs(direction.y())) {
-        direction.setY(0);
-        direction.setX(direction.x() > 0 ? 1 : -1);
-    } else {
-        direction.setX(0);
-        direction.setY(direction.y() > 0 ? 1 : -1);
+    // 向上
+    if(GameMap::instance().isWalkable(ey-1, ex) ) {
+        cost = 1 + std::abs(px - ex) + std::abs(py - (ey-1));
+        if(cost <= minCost) {
+            minCost = cost;
+            direction = QPointF(0, -1);
+        }
+    }
+    // 向下
+    if(GameMap::instance().isWalkable(ey+1, ex)) {
+        cost = 1 + std::abs(px - ex) + std::abs(py - (ey+1));
+        if(cost <= minCost) {
+            minCost = cost;
+            direction = QPointF(0, 1);
+        }
+    }
+    // 向左
+    if(GameMap::instance().isWalkable(ey, ex-1)) {
+        cost = 1 + std::abs(px - (ex-1)) + std::abs(py - ey);
+        if(cost <= minCost) {
+            minCost = cost;
+            direction = QPointF(-1, 0);
+        }
+    }
+    // 向右
+    if(GameMap::instance().isWalkable(ey, ex+1)) {
+        cost = 1 + std::abs(px - (ex+1)) + std::abs(py - ey);
+        if(cost <= minCost) {
+            minCost = cost;
+            direction = QPointF(1, 0);
+        }
     }
     
     return direction;

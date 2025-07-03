@@ -37,14 +37,14 @@ public:
                                    const QPointF& playerPos) const;
 
     // 配置设置
-    void setPlayerCollisionRadius(double radius) { m_playerCollisionRadius = radius; }
-    void setEnemyCollisionRadius(double radius) { m_enemyCollisionRadius = radius; }
-    void setBulletCollisionRadius(double radius) { m_bulletCollisionRadius = radius; }
+    void setPlayerCollisionRadius(double radius) { m_playerWidth = radius; }
+    void setEnemyCollisionRadius(double radius) { m_enemyWidth = radius; }
+    void setBulletCollisionRadius(double radius) { m_bulletWidth = radius; }
 
     // 获取配置
-    double getPlayerCollisionRadius() const { return m_playerCollisionRadius; }
-    double getEnemyCollisionRadius() const { return m_enemyCollisionRadius; }
-    double getBulletCollisionRadius() const { return m_bulletCollisionRadius; }
+    double getPlayerCollisionRadius() const { return m_playerWidth; }
+    double getEnemyCollisionRadius() const { return m_enemyWidth; }
+    double getBulletCollisionRadius() const { return m_bulletWidth; }
 
 signals:
     void playerHitByEnemy(int enemyId);
@@ -52,9 +52,9 @@ signals:
     void enemyHitByZombie(int enemyId);  // 僵尸模式接触击杀
 
 private:
-    double m_playerCollisionRadius = 9.0;
-    double m_enemyCollisionRadius = 9.0;
-    double m_bulletCollisionRadius = 3.0;
+    double m_playerWidth = 16.0;
+    double m_enemyWidth = 16.0;
+    double m_bulletWidth = 3.0;
 
     double calculateDistance(const QPointF& pos1, const QPointF& pos2) const;
     bool isCollision(const QPointF& pos1, const QPointF& pos2, double radius1, double radius2) const;

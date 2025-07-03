@@ -63,6 +63,7 @@ struct EnemyData {
     QPointF velocity;
     double moveSpeed = 40.0;
     bool isActive = true;
+    bool isSmart = true;
 };
 
 struct ItemData {
