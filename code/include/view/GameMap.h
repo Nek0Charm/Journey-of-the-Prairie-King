@@ -1,10 +1,7 @@
 #ifndef GAMEMAP_H
 #define GAMEMAP_H
 
-#include <QMap>
-#include <QString>
 #include <QFile>
-#include <QPainter>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>

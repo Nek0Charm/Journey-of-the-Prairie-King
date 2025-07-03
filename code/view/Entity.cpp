@@ -89,22 +89,38 @@ void PlayerEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QP
     }
 }
 
-MonsterEntity::MonsterEntity(const QString &monsterType, QObject *parent) : Entity(parent), monsterType(monsterType) {
+MonsterEntity::MonsterEntity(const MonsterType &monsterType, QObject *parent) : Entity(parent), monsterType(monsterType) {
     m_currentState = MonsterState::Walking;
     m_velocity = QPointF(0, 0);
-    if (monsterType == "orc") {
-        m_animations[MonsterState::Walking] = new Animation(SpriteManager::instance().getAnimationSequence("orc_walk"), 8.0, true);
-        m_animations[MonsterState::Dying] = new Animation(
-            SpriteManager::instance().getAnimationSequence("orc_die"),
-            5.0,
-            false
-        );
+    switch (monsterType) {
+    case MonsterType::orc:
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_walk"), 8.0, true);
+        break;
+    case MonsterType::spikeball:
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_walk"), 8.0, true);
+        break;
+    case MonsterType::ogre:
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("ogre_walk"), 8.0, true);
+        break;
+    case MonsterType::mushroom:
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("mushroom_walk"), 8.0, true);
+        break;
+    case MonsterType::pixie:
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("pixie_walk"), 8.0, true);
+        break;
+    case MonsterType::mummy:
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("mummy_walk"), 8.0, true);
+        break;
+    case MonsterType::imp:
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("imp_walk"), 8.0, true);
+        break;
+    default:
+        break;
     }
-    m_animation = m_animations.value(m_currentState, nullptr);
 }
 
 MonsterEntity::~MonsterEntity() {
-    qDeleteAll(m_animations);
+    delete m_animation;
 }
 
 void MonsterEntity::setVelocity(const QPointF& velocity) {
@@ -154,19 +170,25 @@ void MonsterEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const Q
     }
 }
 
-DeadMonsterEntity::DeadMonsterEntity(const QString &monsterType, QObject *parent) : Entity(parent), monsterType(monsterType) {
-    m_lingerTimer = 10;
-    m_currentState = DeadMonsterState::Dying;
-    if (monsterType == "orc") {
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_die"), 8.0, false);
-    }
-}
-
 DeadMonsterEntity::DeadMonsterEntity(const MonsterEntity &monserentity) 
     : m_lingerTimer(20), m_currentState(DeadMonsterState::Dying), monsterType(monserentity.getType()){
     m_position = monserentity.getPosition();
-    if (monsterType == "orc") {
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_die"), 8.0, false);
+    switch (monsterType) {
+    case MonsterType::orc:
+    case MonsterType::spikeball:
+    case MonsterType::ogre:
+    case MonsterType::mushroom:
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_die"), 7.0, false);
+        break;
+    case MonsterType::pixie:
+    case MonsterType::imp:
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("pixie_die"), 7.0, false);
+        break;
+    case MonsterType::mummy:
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("explode"), 7.0, false);
+        break;
+    default:
+        break;
     }
 }
 

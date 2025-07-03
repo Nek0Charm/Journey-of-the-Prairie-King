@@ -1,8 +1,6 @@
 #include "viewmodel/ItemEffectManager.h"
 #include "viewmodel/PlayerViewModel.h"
 #include "viewmodel/EnemyManager.h"
-#include <QDebug>
-#include <QMap>
 #include <algorithm>
 
 ItemEffectManager::ItemEffectManager(QObject *parent)
