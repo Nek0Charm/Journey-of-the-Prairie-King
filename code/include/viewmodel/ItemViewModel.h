@@ -1,11 +1,7 @@
 #ifndef __ITEM_VIEW_MODEL_H__
 #define __ITEM_VIEW_MODEL_H__
 
-#include <QObject>
 #include <QPoint>
-#include <QPointF>
-#include <QList>
-#include <QMap>
 
 class ItemViewModel : public QObject {
 

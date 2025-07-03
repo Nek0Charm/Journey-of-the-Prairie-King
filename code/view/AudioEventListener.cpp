@@ -1,6 +1,6 @@
-#include "../include/view/AudioEventListener.h"
-#include "../include/view/AudioManager.h"
-#include "../include/view/GameWidget.h"
+#include "view/AudioEventListener.h"
+#include "view/AudioManager.h"
+#include "view/GameWidget.h"
 // 音频事件监听器实现 - 负责监听游戏事件信号并调用AudioManager播放相应的音效
 // 遵循MVVM架构，只监听ViewModel层的信号
 

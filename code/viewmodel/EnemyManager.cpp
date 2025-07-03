@@ -1,9 +1,6 @@
 #include "viewmodel/EnemyManager.h"
 #include <QRandomGenerator>
-#include <QDebug>
 #include <cmath>
-#include "../../precomp.h"
-#include "viewmodel/EnemyManager.h"
 
 EnemyManager::EnemyManager(QObject *parent)
     : QObject(parent)

@@ -1,9 +1,6 @@
 #ifndef ITEMEFFECTMANAGER_H
 #define ITEMEFFECTMANAGER_H
 
-#include <QObject>
-#include <QDebug>
-#include <QMap>
 #include <QVector>
 
 // 前向声明

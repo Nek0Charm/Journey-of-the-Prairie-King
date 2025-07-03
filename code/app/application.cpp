@@ -2,7 +2,6 @@
 #include "view/AudioManager.h"
 #include "view/AudioEventListener.h"
 #include "viewmodel/GameViewModel.h"
-#include <QDebug>
 
 Application::Application(int &argc, char **argv)
     : QApplication(argc, argv)

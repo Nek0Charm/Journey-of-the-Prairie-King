@@ -178,12 +178,14 @@ DeadMonsterEntity::DeadMonsterEntity(const MonsterEntity &monserentity)
     case MonsterType::spikeball:
     case MonsterType::ogre:
     case MonsterType::mushroom:
-    case MonsterType::mummy:
         m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_die"), 7.0, false);
         break;
     case MonsterType::pixie:
     case MonsterType::imp:
         m_animation = new Animation(SpriteManager::instance().getAnimationSequence("pixie_die"), 7.0, false);
+        break;
+    case MonsterType::mummy:
+        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("explode"), 7.0, false);
         break;
     default:
         break;

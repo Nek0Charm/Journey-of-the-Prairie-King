@@ -1,6 +1,5 @@
 #include "viewmodel/ItemViewModel.h"
 #include "viewmodel/ItemEffectManager.h"
-#include <QDebug>
 #include <algorithm>
 #include <QRandomGenerator>
 #include <QLineF>

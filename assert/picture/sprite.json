@@ -26,6 +26,13 @@
     "player_zombie_1": { "x": 223, "y": 112, "w": 16, "h": 16},
     "player_zombie_2": { "x": 239, "y": 112, "w": 16, "h": 16},
 
+    "merchant_walk_1": { "x": 335, "y": 80, "w": 16, "h": 16 },
+    "merchant_walk_2": { "x": 351, "y": 80, "w": 16, "h": 16 },
+    "merchant_look_left": { "x": 367, "y": 80, "w": 16, "h": 16 },
+    "merchant_look_down": { "x": 383, "y": 80, "w": 16, "h": 16 },
+    "merchant_look_right": { "x": 399, "y": 80, "w": 16, "h": 16 },
+    "tablecloth": { "x": 400, "y": 96, "w": 63, "h": 32 },
+
     "player_bullet": { "x": 389, "y": 112, "w": 4, "h": 4 },
     "coin": { "x": 143, "y": 160, "w": 16, "h": 16 },
     "five_coins": { "x": 159, "y": 160, "w": 16, "h": 16 },
@@ -38,6 +45,17 @@
     "extra_life": {"x": 271, "y": 160, "w": 16, "h": 16 },
     "smoke_bomb": {"x": 287, "y": 160, "w": 16, "h": 16 },
     "badge": {"x": 303, "y": 160, "w": 16, "h": 16 },
+
+    "gun_1": {"x": 191, "y": 128, "w": 16, "h": 16 },
+    "gun_2": {"x": 207, "y": 128, "w": 16, "h": 16 },
+    "gun_3": {"x": 223, "y": 128, "w": 16, "h": 16 },
+    "gun_4": {"x": 335, "y": 128, "w": 16, "h": 16 },
+    "boots_1": {"x": 239, "y": 128, "w": 16, "h": 16 },
+    "boots_2": {"x": 225, "y": 128, "w": 16, "h": 16 },
+    "more_live": {"x": 271, "y": 128, "w": 16, "h": 16 },
+    "bullet_1": {"x": 287, "y": 128, "w": 16, "h": 16 },
+    "bullet_2": {"x": 303, "y": 128, "w": 16, "h": 16 },
+    "bullet_3": {"x": 319, "y": 128, "w": 16, "h": 16 },
 
     "explode_1": { "x": 335, "y": 144, "w": 16, "h": 16 },
     "explode_2": { "x": 351, "y": 144, "w": 16, "h": 16 },
@@ -64,6 +82,11 @@
     "mummy_walk_2": { "x": 335, "y": 64, "w": 16, "h": 16 },
     "imp_walk_1": { "x": 351, "y": 64, "w": 16, "h": 16 },
     "imp_walk_2": { "x": 367, "y": 64, "w": 16, "h": 16 },
+
+    "spikeball_deploy_1": { "x": 223, "y": 80, "w": 16, "h": 16 },
+    "spikeball_deploy_2": { "x": 239, "y": 80, "w": 16, "h": 16 },
+    "spikeball_deploy_3": { "x": 255, "y": 80, "w": 16, "h": 16 },
+    "spikeball_deploy_4": { "x": 447, "y": 64, "w": 16, "h": 16 },
 
     "orc_die_1": { "x": 383, "y": 48, "w": 16, "h": 16 },
     "orc_die_2": { "x": 399, "y": 48, "w": 16, "h": 16 },
@@ -229,6 +252,10 @@
       "player_zombie_1",
       "player_zombie_2"
     ],
+    "merchant_walk": [
+      "merchant_walk_1",
+      "merchant_walk_2"
+    ],  
     "orc_walk": [
       "orc_walk_1",
       "orc_walk_2"
@@ -256,6 +283,12 @@
     "imp_walk": [
       "imp_walk_1",
       "imp_walk_2"
+    ],
+    "spikeball_deploy": [
+      "spikeball_deploy_1",
+      "spikeball_deploy_2",
+      "spikeball_deploy_3",
+      "spikeball_deploy_4"
     ],
     "orc_die": [
       "orc_die_1",

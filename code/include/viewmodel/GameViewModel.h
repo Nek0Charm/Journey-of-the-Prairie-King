@@ -1,7 +1,6 @@
 #ifndef GAMEVIEWMODEL_H
 #define GAMEVIEWMODEL_H
 
-#include <QObject>
 #include <memory>
 
 #include "viewmodel/PlayerViewModel.h"

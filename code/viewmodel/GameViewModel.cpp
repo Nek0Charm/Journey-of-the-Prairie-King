@@ -1,6 +1,5 @@
 #include "viewmodel/GameViewModel.h"
 #include <QRandomGenerator>
-#include <QDebug>
 
 GameViewModel::GameViewModel(QObject *parent)
     : QObject(parent)

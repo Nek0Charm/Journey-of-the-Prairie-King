@@ -1,9 +1,5 @@
 #ifndef ENTITY_H
 #define ENTITY_H
-#include <QObject> 
-#include <QPointF>
-#include <QPainter>
-#include <QMap>
 #include "view/Animation.h"
 #include "view/SpriteManager.h"
 

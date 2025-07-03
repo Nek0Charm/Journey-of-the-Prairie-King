@@ -1,9 +1,6 @@
 #ifndef ENEMYMANAGER_H
 #define ENEMYMANAGER_H
 
-#include <QObject>
-#include <QList>
-#include <QPointF>
 #include <memory>
 
 class EnemyManager : public QObject {

@@ -1,7 +1,6 @@
 #ifndef GAMEWIDGET_H
 #define GAMEWIDGET_H
 
-#include <iostream>
 #include "view/GameMap.h"
 #include "view/Animation.h"
 #include "view/SpriteManager.h"

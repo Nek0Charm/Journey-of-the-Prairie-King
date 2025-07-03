@@ -1,10 +1,6 @@
 #ifndef COLLISIONSYSTEM_H
 #define COLLISIONSYSTEM_H
 
-#include <QObject>
-#include <QPointF>
-#include <QList>
-
 #include "viewmodel/PlayerViewModel.h"
 #include "viewmodel/EnemyManager.h"
 #include "viewmodel/BulletViewModel.h"
