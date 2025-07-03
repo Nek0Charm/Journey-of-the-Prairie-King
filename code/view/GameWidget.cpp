@@ -23,11 +23,14 @@ GameWidget::GameWidget(QWidget *parent)
         qWarning() << "GameWidget: 地图未能加载，地图将不会被绘制。";
     }
     player = new PlayerEntity();
+    vendor = new VendorEntity();
     setFocusPolicy(Qt::StrongFocus); 
     m_maxTime = MAX_GAMETIME; 
     m_currentTime = MAX_GAMETIME; 
     m_timer = new QTimer(this); // 临时时钟
     connect(m_timer, &QTimer::timeout, this, &GameWidget::gameLoop);
+    connect(this, &GameWidget::vendorAppear, vendor, &VendorEntity::onVendorAppear);
+    connect(this, &GameWidget::vendorDisappear, vendor, &VendorEntity::onVendorDisappear); 
     m_timer->start(16);
     m_elapsedTimer.start();
     
@@ -52,6 +55,9 @@ void GameWidget::gameLoop() {
     syncEnemies(); 
     if (player) {
         player->update(deltaTime);
+    }
+    if (vendor) {
+        vendor->update(deltaTime, player->getPosition());
     }
     for (auto& it: m_monsters) {
         it->update(deltaTime);
@@ -81,7 +87,6 @@ void GameWidget::gameLoop() {
 
 void GameWidget::playerPositionChanged(QPointF position) {
     player->setPosition(position);
-    // qDebug() << m_viewModel->getPlayerPosition();
 }
 
 void GameWidget::playerLivesDown() {
@@ -109,13 +114,13 @@ void GameWidget::paintEvent(QPaintEvent *event) {
 
     m_gameMap->paint(&painter, m_spriteSheet, viewOffset);
     paintUi(&painter, viewOffset);
+    vendor->paint(&painter, m_spriteSheet, viewOffset);
     for (auto it: m_deadmonsters) {
         it->paint(&painter, m_spriteSheet, viewOffset);
     }
     for (auto it: m_items) {
         it->paint(&painter, m_spriteSheet, viewOffset);
     }
-    
     player->paint(&painter, m_spriteSheet, viewOffset);
     for (MonsterEntity* monster : m_monsters) {
         monster->paint(&painter, m_spriteSheet, viewOffset); 
@@ -275,6 +280,11 @@ void GameWidget::timerEvent() {
         emit useItem();
     } else if (!keys[Qt::Key_Space]) {
         m_spaceKeyPressed = false;
+    }
+    if (keys[Qt::Key_E]) {
+        emit vendorAppear();
+    } else if (keys[Qt::Key_Q]) {
+        emit vendorDisappear();
     }
 }
 

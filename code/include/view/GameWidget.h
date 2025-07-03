@@ -63,6 +63,7 @@ private:
     GameMapView* m_gameMap;
     QPixmap m_spriteSheet;
     PlayerEntity* player;
+    VendorEntity* vendor;
     QMap<int, MonsterEntity*> m_monsters; 
     QMap<int, DeadMonsterEntity*> m_deadmonsters;
     QMap<int, ItemEntity*> m_items;

@@ -322,9 +322,7 @@ VendorEntity::VendorEntity(QObject *parent): Entity(parent) {
     m_animations[VendorState::Walk] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_walk"), 8.0, true);
     m_animations[VendorState::LookLeft] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_look_left"), 8.0, true);
     m_animations[VendorState::LookRight] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_look_right"), 8.0, true);
-    if (m_currentState != VendorState::Disappearing) {
-        m_currentAnimation = m_animations.value(m_currentState, nullptr);
-    }
+    m_currentAnimation = m_animations.value(m_currentState, nullptr);
 }
 
 VendorEntity::~VendorEntity() {
@@ -332,62 +330,71 @@ VendorEntity::~VendorEntity() {
 }
 
 void VendorEntity::update(double deltaTime, const QPointF& playerPosition) {
+    if (m_currentState == VendorState::Disappearing) {
+        return;// Don't update position or animation if disappearing
+    }
+    m_currentAnimation = m_animations.value(m_currentState, nullptr);
     if (m_currentState == VendorState::Walk) {
+        // qDebug() << "VendorEntity::update: Walking";
         m_lingerTimer -= deltaTime;
-        m_position += QPointF(0, 16 * deltaTime); // 向下移动
+        m_position += QPointF(0, 16 * deltaTime);
         double distance = QLineF(m_position, playerPosition).length();
-        if (m_lingerTimer <= 0) {
-            if (playerPosition.x() - m_position.x() < 32) {
-                setState(VendorState::LookLeft);
-            } else if (playerPosition.x() - m_position.x() > 32) {
-                setState(VendorState::LookRight);
-            } else {
-                setState(VendorState::LookDown);
-            }
+    }
+    if (m_lingerTimer <= 0) {
+        if (playerPosition.x() - m_position.x() > 16) {
+            setState(VendorState::LookRight);
+        } else if (m_position.x() - playerPosition.x() > 16) {
+            setState(VendorState::LookLeft);
+        } else {
+            setState(VendorState::LookDown);
         }
     }
     if (m_currentAnimation) {
+        // qDebug() << "VendorEntity::update: Current animation is not null";
         m_currentAnimation->update(deltaTime);
     }
 }
 
-void VendorEntity::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
-    if (!m_currentAnimation) return;
+void VendorEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) {
+    if (m_currentState == VendorState::Disappearing || !m_currentAnimation) {
+        return;
+    }
     const double scale = 3.0;
     const QString& currentFrameName = m_currentAnimation->getCurrentFrameName();
+    // qDebug() << "VendorEntity::paint currentFrameName: " << currentFrameName;
     QRect vendorSourceRect = SpriteManager::instance().getSpriteRect(currentFrameName);
-    if (vendorSourceRect.isNull()) return; 
-    QPointF vendorAnchor = m_position * scale;
-    QRectF vendorDestRect(vendorAnchor, vendorSourceRect.size() * scale);
-    vendorDestRect.translate(viewOffset);
+
+    if (vendorSourceRect.isNull()) return;
+    QPointF vendorScreenAnchor = m_position * scale + viewOffset;
+    QRectF vendorDestRect(vendorScreenAnchor, vendorSourceRect.size() * scale);
     painter->drawPixmap(vendorDestRect, spriteSheet, vendorSourceRect);
+
     if (m_currentState != VendorState::Walk) {
         QRect tableclothSourceRect = SpriteManager::instance().getSpriteRect("tablecloth");
-        if (!tableclothSourceRect.isNull()) {
-            QSizeF tableclothScaledSize(tableclothSourceRect.width() * scale, tableclothSourceRect.height() * scale);
-            QPointF tableclothTopLeft(
-                vendorDestRect.center().x() - tableclothScaledSize.width() / 2.0,
-                vendorDestRect.bottom()
-            );
-            QRectF tableclothDestRect(tableclothTopLeft, tableclothScaledSize);
-            painter->drawPixmap(tableclothDestRect, spriteSheet, tableclothSourceRect);
-            double itemScale = 2.0;
-            double itemSpacing = 10.0;
-            double allItemsWidth = (itemList.size() * 16 * itemScale) + ((itemList.size() - 1) * itemSpacing);
-            double startX = tableclothDestRect.center().x() - allItemsWidth / 2.0;
-            for (int itemType : itemList) {
-                QString itemName = ItemEntity::typeToString(static_cast<ItemType>(itemType));
-                QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemName);
-                if (!itemSourceRect.isNull()) {
-                    QSizeF itemScaledSize(itemSourceRect.width() * itemScale, itemSourceRect.height() * itemScale);
-                    QPointF itemTopLeft(
-                        startX,
-                        tableclothDestRect.center().y() - itemScaledSize.height() / 2.0
-                    );
-                    QRectF itemDestRect(itemTopLeft, itemScaledSize);
-                    painter->drawPixmap(itemDestRect, spriteSheet, itemSourceRect);
-                    startX += itemScaledSize.width() + itemSpacing;
-                }
+        if (tableclothSourceRect.isNull()) return;
+        QSizeF tableclothScaledSize(tableclothSourceRect.width() * scale, tableclothSourceRect.height() * scale);
+        QPointF tableclothTopLeft(
+            vendorDestRect.center().x() - tableclothScaledSize.width() / 2.0,
+            vendorDestRect.bottom()
+        );
+        QRectF tableclothDestRect(tableclothTopLeft, tableclothScaledSize);
+        painter->drawPixmap(tableclothDestRect, spriteSheet, tableclothSourceRect); 
+        double itemSpacing = 10.0; 
+        double allItemsWidth = (itemList.size() * 16 * scale) + ((itemList.size() - 1) * itemSpacing);
+        double currentItemX = tableclothDestRect.center().x() - allItemsWidth / 2.0;
+        for (int itemType : itemList) {
+            QString itemName = ItemEntity::typeToString(static_cast<ItemType>(itemType));
+            QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemName);
+            
+            if (!itemSourceRect.isNull()) {
+                QSizeF itemScaledSize(itemSourceRect.width() * scale, itemSourceRect.height() * scale);
+                QPointF itemTopLeft(
+                    currentItemX,
+                    tableclothDestRect.center().y() - itemScaledSize.height() / 2.0
+                );
+                QRectF itemDestRect(itemTopLeft, itemScaledSize);
+                painter->drawPixmap(itemDestRect, spriteSheet, itemSourceRect);
+                currentItemX += itemScaledSize.width() + itemSpacing;
             }
         }
     }

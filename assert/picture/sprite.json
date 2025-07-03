@@ -31,8 +31,8 @@
 
     "vendor_walk_1": { "x": 335, "y": 80, "w": 16, "h": 16 },
     "vendor_walk_2": { "x": 351, "y": 80, "w": 16, "h": 16 },
-    "vendor_look_left": { "x": 367, "y": 80, "w": 16, "h": 16 },
-    "vendor_look_down": { "x": 383, "y": 80, "w": 16, "h": 16 },
+    "vendor_look_left": { "x": 383, "y": 80, "w": 16, "h": 16 },
+    "vendor_look_down": { "x": 367, "y": 80, "w": 16, "h": 16 },
     "vendor_look_right": { "x": 399, "y": 80, "w": 16, "h": 16 },
     "tablecloth": { "x": 400, "y": 96, "w": 63, "h": 32 },
 

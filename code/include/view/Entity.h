@@ -164,7 +164,7 @@ public:
     void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
     void setState(VendorState newState) { m_currentState = newState; }
     VendorState getState() const { return m_currentState; }
-protected slots:
+public slots:
     void onVendorAppear();
     void onVendorDisappear();
 private:
@@ -172,7 +172,7 @@ private:
     VendorState m_currentState;
     Animation* m_currentAnimation;
     double m_lingerTimer = 6.0;
-    QList<int> itemList = {0, 0, 0};
+    QList<int> itemList = {5, 6, 7};
 };
 
 #endif // ENTITY_H
