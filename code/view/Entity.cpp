@@ -1,4 +1,5 @@
 #include "view/Entity.h"
+#include "Entity.h"
 
 Entity::Entity(QObject* parent) : QObject(parent), m_position(0, 0) {};
 
@@ -315,3 +316,89 @@ QString ItemEntity::typeToString(ItemType type) {
     return stringtype;
 }
 
+VendorEntity::VendorEntity(QObject *parent): Entity(parent) {
+    m_currentState = VendorState::Disappearing;
+    m_animations[VendorState::LookDown] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_look_down"), 8.0, true);
+    m_animations[VendorState::Walk] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_walk"), 8.0, true);
+    m_animations[VendorState::LookLeft] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_look_left"), 8.0, true);
+    m_animations[VendorState::LookRight] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_look_right"), 8.0, true);
+    if (m_currentState != VendorState::Disappearing) {
+        m_currentAnimation = m_animations.value(m_currentState, nullptr);
+    }
+}
+
+VendorEntity::~VendorEntity() {
+    qDeleteAll(m_animations);
+}
+
+void VendorEntity::update(double deltaTime, const QPointF& playerPosition) {
+    if (m_currentState == VendorState::Walk) {
+        m_lingerTimer -= deltaTime;
+        m_position += QPointF(0, 16 * deltaTime); // 向下移动
+        double distance = QLineF(m_position, playerPosition).length();
+        if (m_lingerTimer <= 0) {
+            if (playerPosition.x() - m_position.x() < 32) {
+                setState(VendorState::LookLeft);
+            } else if (playerPosition.x() - m_position.x() > 32) {
+                setState(VendorState::LookRight);
+            } else {
+                setState(VendorState::LookDown);
+            }
+        }
+    }
+    if (m_currentAnimation) {
+        m_currentAnimation->update(deltaTime);
+    }
+}
+
+void VendorEntity::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
+    if (!m_currentAnimation) return;
+    const double scale = 3.0;
+    const QString& currentFrameName = m_currentAnimation->getCurrentFrameName();
+    QRect vendorSourceRect = SpriteManager::instance().getSpriteRect(currentFrameName);
+    if (vendorSourceRect.isNull()) return; 
+    QPointF vendorAnchor = m_position * scale;
+    QRectF vendorDestRect(vendorAnchor, vendorSourceRect.size() * scale);
+    vendorDestRect.translate(viewOffset);
+    painter->drawPixmap(vendorDestRect, spriteSheet, vendorSourceRect);
+    if (m_currentState != VendorState::Walk) {
+        QRect tableclothSourceRect = SpriteManager::instance().getSpriteRect("tablecloth");
+        if (!tableclothSourceRect.isNull()) {
+            QSizeF tableclothScaledSize(tableclothSourceRect.width() * scale, tableclothSourceRect.height() * scale);
+            QPointF tableclothTopLeft(
+                vendorDestRect.center().x() - tableclothScaledSize.width() / 2.0,
+                vendorDestRect.bottom()
+            );
+            QRectF tableclothDestRect(tableclothTopLeft, tableclothScaledSize);
+            painter->drawPixmap(tableclothDestRect, spriteSheet, tableclothSourceRect);
+            double itemScale = 2.0;
+            double itemSpacing = 10.0;
+            double allItemsWidth = (itemList.size() * 16 * itemScale) + ((itemList.size() - 1) * itemSpacing);
+            double startX = tableclothDestRect.center().x() - allItemsWidth / 2.0;
+            for (int itemType : itemList) {
+                QString itemName = ItemEntity::typeToString(static_cast<ItemType>(itemType));
+                QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemName);
+                if (!itemSourceRect.isNull()) {
+                    QSizeF itemScaledSize(itemSourceRect.width() * itemScale, itemSourceRect.height() * itemScale);
+                    QPointF itemTopLeft(
+                        startX,
+                        tableclothDestRect.center().y() - itemScaledSize.height() / 2.0
+                    );
+                    QRectF itemDestRect(itemTopLeft, itemScaledSize);
+                    painter->drawPixmap(itemDestRect, spriteSheet, itemSourceRect);
+                    startX += itemScaledSize.width() + itemSpacing;
+                }
+            }
+        }
+    }
+}
+
+void VendorEntity::onVendorDisappear() {
+    setState(VendorState::Disappearing);
+}
+
+void VendorEntity::onVendorAppear() {
+    setState(VendorState::Walk);
+    m_lingerTimer = 6.0;
+    m_position = QPointF(16*8, 0);
+}

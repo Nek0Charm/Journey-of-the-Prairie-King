@@ -29,11 +29,11 @@
     "player_zombie_1": { "x": 223, "y": 112, "w": 16, "h": 16},
     "player_zombie_2": { "x": 239, "y": 112, "w": 16, "h": 16},
 
-    "merchant_walk_1": { "x": 335, "y": 80, "w": 16, "h": 16 },
-    "merchant_walk_2": { "x": 351, "y": 80, "w": 16, "h": 16 },
-    "merchant_look_left": { "x": 367, "y": 80, "w": 16, "h": 16 },
-    "merchant_look_down": { "x": 383, "y": 80, "w": 16, "h": 16 },
-    "merchant_look_right": { "x": 399, "y": 80, "w": 16, "h": 16 },
+    "vendor_walk_1": { "x": 335, "y": 80, "w": 16, "h": 16 },
+    "vendor_walk_2": { "x": 351, "y": 80, "w": 16, "h": 16 },
+    "vendor_look_left": { "x": 367, "y": 80, "w": 16, "h": 16 },
+    "vendor_look_down": { "x": 383, "y": 80, "w": 16, "h": 16 },
+    "vendor_look_right": { "x": 399, "y": 80, "w": 16, "h": 16 },
     "tablecloth": { "x": 400, "y": 96, "w": 63, "h": 32 },
 
     "player_bullet": { "x": 389, "y": 112, "w": 4, "h": 4 },
@@ -259,10 +259,19 @@
       "player_lift_1",
       "player_lift_2"
     ],
-    "merchant_walk": [
-      "merchant_walk_1",
-      "merchant_walk_2"
-    ],  
+    "vendor_walk": [
+      "vendor_walk_1",
+      "vendor_walk_2"
+    ],
+    "vendor_look_left": [
+      "vendor_look_left"
+    ],
+    "vendor_look_down": [
+      "vendor_look_down"
+    ],
+    "vendor_look_right": [
+      "vendor_look_right"
+    ],
     "orc_walk": [
       "orc_walk_1",
       "orc_walk_2"

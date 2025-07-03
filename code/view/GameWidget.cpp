@@ -451,3 +451,11 @@ void GameWidget::releaseSmoke(double duration) {
     m_smokeReleaseTimer = duration;
     m_nextSmokeReleaseTimer = 0.0;
 }
+
+void GameWidget::onVendorAppear() {
+    emit vendorAppear();
+}
+
+void GameWidget::onVendorDisappear() {
+    emit vendorDisappear();
+}

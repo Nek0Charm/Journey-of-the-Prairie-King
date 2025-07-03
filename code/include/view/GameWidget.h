@@ -31,6 +31,8 @@ signals:
     void setMovingDirection(QPointF direction, bool isMoving);
     void shoot(QPointF direction);
     void useItem();
+    void vendorAppear();
+    void vendorDisappear();
 
 
 public slots:
@@ -50,6 +52,8 @@ public slots:
     void updateZombieMode(bool isZombieMode);
     void updateStealthMode(bool isStealth);
     void updateItemEffect(int itemType);
+    void onVendorAppear();
+    void onVendorDisappear();
 
 private:
     QTimer* keyRespondTimer;
