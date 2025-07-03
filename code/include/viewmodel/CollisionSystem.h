@@ -1,10 +1,6 @@
 #ifndef COLLISIONSYSTEM_H
 #define COLLISIONSYSTEM_H
 
-#include <QObject>
-#include <QPointF>
-#include <QList>
-
 #include "viewmodel/PlayerViewModel.h"
 #include "viewmodel/EnemyManager.h"
 #include "viewmodel/BulletViewModel.h"
@@ -54,7 +50,7 @@ signals:
 private:
     double m_playerWidth = 16.0;
     double m_enemyWidth = 16.0;
-    double m_bulletWidth = 3.0;
+    double m_bulletWidth = 5.0;
 
     double calculateDistance(const QPointF& pos1, const QPointF& pos2) const;
     bool isCollision(const QPointF& pos1, const QPointF& pos2, double radius1, double radius2) const;

@@ -1,4 +1,3 @@
-#include <QDebug>
 #include "viewmodel/CollisionSystem.h"
 
 CollisionSystem::CollisionSystem(QObject *parent)

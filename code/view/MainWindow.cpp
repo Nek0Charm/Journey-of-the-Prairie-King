@@ -1,9 +1,7 @@
 #include "view/MainWindow.h"
-// #include "view/menuview.h"
 #include "view/StartWidget.h"
 #include "view/GameWidget.h"
 #include "view/EndWidget.h"
-#include "MainWindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent){

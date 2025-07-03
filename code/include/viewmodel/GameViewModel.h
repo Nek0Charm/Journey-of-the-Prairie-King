@@ -1,7 +1,6 @@
 #ifndef GAMEVIEWMODEL_H
 #define GAMEVIEWMODEL_H
 
-#include <QObject>
 #include <memory>
 
 #include "viewmodel/PlayerViewModel.h"
@@ -53,8 +52,10 @@ signals:
     void gameStateChanged(GameState state);
     void playerDied();
     void playerLivesChanged();
+    void playerLivesDown();
     void playerPositonChanged(const QPointF& position);
-    void itemUsed(int itemType); // 道具使用信号
+    void itemUsed(int itemType); 
+    void boomUsed();
     void itemPicked(int itemType);
     void gameTimeChanged(double gameTime);
     void enemiesChanged(QList<EnemyData> enemies);

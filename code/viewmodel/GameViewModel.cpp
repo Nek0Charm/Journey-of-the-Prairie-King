@@ -1,6 +1,5 @@
 #include "viewmodel/GameViewModel.h"
 #include <QRandomGenerator>
-#include <QDebug>
 
 GameViewModel::GameViewModel(QObject *parent)
     : QObject(parent)
@@ -136,6 +135,9 @@ void GameViewModel::setupConnections()
     connect(m_player.get(), &PlayerViewModel::livesChanged,
             this, &GameViewModel::playerLivesChanged);
 
+    connect(m_player.get(), &PlayerViewModel::livesDown,
+            this, &GameViewModel::playerLivesDown);
+            
     connect(m_player.get(), &PlayerViewModel::positionChanged,
             this, &GameViewModel::playerPositonChanged);
     

@@ -1,8 +1,5 @@
-#include "viewmodel/EnemyManager.h"
 #include <QRandomGenerator>
-#include <QDebug>
 #include <cmath>
-#include "../../precomp.h"
 #include "viewmodel/EnemyManager.h"
 #include "common/GameMap.h"
 

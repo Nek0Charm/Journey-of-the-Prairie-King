@@ -1,7 +1,5 @@
 #include "viewmodel/PlayerViewModel.h"
-#include <QDebug>
 #include <QVector>
-#include "../../precomp.h"
 
 PlayerViewModel::PlayerViewModel(QObject *parent)
     : QObject(parent)
@@ -28,7 +26,13 @@ void PlayerViewModel::shoot(const QPointF& direction)
     if (canShoot() && !direction.isNull()) {
         m_stats.shootingDirection = direction;
         
-        if (m_stats.wheelMode) {
+        if (m_stats.wheelMode && m_stats.shotgunMode) {
+            // 轮子+霰弹枪组合模式：向24个方向发射子弹
+            shootInWheelShotgunCombination();
+        } else if (m_stats.badgeMode) {
+            // 治安官徽章模式：包含霰弹枪效果，直接使用霰弹枪射击方法
+            shootInShotgunPattern(direction);
+        } else if (m_stats.wheelMode) {
             // 8方向射击模式：向8个方向发射子弹
             shootInEightDirections();
         } else if (m_stats.shotgunMode) {
@@ -53,7 +57,7 @@ void PlayerViewModel::update(double deltaTime) {
 void PlayerViewModel::takeDamage()
 {
     m_stats.lives--;
-    emit livesChanged();
+    emit livesDown();
     emit healthChanged(m_stats.lives);    
     if (m_stats.lives < 0) {
         emit playerDied();
@@ -78,6 +82,7 @@ void PlayerViewModel::reset()
     m_stats.stealthMode = false;
     m_stats.wheelMode = false; 
     m_stats.shotgunMode = false;
+    m_stats.badgeMode = false;
     m_stats.zombieMode = false;
     m_stats.moving = false;
 
@@ -147,7 +152,47 @@ void PlayerViewModel::shootInShotgunPattern(const QPointF& direction)
         m_bulletViewModel->createBullet(m_stats.position, dir, 200);
     }
     
-    qDebug() << "霰弹枪射击：向" << directions.size() << "个方向发射子弹（30度扇形）";
+    qDebug() << "霰弹枪射击：向" << directions.size() << "个方向发射子弹";
+}
+
+void PlayerViewModel::shootInWheelShotgunCombination()
+{
+    // 轮子+霰弹枪组合模式：向8个方向发射霰弹枪子弹
+    // 8个方向：上、右上、右、右下、下、左下、左、左上
+    QVector<QPointF> directions = {
+        QPointF(0, -1),    // 上
+        QPointF(1, -1),    // 右上
+        QPointF(1, 0),     // 右
+        QPointF(1, 1),     // 右下
+        QPointF(0, 1),     // 下
+        QPointF(-1, 1),    // 左下
+        QPointF(-1, 0),    // 左
+        QPointF(-1, -1)    // 左上
+    };
+    
+    // 对每个方向应用霰弹枪模式
+    for (const auto& mainDirection : directions) {
+        // 计算角度（以弧度为单位）
+        double angle = std::atan2(mainDirection.y(), mainDirection.x());
+        double angleOffset = M_PI / 6.0; // 30度 = π/6弧度
+        
+        // 计算三个方向：左30度、中心、右30度
+        double leftAngle = angle - angleOffset;
+        double centerAngle = angle;
+        double rightAngle = angle + angleOffset;
+        
+        // 转换为单位向量
+        QPointF leftDir(std::cos(leftAngle), std::sin(leftAngle));
+        QPointF centerDir(std::cos(centerAngle), std::sin(centerAngle));
+        QPointF rightDir(std::cos(rightAngle), std::sin(rightAngle));
+        
+        // 向三个方向发射子弹
+        m_bulletViewModel->createBullet(m_stats.position, leftDir, 200);
+        m_bulletViewModel->createBullet(m_stats.position, centerDir, 200);
+        m_bulletViewModel->createBullet(m_stats.position, rightDir, 200);
+    }
+    
+    qDebug() << "轮子+霰弹枪组合射击：向8个方向发射霰弹枪模式子弹，总共" << (8 * 3) << "颗子弹";
 }
 
 void PlayerViewModel::teleportToRandomPosition()
@@ -162,3 +207,5 @@ void PlayerViewModel::teleportToRandomPosition()
     
     qDebug() << "传送至随机位置:" << newPosition;
 }
+
+

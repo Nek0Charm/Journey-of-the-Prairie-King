@@ -19,7 +19,6 @@ void GameService::setupConnections() {
 
 
     connect(m_gameViewModel, &GameViewModel::playerPositonChanged, m_mainWindow->getGameWidget(), &GameWidget::playerPositionChanged);
-    connect(m_gameViewModel, &GameViewModel::playerLivesChanged, m_mainWindow->getGameWidget(), &GameWidget::playerLivesChanged);
     connect(m_gameViewModel->getEnemyManager(), &EnemyManager::enemyDestroyed, m_mainWindow->getGameWidget(), &GameWidget::die);
 
     connect(m_gameViewModel->getPlayer()->getBulletViewModel(), &BulletViewModel::bulletsChanged,
@@ -53,7 +52,7 @@ void GameService::setupConnections() {
             m_mainWindow->getGameWidget(), &GameWidget::updateZombieMode);
 
     connect(m_gameViewModel, &GameViewModel::playerDied, m_audioEventListener, &AudioEventListener::onPlayerHit);
-    connect(m_gameViewModel, &GameViewModel::playerLivesChanged, m_audioEventListener, &AudioEventListener::onPlayerHit);
+    connect(m_gameViewModel, &GameViewModel::playerLivesDown, m_audioEventListener, &AudioEventListener::onPlayerHit);
     
     // 连接敌人爆炸事件信号
     connect(m_gameViewModel->getEnemyManager(), &EnemyManager::enemyDestroyed, m_audioEventListener, &AudioEventListener::onEnemyExplosion);
@@ -65,4 +64,7 @@ void GameService::setupConnections() {
     // 新增：连接shot信号到onPlayerShot槽
     connect(m_gameViewModel->getPlayer(), &PlayerViewModel::shot, m_audioEventListener, &AudioEventListener::onPlayerShot);
     
+
+    connect(m_gameViewModel, &GameViewModel::itemUsed,
+            m_mainWindow->getGameWidget(), &GameWidget::updateItemEffect);
 }

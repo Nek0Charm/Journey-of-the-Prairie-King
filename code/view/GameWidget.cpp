@@ -81,7 +81,7 @@ void GameWidget::playerPositionChanged(QPointF position) {
     // qDebug() << m_viewModel->getPlayerPosition();
 }
 
-void GameWidget::playerLivesChanged() {
+void GameWidget::playerLivesDown() {
     if (player->isInvincible()) {
         return;
     }
@@ -160,7 +160,7 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     }
 
     QRect healthRect = SpriteManager::instance().getSpriteRect("ui_helth");
-    QRectF healthRectF(itemBottomLeft.x(), (itemBottomLeft.y() + ui_margin*SCALE), healthRect.width()*SCALE, healthRect.height()*SCALE);
+    QRectF healthRectF(itemBottomLeft.x()-ui_margin*SCALE, (itemBottomLeft.y() + ui_margin*SCALE), healthRect.width()*SCALE, healthRect.height()*SCALE);
     QPointF healthBottomLeft = healthRectF.bottomLeft();
     healthRectF.translate(viewOffset);
     painter->drawPixmap(healthRectF, m_spriteSheet, healthRect);
@@ -190,13 +190,13 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
         painter->drawRect(barBackgroundRect);
     }
 
-    QString healthText = QString("x%1").arg(m_healthCount);
+    QString healthText = QString("x%1").arg(m_healthCount-1);
     QFont Hfont = painter->font();
     Hfont.setPointSize(16); 
     painter->setFont(Hfont);
     painter->setPen(Qt::white);
     QPointF healthtextPos(
-        healthRectF.right() + (ui_margin/5) * SCALE, 
+        healthRectF.right() + (ui_margin/10) * SCALE, 
         healthRectF.center().y() + Hfont.pointSize() / 2.0 
     );
     painter->drawText(healthtextPos, healthText);
@@ -207,7 +207,7 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     painter->setFont(Mfont);
     painter->setPen(Qt::white); 
     QPointF moneyTextPos(
-        moneyRectF.right() + (ui_margin/5) * SCALE, 
+        moneyRectF.right() + (ui_margin/10) * SCALE, 
         moneyRectF.center().y() + Mfont.pointSize() / 2.0 
     );
     painter->drawText(moneyTextPos, moneyText);
@@ -276,11 +276,6 @@ void GameWidget::timerEvent() {
     } else if (!keys[Qt::Key_Space]) {
         m_spaceKeyPressed = false;
     }
-    if (keys[Qt::Key_B]) {
-        if (m_gameMap) {
-            m_gameMap->startExplosionSequence(10.0);
-        }
-    }
 }
 
 void GameWidget::syncEnemies() {
@@ -299,7 +294,7 @@ void GameWidget::syncEnemies() {
     for (const auto& data : m_enemyDataList) {
         MonsterEntity* monster = nullptr;
         if (!m_monsters.contains(data.id)) {
-            monster = new MonsterEntity("orc");
+            monster = new MonsterEntity(MonsterType::orc);
             m_monsters[data.id] = monster;
         } else {
             monster = m_monsters[data.id];
@@ -370,6 +365,9 @@ void GameWidget::updatePlayerStealthMode(bool isStealth) {
 }
 
 void GameWidget::updatePlayerHealth(int health) {
+    if (m_healthCount > health) {
+        playerLivesDown();
+    }
     m_healthCount = health;
 }
 
@@ -384,4 +382,14 @@ void GameWidget::updatePossessedItem(int itemType, bool hasItem) {
 
 void GameWidget::updateZombieMode(bool isZombieMode) {
     m_isZombieMode = isZombieMode;
+}
+
+void GameWidget::updateItemEffect(int itemType) {
+    switch (itemType) {
+    case 5: // Boom
+        m_gameMap->startExplosionSequence(2.0);
+        break;
+    default:
+        break;
+    }
 }

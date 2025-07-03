@@ -1,4 +1,4 @@
-#include "../include/view/AudioManager.h"
+#include "view/AudioManager.h"
 #include <QUrl>
 #include <memory>
 

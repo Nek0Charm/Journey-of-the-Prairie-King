@@ -1,11 +1,9 @@
 #ifndef __PLAYER_VIEW_MODEL_H__
 #define __PLAYER_VIEW_MODEL_H__
 
-#include <QObject>
-#include <QPointF>
-#include <QList>
 #include <memory>
 #include "viewmodel/BulletViewModel.h"
+#include <algorithm>
 
 class PlayerViewModel : public QObject {
     Q_OBJECT
@@ -22,8 +20,13 @@ public:
         double shootCooldown = 0.3;
         bool wheelMode = false;  // 8方向射击模式
         bool shotgunMode = false;  // 霰弹枪模式
+        bool badgeMode = false;   // 治安官徽章模式（包含霰弹枪效果）
         bool stealthMode = false;  // 潜行模式
         bool zombieMode = false;   // 僵尸模式
+        
+        // 移动速度限制
+        static constexpr double BASE_MOVE_SPEED = 100.0;  // 基础移动速度
+        static constexpr double MAX_MOVE_SPEED = 200.0;   // 最大移动速度上限
     };
 
     
@@ -65,7 +68,10 @@ public:
     // 传送方法
     void teleportToRandomPosition();
 
-    void setMoveSpeed(double speed) {m_stats.moveSpeed = speed;}
+    void setMoveSpeed(double speed) {
+        // 限制移动速度在合理范围内
+        m_stats.moveSpeed = std::clamp(speed, PlayerStats::BASE_MOVE_SPEED, PlayerStats::MAX_MOVE_SPEED);
+    }
 
     void setShootCooldown(double cooldown) {m_stats.shootCooldown = cooldown;}
     void addCoins(int amount) {m_stats.coins += amount; emit coinsChanged(m_stats.coins);}
@@ -77,6 +83,10 @@ public:
     // 霰弹枪模式相关
     void setShotgunMode(bool enabled) {m_stats.shotgunMode = enabled;}
     bool isShotgunMode() const {return m_stats.shotgunMode;}
+    
+    // 治安官徽章模式相关
+    void setBadgeMode(bool enabled) {m_stats.badgeMode = enabled;}
+    bool isBadgeMode() const {return m_stats.badgeMode;}
     
     // 潜行模式相关
     void setStealthMode(bool enabled) {
@@ -92,6 +102,7 @@ public:
 signals:
     void playerDied();
     void livesChanged();
+    void livesDown();
     void coinsChanged(int coins);
     void positionChanged(const QPointF& position);
     void shot(const QPointF& direction);
@@ -107,6 +118,7 @@ private:
     void updateShootCooldown(double deltaTime);
     void shootInEightDirections();  // 8方向射击
     void shootInShotgunPattern(const QPointF& direction);  // 霰弹枪射击
+    void shootInWheelShotgunCombination();  // 轮子+霰弹枪组合射击
 };
 
 #endif
