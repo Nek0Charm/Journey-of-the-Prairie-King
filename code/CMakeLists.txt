@@ -19,6 +19,11 @@ add_executable(MaodieAdventure
     ${RESOURCES}
 )
 
+target_compile_options(MaodieAdventure PRIVATE 
+    "/Zm500"  # 增加堆空间到500MB
+    "/bigobj" # 支持大对象文件
+)
+
 target_include_directories(MaodieAdventure PRIVATE
     include
     # include/app
