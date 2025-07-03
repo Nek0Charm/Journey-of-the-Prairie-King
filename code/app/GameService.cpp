@@ -1,4 +1,4 @@
-#include "common/GameService.h"
+#include "app/GameService.h"
 
 GameService::GameService(MainWindow *mainWindow, GameViewModel *viewModel, AudioEventListener *audioEventListener,QObject *parent)
     :   QObject(parent), 

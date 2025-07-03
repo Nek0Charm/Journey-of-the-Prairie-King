@@ -4,7 +4,7 @@
 #include <view/MainWindow.h>
 #include <viewmodel/GameViewModel.h>
 #include <view/AudioEventListener.h>
-#include <common/GameService.h>
+#include <app/GameService.h>
 
 
 class Application: public QApplication {
