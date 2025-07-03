@@ -203,7 +203,7 @@ void ItemEffectManager::applyWheelEffect(PlayerViewModel* player, EnemyManager* 
 }
 
 void ItemEffectManager::applyBadgeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 治安官徽章效果：提高开火速率和移动速率，持续15秒
+    // 治安官徽章效果：提高开火速率和移动速率，并使你能像使用霰弹枪那样锥状射击，持续15秒
     // 基于基础速度计算，避免无限叠加
     double baseSpeed = 100.0; // 基础移动速度
     double currentSpeed = player->getMoveSpeed();
@@ -220,7 +220,11 @@ void ItemEffectManager::applyBadgeEffect(PlayerViewModel* player, EnemyManager* 
     addEffect(SHOOT_SPEED_BOOST, duration, originalCooldown, newCooldown);
     applyEffectToPlayer(SHOOT_SPEED_BOOST, newCooldown, player);
     
-    qDebug() << "治安官徽章效果：移动速度提升至" << newSpeed << "，提高开火速率，持续" << duration << "秒";
+    // 添加治安官徽章模式效果（包含霰弹枪功能）
+    addEffect(BADGE_MODE, duration, 0.0, 1.0);
+    applyEffectToPlayer(BADGE_MODE, 1.0, player);
+    
+    qDebug() << "治安官徽章效果：移动速度提升至" << newSpeed << "，提高开火速率，包含霰弹枪效果，持续" << duration << "秒";
 }
 
 // 效果管理方法实现
@@ -281,6 +285,9 @@ void ItemEffectManager::applyEffectToPlayer(EffectType type, double effectValue,
         case SHOTGUN_MODE:
             player->setShotgunMode(true);
             break;
+        case BADGE_MODE:
+            player->setBadgeMode(true);
+            break;
         case ZOMBIE_MODE:
             player->setZombieMode(true);
             break;
@@ -307,6 +314,10 @@ void ItemEffectManager::restorePlayerFromEffect(EffectType type, double original
         case SHOTGUN_MODE:
             player->setShotgunMode(false);
             qDebug() << "霰弹枪模式关闭";
+            break;
+        case BADGE_MODE:
+            player->setBadgeMode(false);
+            qDebug() << "治安官徽章模式关闭";
             break;
         case ZOMBIE_MODE:
             player->setZombieMode(false);

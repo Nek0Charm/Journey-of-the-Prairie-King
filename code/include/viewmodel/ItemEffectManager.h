@@ -20,6 +20,7 @@ public:
         SHOOT_SPEED_BOOST,   // 射击速度提升
         WHEEL_MODE,          // 8方向射击模式
         SHOTGUN_MODE,        // 霰弹枪模式
+        BADGE_MODE,          // 治安官徽章模式（包含霰弹枪效果）
         ZOMBIE_MODE,         // 僵尸模式
         STEALTH_MODE         // 潜行模式
     };

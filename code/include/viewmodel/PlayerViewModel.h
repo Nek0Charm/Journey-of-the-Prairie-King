@@ -23,6 +23,7 @@ public:
         double shootCooldown = 0.3;
         bool wheelMode = false;  // 8方向射击模式
         bool shotgunMode = false;  // 霰弹枪模式
+        bool badgeMode = false;   // 治安官徽章模式（包含霰弹枪效果）
         bool stealthMode = false;  // 潜行模式
         bool zombieMode = false;   // 僵尸模式
         
@@ -86,6 +87,10 @@ public:
     void setShotgunMode(bool enabled) {m_stats.shotgunMode = enabled;}
     bool isShotgunMode() const {return m_stats.shotgunMode;}
     
+    // 治安官徽章模式相关
+    void setBadgeMode(bool enabled) {m_stats.badgeMode = enabled;}
+    bool isBadgeMode() const {return m_stats.badgeMode;}
+    
     // 潜行模式相关
     void setStealthMode(bool enabled) {
         m_stats.stealthMode = enabled; 
@@ -116,6 +121,7 @@ private:
     void updateShootCooldown(double deltaTime);
     void shootInEightDirections();  // 8方向射击
     void shootInShotgunPattern(const QPointF& direction);  // 霰弹枪射击
+    void shootInWheelShotgunCombination();  // 轮子+霰弹枪组合射击
 };
 
 #endif
