@@ -67,8 +67,7 @@ void ItemViewModel::updateItems(double deltaTime, const QPointF& playerPosition)
             // 检查是否为需要立即使用的道具类型
             bool shouldUseImmediately = (pickedItem.type == ItemEffectManager::coin || 
                                         pickedItem.type == ItemEffectManager::five_coins ||
-                                        pickedItem.type == ItemEffectManager::extra_life ||
-                                        pickedItem.type == ItemEffectManager::bomb);
+                                        pickedItem.type == ItemEffectManager::extra_life);
             
             if (shouldUseImmediately) {
                 // 需要立即使用的道具，不论道具栏状态都立即使用
