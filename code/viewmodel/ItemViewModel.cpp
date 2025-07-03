@@ -32,7 +32,9 @@ void ItemViewModel::createItem(const QPointF& position, int type) {
     ItemData newItem;
     newItem.type = type; 
     newItem.id = m_nextItemId++;
-    newItem.position = {static_cast<int>(position.x()), static_cast<int>(position.y())};
+    int px = std::clamp(static_cast<int>(position.x()), 16, 226);
+    int py = std::clamp(static_cast<int>(position.y()), 16, 226);
+    newItem.position = {px, py};
     newItem.isPossessed = false;
     newItem.isActive = true;
     newItem.remainTime = 15.0; 
