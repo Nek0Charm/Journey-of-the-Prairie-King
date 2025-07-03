@@ -294,7 +294,7 @@ void GameWidget::syncEnemies() {
     for (const auto& data : m_enemyDataList) {
         MonsterEntity* monster = nullptr;
         if (!m_monsters.contains(data.id)) {
-            monster = new MonsterEntity("orc");
+            monster = new MonsterEntity(MonsterType::orc);
             m_monsters[data.id] = monster;
         } else {
             monster = m_monsters[data.id];

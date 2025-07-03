@@ -64,10 +64,19 @@ enum class MonsterState {
     Dead   
 };
 
+enum class MonsterType {
+    orc,
+    spikeball,
+    ogre,
+    mushroom,
+    pixie,
+    mummy,
+    imp
+};
 class MonsterEntity : public Entity {
     Q_OBJECT
 public:
-    explicit MonsterEntity(const QString& monsterType, QObject* parent = nullptr);
+    explicit MonsterEntity(const MonsterType& monsterType, QObject* parent = nullptr);
     ~MonsterEntity() override;
     void update(double deltaTime) override;
     void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
@@ -75,12 +84,11 @@ public:
     void setVelocity(const QPointF& velocity);
     void setFrozen(bool frozen) { m_isFrozen = frozen; }
     bool isFrozen() const { return m_isFrozen; }
-    QString getType() const {return monsterType;}
+    MonsterType getType() const {return monsterType;}
 private:
-    QMap<MonsterState, Animation*> m_animations;
     Animation* m_animation;    
     QPointF m_velocity; 
-    QString monsterType;
+    MonsterType  monsterType;
     MonsterState m_currentState;
     bool m_isFrozen = false; 
 };
@@ -93,7 +101,6 @@ enum class DeadMonsterState {
 class DeadMonsterEntity : public Entity {
     Q_OBJECT
 public:
-    explicit DeadMonsterEntity(const QString& monsterType, QObject* parent = nullptr);
     explicit DeadMonsterEntity(const MonsterEntity& monserentity);
     ~DeadMonsterEntity() override;
     void update(double deltaTime) override;
@@ -102,7 +109,7 @@ public:
     bool ShouldbeRemove() { return m_lingerTimer <= 0; }
 private:
     Animation* m_animation;
-    QString monsterType;
+    MonsterType monsterType;
     DeadMonsterState m_currentState;
     double m_lingerTimer;
 };
