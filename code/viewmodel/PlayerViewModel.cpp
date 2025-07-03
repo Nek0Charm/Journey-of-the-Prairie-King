@@ -130,153 +130,71 @@ void PlayerViewModel::shootInEightDirections()
 
 void PlayerViewModel::shootInShotgunPattern(const QPointF& direction)
 {
-    // 霰弹枪模式：向指定方向及其相邻方向发射子弹
+    // 霰弹枪模式：向指定方向及其左右30度发射子弹
     QVector<QPointF> directions;
     
-    // 24个方向的单位向量（每15度一个方向）
-    QVector<QPointF> allDirections = {
-        // 0度 - 右
-        QPointF(1.0, 0.0),
-        // 15度
-        QPointF(0.9659, -0.2588),
-        // 30度 - 右上
-        QPointF(0.8660, -0.5),
-        // 45度
-        QPointF(0.7071, -0.7071),
-        // 60度
-        QPointF(0.5, -0.8660),
-        // 75度
-        QPointF(0.2588, -0.9659),
-        // 90度 - 上
-        QPointF(0.0, -1.0),
-        // 105度
-        QPointF(-0.2588, -0.9659),
-        // 120度 - 左上
-        QPointF(-0.5, -0.8660),
-        // 135度
-        QPointF(-0.7071, -0.7071),
-        // 150度
-        QPointF(-0.8660, -0.5),
-        // 165度
-        QPointF(-0.9659, -0.2588),
-        // 180度 - 左
-        QPointF(-1.0, 0.0),
-        // 195度
-        QPointF(-0.9659, 0.2588),
-        // 210度 - 左下
-        QPointF(-0.8660, 0.5),
-        // 225度
-        QPointF(-0.7071, 0.7071),
-        // 240度
-        QPointF(-0.5, 0.8660),
-        // 255度
-        QPointF(-0.2588, 0.9659),
-        // 270度 - 下
-        QPointF(0.0, 1.0),
-        // 285度
-        QPointF(0.2588, 0.9659),
-        // 300度 - 右下
-        QPointF(0.5, 0.8660),
-        // 315度
-        QPointF(0.7071, 0.7071),
-        // 330度
-        QPointF(0.8660, 0.5),
-        // 345度
-        QPointF(0.9659, 0.2588)
-    };
+    // 计算角度（以弧度为单位）
+    double angle = std::atan2(direction.y(), direction.x());
+    double angleOffset = M_PI / 6.0; // 30度 = π/6弧度
     
-    // 找到最接近输入方向的标准方向
-    double maxDot = -1.0;
-    int closestIndex = 0;
+    // 计算三个方向：左30度、中心、右30度
+    double leftAngle = angle - angleOffset;
+    double centerAngle = angle;
+    double rightAngle = angle + angleOffset;
     
-    for (int i = 0; i < allDirections.size(); ++i) {
-        double dot = direction.x() * allDirections[i].x() + direction.y() * allDirections[i].y();
-        if (dot > maxDot) {
-            maxDot = dot;
-            closestIndex = i;
-        }
-    }
+    // 转换为单位向量
+    QPointF leftDir(std::cos(leftAngle), std::sin(leftAngle));
+    QPointF centerDir(std::cos(centerAngle), std::sin(centerAngle));
+    QPointF rightDir(std::cos(rightAngle), std::sin(rightAngle));
     
-    // 添加主方向和相邻的两个方向（总共3个方向）
-    directions.push_back(allDirections[closestIndex]);
-    
-    // 添加顺时针相邻方向
-    int nextIndex = (closestIndex + 1) % 24;
-    directions.push_back(allDirections[nextIndex]);
-    
-    // 添加逆时针相邻方向
-    int prevIndex = (closestIndex - 1 + 24) % 24;
-    directions.push_back(allDirections[prevIndex]);
+    directions = {leftDir, centerDir, rightDir};
     
     // 向确定的方向发射子弹
     for (const auto& dir : directions) {
         m_bulletViewModel->createBullet(m_stats.position, dir, 200);
     }
     
-    qDebug() << "霰弹枪射击：向" << directions.size() << "个方向发射子弹，主方向索引:" << closestIndex;
+    qDebug() << "霰弹枪射击：向" << directions.size() << "个方向发射子弹";
 }
 
 void PlayerViewModel::shootInWheelShotgunCombination()
 {
-    // 轮子+霰弹枪组合模式：向24个方向发射子弹
-    // 24个方向的单位向量（每15度一个方向）
-    QVector<QPointF> allDirections = {
-        // 0度 - 右
-        QPointF(1.0, 0.0),
-        // 15度
-        QPointF(0.9659, -0.2588),
-        // 30度 - 右上
-        QPointF(0.8660, -0.5),
-        // 45度
-        QPointF(0.7071, -0.7071),
-        // 60度
-        QPointF(0.5, -0.8660),
-        // 75度
-        QPointF(0.2588, -0.9659),
-        // 90度 - 上
-        QPointF(0.0, -1.0),
-        // 105度
-        QPointF(-0.2588, -0.9659),
-        // 120度 - 左上
-        QPointF(-0.5, -0.8660),
-        // 135度
-        QPointF(-0.7071, -0.7071),
-        // 150度
-        QPointF(-0.8660, -0.5),
-        // 165度
-        QPointF(-0.9659, -0.2588),
-        // 180度 - 左
-        QPointF(-1.0, 0.0),
-        // 195度
-        QPointF(-0.9659, 0.2588),
-        // 210度 - 左下
-        QPointF(-0.8660, 0.5),
-        // 225度
-        QPointF(-0.7071, 0.7071),
-        // 240度
-        QPointF(-0.5, 0.8660),
-        // 255度
-        QPointF(-0.2588, 0.9659),
-        // 270度 - 下
-        QPointF(0.0, 1.0),
-        // 285度
-        QPointF(0.2588, 0.9659),
-        // 300度 - 右下
-        QPointF(0.5, 0.8660),
-        // 315度
-        QPointF(0.7071, 0.7071),
-        // 330度
-        QPointF(0.8660, 0.5),
-        // 345度
-        QPointF(0.9659, 0.2588)
+    // 轮子+霰弹枪组合模式：向8个方向发射霰弹枪子弹
+    // 8个方向：上、右上、右、右下、下、左下、左、左上
+    QVector<QPointF> directions = {
+        QPointF(0, -1),    // 上
+        QPointF(1, -1),    // 右上
+        QPointF(1, 0),     // 右
+        QPointF(1, 1),     // 右下
+        QPointF(0, 1),     // 下
+        QPointF(-1, 1),    // 左下
+        QPointF(-1, 0),    // 左
+        QPointF(-1, -1)    // 左上
     };
     
-    // 向24个方向发射子弹
-    for (const auto& direction : allDirections) {
-        m_bulletViewModel->createBullet(m_stats.position, direction, 200);
+    // 对每个方向应用霰弹枪模式
+    for (const auto& mainDirection : directions) {
+        // 计算角度（以弧度为单位）
+        double angle = std::atan2(mainDirection.y(), mainDirection.x());
+        double angleOffset = M_PI / 6.0; // 30度 = π/6弧度
+        
+        // 计算三个方向：左30度、中心、右30度
+        double leftAngle = angle - angleOffset;
+        double centerAngle = angle;
+        double rightAngle = angle + angleOffset;
+        
+        // 转换为单位向量
+        QPointF leftDir(std::cos(leftAngle), std::sin(leftAngle));
+        QPointF centerDir(std::cos(centerAngle), std::sin(centerAngle));
+        QPointF rightDir(std::cos(rightAngle), std::sin(rightAngle));
+        
+        // 向三个方向发射子弹
+        m_bulletViewModel->createBullet(m_stats.position, leftDir, 200);
+        m_bulletViewModel->createBullet(m_stats.position, centerDir, 200);
+        m_bulletViewModel->createBullet(m_stats.position, rightDir, 200);
     }
     
-    qDebug() << "轮子+霰弹枪组合射击：向24个方向发射子弹";
+    qDebug() << "轮子+霰弹枪组合射击：向8个方向发射霰弹枪模式子弹，总共" << (8 * 3) << "颗子弹";
 }
 
 void PlayerViewModel::teleportToRandomPosition()

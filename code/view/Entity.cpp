@@ -1,6 +1,4 @@
 #include "view/Entity.h"
-#include "view/SpriteManager.h"
-#include "Entity.h"
 
 Entity::Entity(QObject* parent) : QObject(parent), m_position(0, 0) {};
 

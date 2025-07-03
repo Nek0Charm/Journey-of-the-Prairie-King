@@ -1,5 +1,4 @@
 #include "view/GameWidget.h"
-#include "GameWidget.h"
 
 #define UI_LEFT 27
 #define UI_UP 16

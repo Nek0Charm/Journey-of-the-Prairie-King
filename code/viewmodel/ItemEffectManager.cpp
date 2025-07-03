@@ -219,6 +219,9 @@ void ItemEffectManager::applyBadgeEffect(PlayerViewModel* player, EnemyManager* 
     // 添加射击速度效果
     addEffect(SHOOT_SPEED_BOOST, duration, originalCooldown, newCooldown);
     applyEffectToPlayer(SHOOT_SPEED_BOOST, newCooldown, player);
+
+    addEffect(SHOTGUN_MODE, duration, 0.0, 1.0);
+    applyEffectToPlayer(SHOTGUN_MODE, 1.0, player);
     
     // 添加治安官徽章模式效果（包含霰弹枪功能）
     addEffect(BADGE_MODE, duration, 0.0, 1.0);
