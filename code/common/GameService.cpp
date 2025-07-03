@@ -1,7 +1,10 @@
 #include "common/GameService.h"
 
-GameService::GameService(MainWindow *mainWindow, GameViewModel *viewModel, QObject *parent)
-    : QObject(parent), m_mainWindow(mainWindow), m_gameViewModel(viewModel) {
+GameService::GameService(MainWindow *mainWindow, GameViewModel *viewModel, AudioEventListener *audioEventListener,QObject *parent)
+    :   QObject(parent), 
+        m_mainWindow(mainWindow), 
+        m_gameViewModel(viewModel), 
+        m_audioEventListener(audioEventListener) {
     setupConnections();
 }
 
@@ -48,4 +51,23 @@ void GameService::setupConnections() {
 
     connect(m_gameViewModel->getPlayer(), &PlayerViewModel::zombieModeChanged,
             m_mainWindow->getGameWidget(), &GameWidget::updateZombieMode);
+
+
+
+
+
+
+    bool connected1 = connect(m_gameViewModel, &GameViewModel::playerDied, m_audioEventListener, &AudioEventListener::onPlayerHit);
+    bool connected2 = connect(m_gameViewModel, &GameViewModel::playerLivesChanged, m_audioEventListener, &AudioEventListener::onPlayerHit);
+    
+    // 连接敌人爆炸事件信号
+    bool connected6 = connect(m_gameViewModel->getEnemyManager(), &EnemyManager::enemyDestroyed, m_audioEventListener, &AudioEventListener::onEnemyExplosion);
+    
+    // 新增：连接游戏状态变化信号
+    bool connected5 = connect(m_gameViewModel, &GameViewModel::gameStateChanged, m_audioEventListener, &AudioEventListener::onGameStateChanged);
+    
+    bool connected3 = connect(m_gameViewModel->getPlayer(), &PlayerViewModel::positionChanged, m_audioEventListener, &AudioEventListener::onPlayerMove);
+        // 新增：连接shot信号到onPlayerShot槽
+    bool connected4 = connect(m_gameViewModel->getPlayer(), &PlayerViewModel::shot, m_audioEventListener, &AudioEventListener::onPlayerShot);
+    
 }

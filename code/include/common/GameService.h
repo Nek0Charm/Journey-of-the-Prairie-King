@@ -4,12 +4,13 @@
 #include "viewmodel/GameViewModel.h"
 #include "view/MainWindow.h"
 #include "view/GameWidget.h"
+#include "view/AudioEventListener.h"
 
 class GameService: public QObject{
     Q_OBJECT
 
     public:
-    explicit GameService(MainWindow *mainWindow, GameViewModel *viewModel, QObject *parent = nullptr);
+    explicit GameService(MainWindow *mainWindow, GameViewModel *viewModel,AudioEventListener *audioEventListener, QObject *parent = nullptr);
 
     ~GameService() = default;
 
@@ -18,7 +19,7 @@ class GameService: public QObject{
     private:
     MainWindow *m_mainWindow;
     GameViewModel *m_gameViewModel;
-
+    AudioEventListener *m_audioEventListener;
 };
 
 #endif
