@@ -1,4 +1,5 @@
 #include "view/GameWidget.h"
+#include "GameWidget.h"
 
 #define UI_LEFT 27
 #define UI_UP 16
@@ -72,7 +73,9 @@ void GameWidget::gameLoop() {
     }    
     if(m_gameMap) {
         m_gameMap->update(deltaTime);
-    }   
+    }  
+    updateExplosion(deltaTime);
+    updateSmoke(deltaTime); 
     this->update();
 }
 
@@ -241,9 +244,6 @@ void GameWidget::timerEvent() {
     if (!shootDirection.isNull()) { 
         emit shoot(shootDirection);
     }
-    
-
-    
     // 如果处于僵尸模式，直接设置僵尸动画
     if (m_isZombieMode) {
         player->setState(PlayerState::Zombie);
@@ -384,12 +384,70 @@ void GameWidget::updateZombieMode(bool isZombieMode) {
     m_isZombieMode = isZombieMode;
 }
 
+void GameWidget::updateStealthMode(bool isStealth) {
+    m_playerStealthMode = isStealth;
+}
+
 void GameWidget::updateItemEffect(int itemType) {
     switch (itemType) {
     case 5: // Boom
-        m_gameMap->startExplosionSequence(2.0);
+        startExplosionSequence(2.0);
+        break;
+    case 7: // Stealth
+        m_isStealthMode = true;
+        player->setInvincible(true);
+        player->setInvincibilityTime(3);
+        releaseSmoke(0.5);
         break;
     default:
         break;
     }
+}
+
+void GameWidget::updateSmoke(double deltaTime) {
+    if (!m_isSmokeReleased) {
+        return; 
+    }
+    m_smokeReleaseTimer -= deltaTime;
+    if (m_smokeReleaseTimer <= 0) {
+        m_isSmokeReleased = false;
+        return;
+    }
+    m_nextSmokeReleaseTimer -= deltaTime;
+    if (m_nextSmokeReleaseTimer <= 0) {
+        double randX = QRandomGenerator::global()->bounded(16) + player->getPosition().x();
+        double randY = QRandomGenerator::global()->bounded(16) + player->getPosition().y();
+        m_gameMap->createExplosion(QPointF(randX, randY));
+        m_nextSmokeReleaseTimer = (QRandomGenerator::global()->bounded(150) + 150) / 1000.0;
+    }
+}
+
+void GameWidget::updateExplosion(double deltaTime) {
+    if (!m_isExplosionSequenceActive) {
+        return; 
+    }
+    m_explosionSequenceTimer -= deltaTime;
+    if (m_explosionSequenceTimer <= 0) {
+        m_isExplosionSequenceActive = false; 
+        return;
+    }
+    m_nextExplosionSpawnTimer -= deltaTime;
+    if (m_nextExplosionSpawnTimer <= 0) {
+        double randX = QRandomGenerator::global()->bounded((m_gameMap->getWidth()-1) * 16);
+        double randY = QRandomGenerator::global()->bounded((m_gameMap->getHeight()-1) * 16);
+        m_gameMap->createExplosion(QPointF(randX, randY));
+        m_nextExplosionSpawnTimer = (QRandomGenerator::global()->bounded(150) + 0) / 1000.0;
+    }
+}
+
+void GameWidget::startExplosionSequence(double duration) {
+    m_isExplosionSequenceActive = true;
+    m_explosionSequenceTimer = duration;
+    m_nextExplosionSpawnTimer = 0.0;
+}
+
+void GameWidget::releaseSmoke(double duration) {
+    m_isSmokeReleased = true;
+    m_smokeReleaseTimer = duration;
+    m_nextSmokeReleaseTimer = 0.0;
 }

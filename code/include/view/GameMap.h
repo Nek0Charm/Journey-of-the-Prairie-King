@@ -32,7 +32,6 @@ public:
     int getWidth() const;
     int getHeight() const;
     void createExplosion(const QPointF& position);
-    void startExplosionSequence(double duration);
 private:
     QList<QList<int>> m_tiles;       // 存储地图布局的二维列表
     QMap<int, QString> m_tileLegend; // 存储图块ID到精灵名字的映射
@@ -40,10 +39,7 @@ private:
     QList<ExplosionEffect*> m_explosions;
     QString map_title;
     int m_width;
-    int m_height;
-    bool m_isExplosionSequenceActive;   
-    double m_explosionSequenceTimer;    
-    double m_nextExplosionSpawnTimer;   
+    int m_height;  
 };
 
 #endif // GAMEMAP_H

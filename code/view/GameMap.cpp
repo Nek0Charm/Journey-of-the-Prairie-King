@@ -1,6 +1,5 @@
 #include "view/GameMap.h"
-GameMapView::GameMapView(QString map_title) : m_width(16), m_height(16), map_title(map_title), m_isExplosionSequenceActive(false), 
-                                      m_explosionSequenceTimer(0.0), m_nextExplosionSpawnTimer(0.0) {
+GameMapView::GameMapView(QString map_title) : m_width(16), m_height(16), map_title(map_title) {
     loadFromFile(":/assert/picture/gamemap.json", "map_1", "1");
 }
 
@@ -80,21 +79,6 @@ void GameMapView::update(double deltaTime) {
             ++it;
         }
     }  
-        if (!m_isExplosionSequenceActive) {
-        return; 
-    }
-    m_explosionSequenceTimer -= deltaTime;
-    if (m_explosionSequenceTimer <= 0) {
-        m_isExplosionSequenceActive = false; 
-        return;
-    }
-    m_nextExplosionSpawnTimer -= deltaTime;
-    if (m_nextExplosionSpawnTimer <= 0) {
-        double randX = QRandomGenerator::global()->bounded((getWidth()-1) * 16);
-        double randY = QRandomGenerator::global()->bounded((getHeight()-1) * 16);
-        createExplosion(QPointF(randX, randY));
-        m_nextExplosionSpawnTimer = (QRandomGenerator::global()->bounded(150) + 0) / 1000.0;
-    }
 }
 
 void GameMapView::paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset) {
@@ -144,12 +128,6 @@ void GameMapView::createExplosion(const QPointF &position) {
     m_explosions.append(new ExplosionEffect(position));
 }
 
-void GameMapView::startExplosionSequence(double duration) {
-    if (m_isExplosionSequenceActive) return;
-    m_isExplosionSequenceActive = true;
-    m_explosionSequenceTimer = duration;
-    m_nextExplosionSpawnTimer = 0.0;
-}
 ExplosionEffect::ExplosionEffect(const QPointF &position) {
     auto frames = SpriteManager::instance().getAnimationSequence("explode");
     m_animation = new Animation(frames, 6.0, false); 

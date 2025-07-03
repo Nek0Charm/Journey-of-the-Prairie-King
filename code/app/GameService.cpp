@@ -67,4 +67,7 @@ void GameService::setupConnections() {
 
     connect(m_gameViewModel, &GameViewModel::itemUsed,
             m_mainWindow->getGameWidget(), &GameWidget::updateItemEffect);
+
+    connect(m_gameViewModel->getPlayer(), &PlayerViewModel::playerStealthModeChanged,
+            m_mainWindow->getGameWidget(), &GameWidget::updateStealthMode);
 }

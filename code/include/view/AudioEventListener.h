@@ -1,9 +1,6 @@
 #ifndef AUDIOEVENTLISTENER_H
 #define AUDIOEVENTLISTENER_H
 
-// 前向声明
-class PlayerViewModel;
-
 // 音频事件监听器 - 专门负责监听游戏事件信号并触发相应的音效播放
 // 独立于GameWidget，保持MVVM架构的清晰性
 class AudioEventListener : public QObject

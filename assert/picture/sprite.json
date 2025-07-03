@@ -5,17 +5,20 @@
   },
 
   "frames": {
-    "player_idle": { "x": 127, "y": 80, "w": 16, "h": 16 },
+    "player_idle": { "x": 367, "y": 112, "w": 16, "h": 16 },
 
-    "player_body_left": { "x": 143, "y": 64, "w": 16, "h": 14 },
-    "player_body_right": { "x": 111, "y": 64, "w": 16, "h": 14 },
-    "player_body_up": { "x": 95, "y": 64, "w": 16, "h": 14 },
-    "player_body_down": { "x": 127, "y": 64, "w": 16, "h": 15 },
+    "player_body_left": { "x": 383, "y": 96, "w": 16, "h": 14 },
+    "player_body_right": { "x": 351, "y": 96, "w": 16, "h": 14 },
+    "player_body_up": { "x": 335, "y": 96, "w": 16, "h": 14 },
+    "player_body_down": { "x": 367, "y": 96, "w": 16, "h": 15 },
 
-    "player_walk_leg_1": { "x": 111, "y": 80, "w": 16, "h": 3 },
-    "player_walk_leg_2": { "x": 111, "y": 83, "w": 16, "h": 3 },
-    "player_walk_leg_3": { "x": 111, "y": 86, "w": 16, "h": 3 },
-    "player_walk_leg_4": { "x": 111, "y": 89, "w": 16, "h": 3 },
+    "player_walk_leg_1": { "x": 351, "y": 112, "w": 16, "h": 3 },
+    "player_walk_leg_2": { "x": 351, "y": 115, "w": 16, "h": 3 },
+    "player_walk_leg_3": { "x": 351, "y": 118, "w": 16, "h": 3 },
+    "player_walk_leg_4": { "x": 351, "y": 121, "w": 16, "h": 3 },
+
+    "player_lift_1": { "x": 255, "y": 112, "w": 16, "h": 16 },
+    "player_lift_2": { "x": 271, "y": 112, "w": 16, "h": 16 },
 
     "player_dying_1": { "x": 335, "y": 160, "w": 16, "h": 16},
     "player_dying_2": { "x": 351, "y": 160, "w": 16, "h": 16},
@@ -251,6 +254,10 @@
     "player_zombie": [
       "player_zombie_1",
       "player_zombie_2"
+    ],
+    "player_lift": [
+      "player_lift_1",
+      "player_lift_2"
     ],
     "merchant_walk": [
       "merchant_walk_1",

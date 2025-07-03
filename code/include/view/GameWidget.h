@@ -22,6 +22,10 @@ protected:
     void syncEnemies();
     void syncItems();
     void playerLivesDown();
+    void updateSmoke(double deltaTime);
+    void updateExplosion(double deltaTime);
+    void startExplosionSequence(double duration);
+    void releaseSmoke(double duration);
 
 signals:
     void setMovingDirection(QPointF direction, bool isMoving);
@@ -44,6 +48,7 @@ public slots:
     void updatePlayerMoney(int money);
     void updatePossessedItem(int itemType, bool hasItem); 
     void updateZombieMode(bool isZombieMode);
+    void updateStealthMode(bool isStealth);
     void updateItemEffect(int itemType);
 
 private:
@@ -59,6 +64,12 @@ private:
     QMap<int, ItemEntity*> m_items;
 
 
+    bool m_isExplosionSequenceActive = false;   
+    double m_explosionSequenceTimer = 0.0;    
+    double m_nextExplosionSpawnTimer = 0.0; 
+    bool m_isSmokeReleased = false;
+    double m_smokeReleaseTimer = 0.0;
+    double m_nextSmokeReleaseTimer = 0.0;
     /*
     这些变量需要随着GameViewModel内值的变化而变化
     */
@@ -72,10 +83,12 @@ private:
     int m_moneyCount = 0;
     int m_possessedItemType;
     bool m_hasPossessedItem;
-    bool m_isZombieMode = false;
     
     // 道具使用相关
     bool m_spaceKeyPressed = false;  // 防止空格键重复触发  
+    bool m_isZombieMode = false;
+    bool m_isBoomActive = false;
+    bool m_isStealthMode = false;
 };
 
 #endif
