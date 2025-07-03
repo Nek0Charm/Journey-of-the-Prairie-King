@@ -123,72 +123,31 @@ void PlayerViewModel::shootInEightDirections()
 
 void PlayerViewModel::shootInShotgunPattern(const QPointF& direction)
 {
-    // 霰弹枪模式：向指定方向及其相邻方向发射子弹
+    // 霰弹枪模式：向指定方向及其左右30度发射子弹
     QVector<QPointF> directions;
     
-    // 确定主要方向
-    QPointF mainDir = direction;
+    // 计算角度（以弧度为单位）
+    double angle = std::atan2(direction.y(), direction.x());
+    double angleOffset = M_PI / 6.0; // 30度 = π/6弧度
     
-    // 根据主要方向确定相邻方向
-    if (mainDir == QPointF(0, -1)) {  // 上
-        directions = {
-            QPointF(0, -1),    // 上
-            QPointF(1, -1),    // 右上
-            QPointF(-1, -1)    // 左上
-        };
-    } else if (mainDir == QPointF(1, 0)) {  // 右
-        directions = {
-            QPointF(1, 0),     // 右
-            QPointF(1, -1),    // 右上
-            QPointF(1, 1)      // 右下
-        };
-    } else if (mainDir == QPointF(0, 1)) {  // 下
-        directions = {
-            QPointF(0, 1),     // 下
-            QPointF(1, 1),     // 右下
-            QPointF(-1, 1)     // 左下
-        };
-    } else if (mainDir == QPointF(-1, 0)) {  // 左
-        directions = {
-            QPointF(-1, 0),    // 左
-            QPointF(-1, -1),   // 左上
-            QPointF(-1, 1)     // 左下
-        };
-    } else if (mainDir == QPointF(1, -1)) {  // 右上
-        directions = {
-            QPointF(1, -1),    // 右上
-            QPointF(0, -1),    // 上
-            QPointF(1, 0)      // 右
-        };
-    } else if (mainDir == QPointF(1, 1)) {  // 右下
-        directions = {
-            QPointF(1, 1),     // 右下
-            QPointF(1, 0),     // 右
-            QPointF(0, 1)      // 下
-        };
-    } else if (mainDir == QPointF(-1, 1)) {  // 左下
-        directions = {
-            QPointF(-1, 1),    // 左下
-            QPointF(-1, 0),    // 左
-            QPointF(0, 1)      // 下
-        };
-    } else if (mainDir == QPointF(-1, -1)) {  // 左上
-        directions = {
-            QPointF(-1, -1),   // 左上
-            QPointF(-1, 0),    // 左
-            QPointF(0, -1)     // 上
-        };
-    } else {
-        // 如果不是标准方向，就只发射一颗子弹
-        directions = {mainDir};
-    }
+    // 计算三个方向：左30度、中心、右30度
+    double leftAngle = angle - angleOffset;
+    double centerAngle = angle;
+    double rightAngle = angle + angleOffset;
+    
+    // 转换为单位向量
+    QPointF leftDir(std::cos(leftAngle), std::sin(leftAngle));
+    QPointF centerDir(std::cos(centerAngle), std::sin(centerAngle));
+    QPointF rightDir(std::cos(rightAngle), std::sin(rightAngle));
+    
+    directions = {leftDir, centerDir, rightDir};
     
     // 向确定的方向发射子弹
     for (const auto& dir : directions) {
         m_bulletViewModel->createBullet(m_stats.position, dir, 200);
     }
     
-    qDebug() << "霰弹枪射击：向" << directions.size() << "个方向发射子弹";
+    qDebug() << "霰弹枪射击：向" << directions.size() << "个方向发射子弹（30度扇形）";
 }
 
 void PlayerViewModel::teleportToRandomPosition()

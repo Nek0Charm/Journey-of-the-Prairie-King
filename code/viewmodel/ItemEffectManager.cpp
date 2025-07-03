@@ -212,6 +212,9 @@ void ItemEffectManager::applyBadgeEffect(PlayerViewModel* player, EnemyManager* 
     // 添加射击速度效果
     addEffect(SHOOT_SPEED_BOOST, duration, originalCooldown, newCooldown);
     applyEffectToPlayer(SHOOT_SPEED_BOOST, newCooldown, player);
+
+    addEffect(SHOTGUN_MODE, duration, 0.0, 1.0);
+    applyEffectToPlayer(SHOTGUN_MODE, 1.0, player);
     
     qDebug() << "治安官徽章效果：提高开火速率和移动速率，持续" << duration << "秒";
 }
