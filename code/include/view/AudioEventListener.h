@@ -1,8 +1,6 @@
 #ifndef AUDIOEVENTLISTENER_H
 #define AUDIOEVENTLISTENER_H
 
-#include "viewmodel/GameViewModel.h"
-
 // 前向声明
 class PlayerViewModel;
 
@@ -16,16 +14,14 @@ public:
     explicit AudioEventListener(QObject *parent = nullptr);
     ~AudioEventListener() = default;
     
-    // 设置游戏视图模型
-    void setGameViewModel(GameViewModel* gameViewModel);
-    
+    // 设置游戏视图模型    
     // 开始监听游戏事件
     void startListening();
     
     // 停止监听游戏事件
     void stopListening();
 
-private slots:
+public slots:
     // 游戏事件音效槽函数
     void onPlayerHit();                                // 玩家受伤音效
     
@@ -42,8 +38,6 @@ private slots:
     void onGameStateChanged(GameState state); // 游戏状态变化（背景音乐）
 
 private:
-    GameViewModel* m_gameViewModel;                    // 游戏视图模型指针
-    PlayerViewModel* m_playerViewModel;                // 玩家视图模型指针
     
     // 连接所有游戏事件信号
     void connectGameEvents();
