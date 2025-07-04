@@ -31,6 +31,8 @@ GameWidget::GameWidget(QWidget *parent)
     connect(m_timer, &QTimer::timeout, this, &GameWidget::gameLoop);
     connect(this, &GameWidget::vendorAppear, vendor, &VendorEntity::onVendorAppear);
     connect(this, &GameWidget::vendorDisappear, vendor, &VendorEntity::onVendorDisappear); 
+    connect(this, &GameWidget::gameWin, vendor, &VendorEntity::onGameWin);
+    connect(this, &GameWidget::gameWin, player, &PlayerEntity::onGameWin);
     m_timer->start(16);
     m_elapsedTimer.start();
     
@@ -86,7 +88,9 @@ void GameWidget::gameLoop() {
 }
 
 void GameWidget::playerPositionChanged(QPointF position) {
-    player->setPosition(position);
+    if (!m_isGamePaused) {
+        player->setPosition(position);
+    }
 }
 
 void GameWidget::playerLivesDown() {
@@ -95,7 +99,7 @@ void GameWidget::playerLivesDown() {
     }
     // qDebug() << "受伤了";
     player->setInvincible(true);
-    player->setInvincibilityTime(100.0);
+    player->setInvincibilityTime(3.0);
 }
 
 void GameWidget::paintEvent(QPaintEvent *event) {
@@ -233,6 +237,18 @@ void GameWidget::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void GameWidget::timerEvent() {
+    if (keys[Qt::Key_P] && !m_pauseKeyPressed) {
+        m_pauseKeyPressed = true;
+        m_isGamePaused = !m_isGamePaused;
+        if (m_isGamePaused) {
+            emit pauseGame();
+        } else {
+            emit resumeGame();
+        }
+    } else if (!keys[Qt::Key_P]) {
+        m_pauseKeyPressed = false;
+    }
+    if (m_isGamePaused) return;
     QPointF moveDirection(0, 0);
     if (keys[Qt::Key_W]) { moveDirection.ry() -= 1; }
     if (keys[Qt::Key_S]) { moveDirection.ry() += 1; }
@@ -285,6 +301,8 @@ void GameWidget::timerEvent() {
         emit vendorAppear();
     } else if (keys[Qt::Key_Q]) {
         emit vendorDisappear();
+    } else if (keys[Qt::Key_O]) {
+        onGameWin();
     }
 }
 
@@ -401,7 +419,7 @@ void GameWidget::updateStealthMode(bool isStealth) {
 void GameWidget::updateItemEffect(int itemType) {
     switch (itemType) {
     case 5: // Boom
-        startExplosionSequence(2.0);
+        startExplosionSequence(1.0);
         break;
     case 7: // Stealth
         m_isStealthMode = true;
@@ -468,4 +486,9 @@ void GameWidget::onVendorAppear() {
 
 void GameWidget::onVendorDisappear() {
     emit vendorDisappear();
+}
+
+void GameWidget::onGameWin() {
+    m_isGamePaused = true;
+    emit gameWin(); 
 }

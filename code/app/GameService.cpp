@@ -11,10 +11,13 @@ GameService::GameService(MainWindow *mainWindow, GameViewModel *viewModel, Audio
 void GameService::setupConnections() {
     connect(m_mainWindow, &MainWindow::startGameRequested, m_gameViewModel, &GameViewModel::startGame);
     connect(m_mainWindow, &MainWindow::exitGameRequested, m_gameViewModel, &GameViewModel::endGame);
+
     
     connect(m_mainWindow->getGameWidget(), &GameWidget::setMovingDirection, m_gameViewModel, &GameViewModel::setPlayerMoveDirection);
     connect(m_mainWindow->getGameWidget(), &GameWidget::shoot, m_gameViewModel, &GameViewModel::playerAttack);
-
+    connect(m_mainWindow->getGameWidget(), &GameWidget::gameWin, m_gameViewModel, &GameViewModel::pauseGame);
+    connect(m_mainWindow->getGameWidget(), &GameWidget::pauseGame, m_gameViewModel, &GameViewModel::pauseGame);
+    connect(m_mainWindow->getGameWidget(), &GameWidget::resumeGame, m_gameViewModel, &GameViewModel::resumeGame);
     connect(m_gameViewModel, &GameViewModel::gameStateChanged, m_mainWindow, &MainWindow::onGameStateChanged);
 
 

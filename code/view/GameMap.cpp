@@ -106,6 +106,18 @@ void GameMapView::paint(QPainter *painter, const QPixmap &spriteSheet, const QPo
             }
         }
     }
+    if (map_title == "end") {
+        QString houseSpriteName = "house";
+        QRect houseSourceRect = SpriteManager::instance().getSpriteRect(houseSpriteName);
+        if (!houseSourceRect.isNull()) {
+            double houseScale = 3.0;
+            double houseX = ((m_width*16 - houseSourceRect.width())/ 2.0) * houseScale;
+            double houseY = ((m_height*16) / 2.0  - houseSourceRect.height()) * houseScale;
+            QRectF houseDestRect(houseX, houseY, houseSourceRect.width() * houseScale, houseSourceRect.height() * houseScale);
+            houseDestRect.translate(viewOffset);
+            painter->drawPixmap(houseDestRect, spriteSheet, houseSourceRect);
+        }
+    }
     for (ExplosionEffect* explosion : m_explosions) {
         explosion->paint(painter, spriteSheet, viewOffset);
     }

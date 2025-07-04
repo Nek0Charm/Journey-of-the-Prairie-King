@@ -40,6 +40,8 @@ void MainWindow::update() {
             case GameState::MENU:
                 m_stackedWidget->setCurrentWidget(m_startWidget);
                 break;
+            case GameState::PAUSED:
+                
             case GameState::PLAYING:
                 m_stackedWidget->setCurrentWidget(m_gameWidget);
                 break;
