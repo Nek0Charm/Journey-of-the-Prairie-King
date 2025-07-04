@@ -1,8 +1,16 @@
 #include "viewmodel/CollisionSystem.h"
+#include "viewmodel/PlayerViewModel.h"
+#include "viewmodel/EnemyManager.h"
+#include "viewmodel/BulletViewModel.h"
 
 CollisionSystem::CollisionSystem(QObject *parent)
     : QObject(parent)
 {
+}
+
+CollisionSystem& CollisionSystem::instance(){ 
+    static CollisionSystem instance; 
+    return instance;
 }
 
 void CollisionSystem::checkCollisions(const PlayerViewModel& player,
