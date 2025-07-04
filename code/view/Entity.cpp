@@ -62,7 +62,7 @@ void PlayerEntity::update(double deltaTime) {
     }
     if (m_isGamewin) {
         m_invincibilityTimer -= deltaTime;
-        qDebug() << "m_time" << m_invincibilityTimer;
+        // qDebug() << "m_time" << m_invincibilityTimer;
         if (m_invincibilityTimer <= 16 && m_invincibilityTimer >= 7) {
             setState(PlayerState::WalkLiftingHeart);
             m_position += QPointF(deltaTime*16, 0);

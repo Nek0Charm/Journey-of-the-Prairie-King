@@ -10,7 +10,7 @@ StartWidget::StartWidget(QWidget *parent) : QWidget(parent)
     QPixmap titlePixmap = fullSpriteSheet.copy(cropRect);
 
     int baseFontSize = 6; 
-    int scaleFactor = 10; 
+    int scaleFactor = 7; 
     QSize newSize = titlePixmap.size() * scaleFactor;
     QPixmap scaledPixmap = titlePixmap.scaled(newSize, Qt::KeepAspectRatio, Qt::FastTransformation);
     m_titleLabel->setPixmap(scaledPixmap);
