@@ -51,39 +51,31 @@ void ItemEffectManager::applyItemEffect(int itemType, PlayerViewModel* player, E
             applyBadgeEffect(player, enemyManager, isImmediate);
             break;
             
-        // 供应商道具类型
+        // 供应商道具类型 - 直接复用现有效果
         case vendor_boots_1:
-            applyVendorBoots1Effect(player, enemyManager, isImmediate);
-            break;
         case vendor_boots_2:
-            applyVendorBoots2Effect(player, enemyManager, isImmediate);
+            applyCoffeeEffect(player, enemyManager, isImmediate);
+            qDebug() << "供应商靴子效果：永久应用咖啡效果（移动速度提升）";
             break;
         case vendor_extra_life:
-            applyVendorExtraLifeEffect(player, enemyManager, isImmediate);
+            applyExtraLifeEffect(player, enemyManager, isImmediate);
+            qDebug() << "供应商额外生命效果：永久应用额外生命效果";
             break;
         case vendor_gun_1:
-            applyVendorGun1Effect(player, enemyManager, isImmediate);
-            break;
         case vendor_gun_2:
-            applyVendorGun2Effect(player, enemyManager, isImmediate);
-            break;
         case vendor_gun_3:
-            applyVendorGun3Effect(player, enemyManager, isImmediate);
-            break;
-        case vendor_gun_4:
-            applyVendorGun4Effect(player, enemyManager, isImmediate);
+            applyMachineGunEffect(player, enemyManager, isImmediate);
+            qDebug() << "供应商枪效果：永久应用机枪效果（射击速度提升）";
             break;
         case vendor_ammo_1:
-            applyVendorAmmo1Effect(player, enemyManager, isImmediate);
-            break;
         case vendor_ammo_2:
-            applyVendorAmmo2Effect(player, enemyManager, isImmediate);
-            break;
         case vendor_ammo_3:
-            applyVendorAmmo3Effect(player, enemyManager, isImmediate);
+            applyShotgunEffect(player, enemyManager, isImmediate);
+            qDebug() << "供应商弹药效果：永久应用霰弹枪效果（子弹穿透）";
             break;
         case vendor_badge:
-            applyVendorBadgeEffect(player, enemyManager, isImmediate);
+            applyBadgeEffect(player, enemyManager, isImmediate);
+            qDebug() << "供应商治安官徽章效果：永久应用治安官徽章效果";
             break;
             
         default:
@@ -93,6 +85,7 @@ void ItemEffectManager::applyItemEffect(int itemType, PlayerViewModel* player, E
     
     emit itemEffectApplied(itemType, isImmediate);
 }
+
 //转换成中文这样debug信息清楚一点
 QString ItemEffectManager::getItemName(int itemType) {
     switch(itemType) {
@@ -109,17 +102,21 @@ QString ItemEffectManager::getItemName(int itemType) {
         case badge: return "治安官徽章";
         
         // 供应商道具名称
-        case vendor_boots_1: return "靴子";
-        case vendor_boots_2: return "靴子";
-        case vendor_extra_life: return "额外生命";
-        case vendor_gun_1: return "枪";
-        case vendor_gun_2: return "枪";
-        case vendor_gun_3: return "枪";
-        case vendor_gun_4: return "枪-加强版";
-        case vendor_ammo_1: return "弹药";
-        case vendor_ammo_2: return "弹药";
-        case vendor_ammo_3: return "弹药";
-        case vendor_badge: return "治安官徽章";
+        case vendor_boots_1:
+        case vendor_boots_2:
+            return "靴子";
+        case vendor_extra_life:
+            return "额外生命";
+        case vendor_gun_1:
+        case vendor_gun_2:
+        case vendor_gun_3:
+            return "枪";
+        case vendor_ammo_1:
+        case vendor_ammo_2:
+        case vendor_ammo_3:
+            return "弹药";
+        case vendor_badge:
+            return "治安官徽章";
         
         default: return "未知道具";
     }
@@ -140,17 +137,21 @@ QString ItemEffectManager::getItemDescription(int itemType) {
         case badge: return "提高开火速率和移动速率，并使你能像使用霰弹枪那样锥状射击";
         
         // 供应商道具描述
-        case vendor_boots_1: return "提高移动速度";
-        case vendor_boots_2: return "提高移动速度";
-        case vendor_extra_life: return "获得额外一条生命，当供应商下一次出现的时候，可以再次购买";
-        case vendor_gun_1: return "提高射击速度";
-        case vendor_gun_2: return "提高射击速度";
-        case vendor_gun_3: return "提高射击速度";
-        case vendor_gun_4: return "永久应用霰弹枪力量升级的效果，没有降低射击速度的减益效果";
-        case vendor_ammo_1: return "把子弹的杀伤值提高到2/3/4。子弹具有穿透性";
-        case vendor_ammo_2: return "把子弹的杀伤值提高到2/3/4。子弹具有穿透性";
-        case vendor_ammo_3: return "把子弹的杀伤值提高到2/3/4。子弹具有穿透性";
-        case vendor_badge: return "获得一枚治安官徽章，当供应商下一次出现的时候，可以再次购买";
+        case vendor_boots_1:
+        case vendor_boots_2:
+            return "提高移动速度";
+        case vendor_extra_life:
+            return "获得额外一条生命，当供应商下一次出现的时候，可以再次购买";
+        case vendor_gun_1:
+        case vendor_gun_2:
+        case vendor_gun_3:
+            return "提高射击速度";
+        case vendor_ammo_1:
+        case vendor_ammo_2:
+        case vendor_ammo_3:
+            return "把子弹的杀伤值提高到2/3/4。子弹具有穿透性";
+        case vendor_badge:
+            return "获得一枚治安官徽章，当供应商下一次出现的时候，可以再次购买";
         
         default: return "未知效果";
     }
@@ -431,79 +432,4 @@ void ItemEffectManager::clearAllEffects(PlayerViewModel* player) {
     m_currentTime = 0.0;
     
     qDebug() << "清除所有道具效果";
-}
-
-// 供应商道具效果实现
-void ItemEffectManager::applyVendorBoots1Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 永久提升移动速度10%
-    double currentSpeed = player->getMoveSpeed();
-    double newSpeed = currentSpeed * 1.1;
-    player->setMoveSpeed(newSpeed);
-    qDebug() << "供应商靴子1效果：永久提升移动速度至" << newSpeed;
-}
-
-void ItemEffectManager::applyVendorBoots2Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 永久提升移动速度20%
-    double currentSpeed = player->getMoveSpeed();
-    double newSpeed = currentSpeed * 1.2;
-    player->setMoveSpeed(newSpeed);
-    qDebug() << "供应商靴子2效果：永久提升移动速度至" << newSpeed;
-}
-
-void ItemEffectManager::applyVendorExtraLifeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 永久增加一条生命
-    player->addLife();
-    qDebug() << "供应商额外生命效果：永久增加一条生命";
-}
-
-void ItemEffectManager::applyVendorGun1Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 永久提升射击速度10%
-    double currentCooldown = player->getShootCooldown();
-    double newCooldown = currentCooldown * 0.9;
-    player->setShootCooldown(newCooldown);
-    qDebug() << "供应商枪1效果：永久提升射击速度，冷却时间降至" << newCooldown;
-}
-
-void ItemEffectManager::applyVendorGun2Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 永久提升射击速度20%
-    double currentCooldown = player->getShootCooldown();
-    double newCooldown = currentCooldown * 0.8;
-    player->setShootCooldown(newCooldown);
-    qDebug() << "供应商枪2效果：永久提升射击速度，冷却时间降至" << newCooldown;
-}
-
-void ItemEffectManager::applyVendorGun3Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 永久提升射击速度30%
-    double currentCooldown = player->getShootCooldown();
-    double newCooldown = currentCooldown * 0.7;
-    player->setShootCooldown(newCooldown);
-    qDebug() << "供应商枪3效果：永久提升射击速度，冷却时间降至" << newCooldown;
-}
-
-void ItemEffectManager::applyVendorGun4Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 永久应用霰弹枪效果，无射击速度减益
-    player->setShotgunMode(true);
-    qDebug() << "供应商枪-加强版效果：永久应用霰弹枪效果";
-}
-
-void ItemEffectManager::applyVendorAmmo1Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 永久提升子弹伤害和穿透能力
-    // 这里需要在 BulletViewModel 中添加伤害和穿透属性
-    qDebug() << "供应商弹药1效果：永久提升子弹伤害和穿透能力";
-}
-
-void ItemEffectManager::applyVendorAmmo2Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 永久提升子弹伤害和穿透能力
-    qDebug() << "供应商弹药2效果：永久提升子弹伤害和穿透能力";
-}
-
-void ItemEffectManager::applyVendorAmmo3Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 永久提升子弹伤害和穿透能力
-    qDebug() << "供应商弹药3效果：永久提升子弹伤害和穿透能力";
-}
-
-void ItemEffectManager::applyVendorBadgeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
-    // 永久获得治安官徽章效果
-    player->setBadgeMode(true);
-    qDebug() << "供应商治安官徽章效果：永久获得治安官徽章效果";
 }

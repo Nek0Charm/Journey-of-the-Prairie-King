@@ -40,13 +40,32 @@ void VendorManager::hideVendor() {
 
 QList<int> VendorManager::getAvailableUpgradeItems() const {
     QList<int> availableItems;
-    
+    QStringList slotInfo;
+    // 槽位0
     for (const auto& item : m_vendorItems) {
-        if (isItemAvailable(item.itemType)) {
+        if (item.slotIndex == 0 && isItemAvailable(item.itemType)) {
             availableItems.append(item.itemType);
+            slotInfo << QString("[0]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[0]);
+            break;
         }
     }
-    
+    // 槽位1
+    for (const auto& item : m_vendorItems) {
+        if (item.slotIndex == 1 && isItemAvailable(item.itemType)) {
+            availableItems.append(item.itemType);
+            slotInfo << QString("[1]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[1]);
+            break;
+        }
+    }
+    // 槽位2
+    for (const auto& item : m_vendorItems) {
+        if (item.slotIndex == 2 && isItemAvailable(item.itemType)) {
+            availableItems.append(item.itemType);
+            slotInfo << QString("[2]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[2]);
+            break;
+        }
+    }
+    qDebug() << "[供应商可购买物品]" << slotInfo.join(" | ");
     return availableItems;
 }
 
@@ -60,33 +79,34 @@ bool VendorManager::canPurchaseItem(int itemType, int playerCoins) const {
 }
 
 bool VendorManager::purchaseItem(int itemType, PlayerViewModel* player) {
-    if (!player) {
-        return false;
-    }
-    
+    if (!player) return false;
     int price = getItemPrice(itemType);
-    
     if (player->getCoins() >= price) {
-        // 扣除金币
         player->addCoins(-price);
-        
-        
-        // 更新进度
         int slotIndex = getSlotIndex(itemType);
-        m_slotProgress[slotIndex]++;
-        unlockNextItem(slotIndex);
-        
+        bool isInfiniteItem = false;
+        for (const auto& item : m_vendorItems) {
+            if (item.itemType == itemType && item.isInfinitePurchase) {
+                isInfiniteItem = true;
+                break;
+            }
+        }
+        if (!isInfiniteItem && slotIndex >= 0 && slotIndex < 4) {
+            m_slotProgress[slotIndex]++;
+            unlockNextItem(slotIndex);
+        }
         emit itemPurchased(itemType);
-        qDebug() << "购买供应商道具:" << ItemEffectManager::getItemName(itemType) << "价格:" << price;
+        qDebug() << QString("[购买成功] 槽位%1 物品:%2(ID:%3) 价格:%4 进度:%5").arg(slotIndex).arg(ItemEffectManager::getItemName(itemType)).arg(itemType).arg(price).arg(m_slotProgress[slotIndex]);
+        // 购买成功后，更新物品列表，但不隐藏供应商
+        emit vendorItemsChanged(getAvailableUpgradeItems());
         return true;
     }
-    
-    qDebug() << "金币不足，无法购买道具:" << ItemEffectManager::getItemName(itemType);
+    qDebug() << QString("[购买失败] 金币不足 物品:%1(ID:%2) 价格:%3 当前金币:%4").arg(ItemEffectManager::getItemName(itemType)).arg(itemType).arg(price).arg(player->getCoins());
     return false;
 }
 
 int VendorManager::getSlotProgress(int slotIndex) const {
-    if (slotIndex >= 0 && slotIndex < 3) {
+    if (slotIndex >= 0 && slotIndex < 4) {
         return m_slotProgress[slotIndex];
     }
     return 0;
@@ -94,32 +114,27 @@ int VendorManager::getSlotProgress(int slotIndex) const {
 
 void VendorManager::initializeVendorItems() {
     m_vendorItems.clear();
-    
-    // 卡槽1：靴子系列
+    // 重置所有槽位进度
+    for (int i = 0; i < 4; i++) m_slotProgress[i] = 0;
+    // 槽位0：靴子系列 + 额外生命
     m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_boots_1, 8, 0, 0));
     m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_boots_2, 20, 0, 1));
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_extra_life, 10, 0, 2));
-    
-    // 卡槽2：枪系列
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_extra_life, 10, 0, 2, false, true)); // 无限购买
+    // 槽位1：枪系列 + 徽章
     m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_gun_1, 10, 1, 0));
     m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_gun_2, 20, 1, 1));
     m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_gun_3, 30, 1, 2));
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_gun_4, 99, 1, 3, true)); // 困难模式
-    
-    // 卡槽3：弹药系列
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_badge, 10, 1, 3, false, true)); // 无限购买
+    // 槽位2：弹药系列 + 徽章
     m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_ammo_1, 15, 2, 0));
     m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_ammo_2, 30, 2, 1));
     m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_ammo_3, 45, 2, 2));
-    
-    // 通用：治安官徽章
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_badge, 10, 1, 4));
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_badge, 10, 2, 3));
-    
-    qDebug() << "供应商物品初始化完成，共" << m_vendorItems.size() << "个物品";
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_badge, 10, 2, 3, false, true)); // 无限购买
+    qDebug() << "[供应商初始化] 槽位进度: [0]" << m_slotProgress[0] << "[1]" << m_slotProgress[1] << "[2]" << m_slotProgress[2];
 }
 
 void VendorManager::unlockNextItem(int slotIndex) {
-    if (slotIndex < 0 || slotIndex >= 3) {
+    if (slotIndex < 0 || slotIndex >= 4) {
         return;
     }
     
@@ -129,6 +144,8 @@ void VendorManager::unlockNextItem(int slotIndex) {
     for (const auto& item : m_vendorItems) {
         if (item.slotIndex == slotIndex && item.itemIndex == currentProgress) {
             qDebug() << "解锁卡槽" << slotIndex << "的下一个物品:" << ItemEffectManager::getItemName(item.itemType);
+            // 发出物品列表变化信号，通知UI更新
+            emit vendorItemsChanged(getAvailableUpgradeItems());
             break;
         }
     }
@@ -163,9 +180,19 @@ bool VendorManager::isItemAvailable(int itemType) const {
             // 检查购买进度
             int slotIndex = item.slotIndex;
             int itemIndex = item.itemIndex;
-            int currentProgress = m_slotProgress[slotIndex];
             
-            return itemIndex == currentProgress;
+            // 特殊处理：无限购买物品（额外生命、治安官徽章）
+            if (item.isInfinitePurchase) {
+                // 如果已经到达该槽位的最后一个物品，则始终可用
+                int currentProgress = m_slotProgress[slotIndex];
+                return itemIndex == currentProgress;
+            }
+            
+            // 对于其他槽位，检查当前进度
+            if (slotIndex >= 0 && slotIndex < 4) {
+                int currentProgress = m_slotProgress[slotIndex];
+                return itemIndex == currentProgress;
+            }
         }
     }
     return false;

@@ -74,7 +74,7 @@ void PlayerViewModel::addLife()
 void PlayerViewModel::reset()
 {
     m_stats.lives = 4;
-    m_stats.coins = 0;
+    m_stats.coins = 1000;
     m_stats.position = QPointF(MAP_WIDTH/2, MAP_HEIGHT/2);
     m_stats.shootingDirection = QPointF(1, 0);
     m_stats.moveSpeed = 80.0;

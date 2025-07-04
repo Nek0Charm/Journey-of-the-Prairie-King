@@ -8,6 +8,7 @@
 #include "viewmodel/CollisionSystem.h"
 #include "viewmodel/ItemViewModel.h"
 #include "viewmodel/ItemEffectManager.h"
+#include "viewmodel/VendorManager.h"
 
 class GameViewModel : public QObject {
     Q_OBJECT
@@ -47,7 +48,14 @@ public:
         
     GameState getGameState() const { return m_gameState; }
     bool isGameActive() const { return m_gameState == GameState::PLAYING; }
-    
+
+    // 供应商相关接口
+    VendorManager* getVendorManager() const { return m_vendorManager.get(); }
+    void purchaseVendorItem(int itemType);
+    QList<int> getAvailableVendorItems() const;
+    bool canPurchaseVendorItem(int itemType) const;
+    int getVendorItemPrice(int itemType) const;
+
 signals:
     void gameStateChanged(GameState state);
     void playerDied();
@@ -60,6 +68,10 @@ signals:
     void gameTimeChanged(double gameTime);
     void enemiesChanged(QList<EnemyData> enemies);
     void itemsChanged(QList<ItemData> items);
+    void vendorAppeared();
+    void vendorDisappeared();
+    void vendorItemPurchased(int itemType);
+    void vendorItemsChanged(const QList<int>& items);  // 供应商物品列表变化信号
 
     
 private:
@@ -69,7 +81,9 @@ private:
     std::unique_ptr<CollisionSystem> m_collisionSystem;
     std::unique_ptr<ItemViewModel> m_item;
     std::unique_ptr<ItemEffectManager> m_itemEffectManager;
+    std::unique_ptr<VendorManager> m_vendorManager;
     double m_gameTime = 0.0;   
+    int m_currentArea = 12;  // 当前区域，临时改为1-2来测试供应商
     
     void checkGameState();
     void handlePlayerDeath();

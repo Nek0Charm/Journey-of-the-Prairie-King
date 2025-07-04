@@ -78,3 +78,5 @@ void MainWindow::onGameStateChanged(GameState state) {
     m_gameState = state;
     update();
 }
+
+

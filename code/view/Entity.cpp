@@ -310,6 +310,37 @@ QString ItemEntity::typeToString(ItemType type) {
     case ItemType::badge:
         stringtype = "badge";
         break;
+    // 供应商道具类型映射
+    case ItemType::vendor_boots_1:
+        stringtype = "boots_1";  // 靴子1
+        break;
+    case ItemType::vendor_boots_2:
+        stringtype = "boots_2";  // 靴子2
+        break;
+    case ItemType::vendor_extra_life:
+        stringtype = "more_live";  // 额外生命
+        break;
+    case ItemType::vendor_gun_1:
+        stringtype = "gun_1";  // 枪1
+        break;
+    case ItemType::vendor_gun_2:
+        stringtype = "gun_2";  // 枪2
+        break;
+    case ItemType::vendor_gun_3:
+        stringtype = "gun_3";  // 枪3
+        break;
+    case ItemType::vendor_ammo_1:
+        stringtype = "bullet_1";  // 弹药1
+        break;
+    case ItemType::vendor_ammo_2:
+        stringtype = "bullet_2";  // 弹药2
+        break;
+    case ItemType::vendor_ammo_3:
+        stringtype = "bullet_3";  // 弹药3
+        break;
+    case ItemType::vendor_badge:
+        stringtype = "badge";  // 治安官徽章
+        break;
     default:
         break;
     }
@@ -380,9 +411,9 @@ void VendorEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QP
         QRectF tableclothDestRect(tableclothTopLeft, tableclothScaledSize);
         painter->drawPixmap(tableclothDestRect, spriteSheet, tableclothSourceRect); 
         double itemSpacing = 10.0; 
-        double allItemsWidth = (itemList.size() * 16 * scale) + ((itemList.size() - 1) * itemSpacing);
+        double allItemsWidth = (m_availableItems.size() * 16 * scale) + ((m_availableItems.size() - 1) * itemSpacing);
         double currentItemX = tableclothDestRect.center().x() - allItemsWidth / 2.0;
-        for (int itemType : itemList) {
+        for (int itemType : m_availableItems) {
             QString itemName = ItemEntity::typeToString(static_cast<ItemType>(itemType));
             QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemName);
             

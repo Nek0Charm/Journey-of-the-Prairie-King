@@ -36,6 +36,9 @@ GameWidget::GameWidget(QWidget *parent)
     
     // 初始化道具使用相关
     m_spaceKeyPressed = false;
+    
+    // 初始化供应商物品列表（空列表，等待VendorManager更新）
+    m_availableVendorItems = {};
 }
 
 GameWidget::~GameWidget() {
@@ -113,8 +116,6 @@ void GameWidget::paintEvent(QPaintEvent *event) {
     painter.fillRect(rect(), Qt::black); 
 
     m_gameMap->paint(&painter, m_spriteSheet, viewOffset);
-    paintUi(&painter, viewOffset);
-    vendor->paint(&painter, m_spriteSheet, viewOffset);
     for (auto it: m_deadmonsters) {
         it->paint(&painter, m_spriteSheet, viewOffset);
     }
@@ -125,6 +126,8 @@ void GameWidget::paintEvent(QPaintEvent *event) {
     for (MonsterEntity* monster : m_monsters) {
         monster->paint(&painter, m_spriteSheet, viewOffset); 
     }
+    paintUi(&painter, viewOffset);
+    vendor->paint(&painter, m_spriteSheet, viewOffset);
 
     QRect bulletSourceRect = SpriteManager::instance().getSpriteRect("player_bullet");
     if (!bulletSourceRect.isNull()) {
@@ -283,8 +286,41 @@ void GameWidget::timerEvent() {
     }
     if (keys[Qt::Key_E]) {
         emit vendorAppear();
-    } else if (keys[Qt::Key_Q]) {
-        emit vendorDisappear();
+        // 强制激活供应商状态
+        if (vendor) {
+            vendor->onVendorAppear();
+        }
+    }
+    
+    // 供应商物品购买 - 根据实际可购买的物品响应按键
+    static bool key1Pressed = false, key2Pressed = false, key3Pressed = false;
+    
+    if (vendor) {
+        qDebug() << "当前可购买的供应商物品:" << m_availableVendorItems;
+        
+        if (keys[Qt::Key_1] && !key1Pressed && m_availableVendorItems.size() >= 1) {
+            key1Pressed = true;
+            qDebug() << "尝试购买第一个物品:" << m_availableVendorItems[0];
+            emit purchaseVendorItem(m_availableVendorItems[0]);  // 购买第一个可购买物品
+        } else if (!keys[Qt::Key_1]) {
+            key1Pressed = false;
+        }
+        
+        if (keys[Qt::Key_2] && !key2Pressed && m_availableVendorItems.size() >= 2) {
+            key2Pressed = true;
+            qDebug() << "尝试购买第二个物品:" << m_availableVendorItems[1];
+            emit purchaseVendorItem(m_availableVendorItems[1]);  // 购买第二个可购买物品
+        } else if (!keys[Qt::Key_2]) {
+            key2Pressed = false;
+        }
+        
+        if (keys[Qt::Key_3] && !key3Pressed && m_availableVendorItems.size() >= 3) {
+            key3Pressed = true;
+            qDebug() << "尝试购买第三个物品:" << m_availableVendorItems[2];
+            emit purchaseVendorItem(m_availableVendorItems[2]);  // 购买第三个可购买物品
+        } else if (!keys[Qt::Key_3]) {
+            key3Pressed = false;
+        }
     }
 }
 
@@ -468,4 +504,56 @@ void GameWidget::onVendorAppear() {
 
 void GameWidget::onVendorDisappear() {
     emit vendorDisappear();
+}
+
+// 新增的供应商相关方法
+void GameWidget::onVendorAppeared() {
+    // 供应商出现时的处理逻辑
+    qDebug() << "供应商出现在UI中";
+    
+    // 获取可购买的物品列表并更新供应商显示
+    if (vendor) {
+        // 使用当前已设置的供应商物品列表
+        vendor->setAvailableItems(m_availableVendorItems);
+        qDebug() << "供应商显示物品列表:" << m_availableVendorItems;
+    }
+}
+
+void GameWidget::onVendorDisappeared() {
+    // 供应商消失时的处理逻辑
+    qDebug() << "供应商从UI中消失";
+    
+    // 清空供应商物品列表
+    m_availableVendorItems.clear();
+    
+    // 隐藏供应商实体
+    if (vendor) {
+        vendor->setAvailableItems(QList<int>());
+        qDebug() << "供应商实体已隐藏，物品列表已清空";
+    }
+}
+
+void GameWidget::onVendorItemPurchased(int itemType) {
+    // 供应商物品购买成功时的处理逻辑
+    qDebug() << "成功购买供应商物品:" << itemType;
+    
+    // 购买成功后，更新供应商的可购买物品列表
+    updateVendorItems();
+}
+
+void GameWidget::updateVendorItems() {
+    // 更新供应商的可购买物品列表
+    if (vendor) {
+        qDebug() << "正在更新VendorEntity的物品列表，当前列表:" << m_availableVendorItems;
+        vendor->setAvailableItems(m_availableVendorItems);
+        qDebug() << "VendorEntity物品列表更新完成，当前列表:" << vendor->getAvailableItems();
+    } else {
+        qDebug() << "警告：vendor对象为空，无法更新物品列表";
+    }
+}
+
+void GameWidget::setAvailableVendorItems(const QList<int>& items) {
+    m_availableVendorItems = items;
+    qDebug() << "设置可购买的供应商物品:" << m_availableVendorItems;
+    updateVendorItems();  // 立即更新供应商显示
 }

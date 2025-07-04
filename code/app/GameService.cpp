@@ -70,4 +70,20 @@ void GameService::setupConnections() {
 
     connect(m_gameViewModel->getPlayer(), &PlayerViewModel::playerStealthModeChanged,
             m_mainWindow->getGameWidget(), &GameWidget::updateStealthMode);
+            
+    // 连接供应商相关信号
+    connect(m_gameViewModel, &GameViewModel::vendorAppeared,
+            m_mainWindow->getGameWidget(), &GameWidget::onVendorAppeared);
+    connect(m_gameViewModel, &GameViewModel::vendorDisappeared,
+            m_mainWindow->getGameWidget(), &GameWidget::onVendorDisappeared);
+    connect(m_gameViewModel, &GameViewModel::vendorItemPurchased,
+            m_mainWindow->getGameWidget(), &GameWidget::onVendorItemPurchased);
+            
+    // 连接供应商购买请求
+    connect(m_mainWindow->getGameWidget(), &GameWidget::purchaseVendorItem,
+            m_gameViewModel, &GameViewModel::purchaseVendorItem);
+            
+    // 连接供应商物品列表更新
+    connect(m_gameViewModel, &GameViewModel::vendorItemsChanged,
+            m_mainWindow->getGameWidget(), &GameWidget::setAvailableVendorItems);
 }

@@ -92,6 +92,28 @@ void GameViewModel::updateGame(double deltaTime)
     // 更新道具效果
     m_itemEffectManager->updateEffects(deltaTime, m_player.get());
     
+    // 检查供应商出现
+    m_vendorManager->checkVendorAppearance(m_currentArea);
+    
+    // 只在供应商激活时才发出供应商物品列表变化信号
+    static QList<int> lastVendorItems;
+    static bool lastVendorActive = false;
+    bool currentVendorActive = m_vendorManager->isVendorActive();
+    
+    if (currentVendorActive) {
+        QList<int> currentVendorItems = m_vendorManager->getAvailableUpgradeItems();
+        if (lastVendorItems != currentVendorItems || !lastVendorActive) {
+            lastVendorItems = currentVendorItems;
+            emit vendorItemsChanged(currentVendorItems);
+        }
+    } else if (lastVendorActive) {
+        // 供应商刚刚消失，清空物品列表
+        lastVendorItems.clear();
+        emit vendorItemsChanged(QList<int>());
+    }
+    
+    lastVendorActive = currentVendorActive;
+    
     // 检查游戏状态
     checkGameState();
 }
@@ -112,7 +134,7 @@ void GameViewModel::handlePlayerDeath()
 
 void GameViewModel::setupConnections()
 {
-    if (!m_player || !m_enemyManager || !m_collisionSystem) {
+    if (!m_player || !m_enemyManager || !m_collisionSystem || !m_vendorManager) {
         return;
     }
 
@@ -149,6 +171,14 @@ void GameViewModel::setupConnections()
             this, &GameViewModel::handleItemUsed);
     connect(m_item.get(), &ItemViewModel::itemUsedImmediately,
             this, &GameViewModel::handleItemUsedImmediately);
+
+    // 连接供应商信号
+    connect(m_vendorManager.get(), &VendorManager::vendorAppeared,
+            this, &GameViewModel::vendorAppeared);
+    connect(m_vendorManager.get(), &VendorManager::vendorDisappeared,
+            this, &GameViewModel::vendorDisappeared);
+    connect(m_vendorManager.get(), &VendorManager::itemPurchased,
+            this, &GameViewModel::vendorItemPurchased);
 }
 
 void GameViewModel::initializeComponents()
@@ -158,6 +188,7 @@ void GameViewModel::initializeComponents()
     m_enemyManager = std::make_unique<EnemyManager>(this);
     m_collisionSystem = std::make_unique<CollisionSystem>(this);
     m_itemEffectManager = std::make_unique<ItemEffectManager>(this);
+    m_vendorManager = std::make_unique<VendorManager>(this);
 }
 
 void GameViewModel::resetGame()
@@ -213,4 +244,29 @@ void GameViewModel::handleItemUsed(int itemType) {
 }
 void GameViewModel::handleItemUsedImmediately(int itemType) {
     handleItemUsed(itemType);
+}
+
+// 供应商相关方法实现
+void GameViewModel::purchaseVendorItem(int itemType) {
+    if (m_vendorManager && m_player) {
+        if (m_vendorManager->purchaseItem(itemType, m_player.get())) {
+            // 购买成功后，应用物品效果
+            m_itemEffectManager->applyItemEffect(itemType, m_player.get(), m_enemyManager.get(), true);
+        }
+    }
+}
+
+QList<int> GameViewModel::getAvailableVendorItems() const {
+    return m_vendorManager ? m_vendorManager->getAvailableUpgradeItems() : QList<int>();
+}
+
+bool GameViewModel::canPurchaseVendorItem(int itemType) const {
+    if (!m_vendorManager || !m_player) {
+        return false;
+    }
+    return m_vendorManager->canPurchaseItem(itemType, m_player->getCoins());
+}
+
+int GameViewModel::getVendorItemPrice(int itemType) const {
+    return m_vendorManager ? m_vendorManager->getItemPrice(itemType) : 0;
 }

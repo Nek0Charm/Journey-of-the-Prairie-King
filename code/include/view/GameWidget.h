@@ -5,6 +5,7 @@
 #include "view/Animation.h"
 #include "view/SpriteManager.h"
 #include "view/Entity.h"
+
 class GameWidget : public QWidget {
     Q_OBJECT
 
@@ -12,6 +13,9 @@ public:
     GameWidget(QWidget *parent = nullptr);
     void clearKeys() {keys.clear();};
     ~GameWidget();
+    
+    // 设置可购买的供应商物品列表（通过信号槽机制）
+    void setAvailableVendorItems(const QList<int>& items);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -33,7 +37,7 @@ signals:
     void useItem();
     void vendorAppear();
     void vendorDisappear();
-
+    void purchaseVendorItem(int itemType);  // 购买供应商物品的信号
 
 public slots:
     // void onStateUpdated();
@@ -54,6 +58,12 @@ public slots:
     void updateItemEffect(int itemType);
     void onVendorAppear();
     void onVendorDisappear();
+    void onVendorAppeared();      // 供应商出现时的槽
+    void onVendorDisappeared();   // 供应商消失时的槽
+    void onVendorItemPurchased(int itemType);  // 供应商物品购买成功时的槽
+    
+    // 更新供应商可购买物品列表
+    void updateVendorItems();
 
 private:
     QTimer* keyRespondTimer;
@@ -94,6 +104,9 @@ private:
     bool m_isZombieMode = false;
     bool m_isBoomActive = false;
     bool m_isStealthMode = false;
+    
+    // 供应商相关
+    QList<int> m_availableVendorItems;  // 当前可购买的供应商物品列表
 };
 
 #endif
