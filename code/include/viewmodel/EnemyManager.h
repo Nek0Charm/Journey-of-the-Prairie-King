@@ -65,8 +65,7 @@ private:
     void removeInactiveEnemies();
     bool isPositionValid(const QPointF& position) const;
     bool isPositionValid(const QPointF& position, const int enemyId) const;
-    QPointF calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos) const;
-    double calculateDistance(const QPointF& pos1, const QPointF& pos2) const;
+    QPointF calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos, int enemyId) const;
 };
 
 #endif // ENEMYMANAGER_H
