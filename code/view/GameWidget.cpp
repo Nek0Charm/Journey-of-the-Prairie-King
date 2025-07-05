@@ -433,9 +433,9 @@ void GameWidget::syncItems() {
         }
         if (item->getState() != ItemState::Picked) {
             item->setPosition(data.position);
+            item->setLingerTimer(data.remainTime);
         }
     }
-    
 }
 
 void GameWidget::die(int id) {

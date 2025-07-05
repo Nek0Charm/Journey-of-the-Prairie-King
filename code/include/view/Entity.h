@@ -166,8 +166,8 @@ public:
     void update(double deltaTime) override;
     void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
     void setState(ItemState newState) { m_currentState = newState; }
+    void setLingerTimer(double timer) { m_lingerTimer = timer; }
     ItemState getState() { return m_currentState; }
-    bool ShouldbeRemove() { return m_lingerTimer <= 0 ; }
     bool isVisible();
     static QString typeToString(ItemType type);
 private:

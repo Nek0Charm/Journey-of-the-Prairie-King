@@ -269,9 +269,6 @@ ItemEntity::ItemEntity(int itemtype, QObject *parent, QPointF pos)
 }
 
 void ItemEntity::update(double deltaTime) {
-    if (m_lingerTimer > 0) {
-        m_lingerTimer -= deltaTime;
-    }
     if (m_currentState == ItemState::Drop && m_lingerTimer <= 3.0) {
         setState(ItemState::Flash);
     }
