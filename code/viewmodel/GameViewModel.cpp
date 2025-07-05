@@ -69,8 +69,8 @@ void GameViewModel::updateGame(double deltaTime)
     }
 
     m_gameTime += deltaTime;
-    if(m_gameTime > MAX_GAMETIME) {
-        m_gameTime = 0.0; 
+    m_gameTime = std::min(m_gameTime, MAX_GAMETIME);
+    if(m_gameTime == MAX_GAMETIME && m_enemyManager->getActiveEnemyCount() == 0) {
         emit gameTimeChanged(m_gameTime);
         endGame();
         return;
@@ -81,7 +81,7 @@ void GameViewModel::updateGame(double deltaTime)
     m_player->update(deltaTime);
     
     // 更新敌人（传递玩家潜行状态）
-    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition(), m_player->isStealthMode());
+    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition(), m_player->isStealthMode(), m_gameTime == MAX_GAMETIME);
 
     m_collisionSystem->checkCollisions(*m_player, 
                                       m_enemyManager->getEnemies(),
@@ -153,9 +153,6 @@ void GameViewModel::setupConnections()
     // 连接玩家状态变化
     connect(m_player.get(), &PlayerViewModel::playerDied,
             this, &GameViewModel::handlePlayerDeath);
-
-    connect(m_player.get(), &PlayerViewModel::livesChanged,
-            this, &GameViewModel::playerLivesChanged);
 
     connect(m_player.get(), &PlayerViewModel::livesDown,
             this, &GameViewModel::playerLivesDown);

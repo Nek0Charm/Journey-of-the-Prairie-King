@@ -62,9 +62,11 @@ struct EnemyData {
     int health = 1;
     QPointF position;
     QPointF velocity;
+    QPointF targetPosition;
     double moveSpeed = 40.0;
     bool isActive = true;
     bool isSmart = true;
+    double time = 0.0;
 };
 
 struct ItemData {

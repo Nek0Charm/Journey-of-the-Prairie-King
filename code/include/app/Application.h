@@ -22,6 +22,11 @@ private slots:
 private:
     void setupGameLoop();
     void calculateDeltaTime();
+    void initalizeComponents();
+    /*
+     * 由于Application类继承自QApplication，不能够使用connect
+     * 所以不能把connect写在Application中
+    */
 
     std::unique_ptr<MainWindow> m_view;
     std::unique_ptr<GameViewModel> m_viewModel;

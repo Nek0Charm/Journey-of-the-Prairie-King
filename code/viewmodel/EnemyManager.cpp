@@ -1,6 +1,7 @@
 #include <QRandomGenerator>
 #include <cmath>
 #include "viewmodel/EnemyManager.h"
+#include "viewmodel/CollisionSystem.h"
 #include "common/GameMap.h"
 
 EnemyManager::EnemyManager(QObject *parent)
@@ -38,6 +39,9 @@ void EnemyManager::spawnEnemy(const QPointF& position)
     enemy.health = 1;
     enemy.position = position;
     enemy.velocity = QPointF(0, 0);
+    int px = QRandomGenerator::global()->bounded(128)+64;
+    int py = QRandomGenerator::global()->bounded(128)+64;
+    enemy.targetPosition = QPointF(px, py);
     enemy.moveSpeed = m_enemyMoveSpeed;
     enemy.isActive = true;
     enemy.isSmart = QRandomGenerator::global()->bounded(3) != 2; 
@@ -59,7 +63,7 @@ void EnemyManager::spawnEnemyAtRandomPosition()
     spawnEnemy(position);
 }
 
-void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode)
+void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode, bool gameOver)
 {
     // 更新潜行状态
     m_playerStealthMode = playerStealthMode;
@@ -67,10 +71,20 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
     for (auto& enemy : m_enemies) {
         if (enemy.isActive) {
             // 如果玩家处于潜行模式，敌人停止移动
+            enemy.time += deltaTime;
+            if( enemy.time >= (enemy.isSmart ?0.25 :1)) {
+                enemy.time = 0.0;
+                enemy.targetPosition = playerPos;
+                if(!enemy.isSmart) {
+                    int px = QRandomGenerator::global()->bounded(208)+16;
+                    int py = QRandomGenerator::global()->bounded(208)+64;
+                    enemy.targetPosition = QPointF(px, py);
+                }
+            }
             if (playerStealthMode) {
                 enemy.velocity = QPointF(0, 0);
             } else {
-                updateEnemyAI(enemy, playerPos);
+                updateEnemyAI(enemy, enemy.targetPosition);
             }
             
             if(!isPositionValid(enemy.position + enemy.velocity * deltaTime, enemy.id)) {
@@ -79,7 +93,7 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
             enemy.position += enemy.velocity * deltaTime;
         }
     }
-    spawnEnemies(deltaTime);
+    if(!gameOver) spawnEnemies(deltaTime);
     
     removeInactiveEnemies();
 
@@ -181,9 +195,9 @@ void EnemyManager::updateEnemyAI(EnemyData& enemy, const QPointF& playerPos)
     // 计算到玩家的方向
     QPointF direction = QPointF(0, 0);
     if(enemy.isSmart) {
-        direction = calculateDirectionToPlayer(enemy.position, playerPos);
+        direction = calculateDirectionToPlayer(enemy.position, playerPos, enemy.id);
     } else {
-        direction = calculateDirectionToPlayer(enemy.position,QPointF(255, 255)-playerPos);
+        direction = calculateDirectionToPlayer(enemy.position,QPointF(255, 255)-playerPos, enemy.id);
     }
     // 设置速度
     enemy.velocity = direction * enemy.moveSpeed;
@@ -202,10 +216,7 @@ bool EnemyManager::isPositionValid(const QPointF& position) const
 {
     for(const auto& enemy : m_enemies) {
         if (enemy.isActive ) {
-            if(enemy.position.x() < position.x() + ENEMY_WIDTH &&
-               enemy.position.x() + ENEMY_WIDTH > position.x() &&
-               enemy.position.y() < position.y() + ENEMY_WIDTH &&
-               enemy.position.y() + ENEMY_WIDTH > position.y()) {
+            if(CollisionSystem::instance().isCollision(position, enemy.position, 16, 16)) {
                 return false;
             }
         }
@@ -217,10 +228,7 @@ bool EnemyManager::isPositionValid(const QPointF& position, const int enemyId) c
 {
     for(const auto& enemy : m_enemies) {
         if (enemy.isActive && enemy.id != enemyId) {
-            if(enemy.position.x() < position.x() + ENEMY_WIDTH &&
-               enemy.position.x() + ENEMY_WIDTH > position.x() &&
-               enemy.position.y() < position.y() + ENEMY_WIDTH &&
-               enemy.position.y() + ENEMY_WIDTH > position.y()) {
+            if(CollisionSystem::instance().isCollision(position, enemy.position, 16, 16)) {
                 return false;
             }
         }
@@ -228,7 +236,7 @@ bool EnemyManager::isPositionValid(const QPointF& position, const int enemyId) c
     return true;
 }
 
-QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos) const
+QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos, int enemyId) const
 {
     QPointF direction = QPointF(0, 0);
     QPoint enemyPosInt = QPoint(static_cast<int>(enemyPos.x())/16, static_cast<int>(enemyPos.y())/16);
@@ -243,7 +251,8 @@ QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const 
         return direction;
     }
     // 向上
-    if(GameMap::instance().isWalkable(ey-1, ex) ) {
+    if(GameMap::instance().isWalkable(ey-1, ex) 
+    && isPositionValid(QPointF(ex*16,(ey-1)*16), enemyId)) {
         cost = 1 + std::abs(px - ex) + std::abs(py - (ey-1));
         if(cost <= minCost) {
             minCost = cost;
@@ -251,7 +260,9 @@ QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const 
         }
     }
     // 向下
-    if(GameMap::instance().isWalkable(ey+1, ex)) {
+    if(GameMap::instance().isWalkable(ey+1, ex) 
+    && isPositionValid(QPointF(ex*16,(ey+1)*16), enemyId)) {
+        
         cost = 1 + std::abs(px - ex) + std::abs(py - (ey+1));
         if(cost <= minCost) {
             minCost = cost;
@@ -259,7 +270,8 @@ QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const 
         }
     }
     // 向左
-    if(GameMap::instance().isWalkable(ey, ex-1)) {
+    if(GameMap::instance().isWalkable(ey, ex-1)
+    && isPositionValid(QPointF((ex-1)*16,ey*16), enemyId)) {
         cost = 1 + std::abs(px - (ex-1)) + std::abs(py - ey);
         if(cost <= minCost) {
             minCost = cost;
@@ -267,7 +279,8 @@ QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const 
         }
     }
     // 向右
-    if(GameMap::instance().isWalkable(ey, ex+1)) {
+    if(GameMap::instance().isWalkable(ey, ex+1)
+    && isPositionValid(QPointF((ex+1)*16,ey*16), enemyId)) {
         cost = 1 + std::abs(px - (ex+1)) + std::abs(py - ey);
         if(cost <= minCost) {
             minCost = cost;
@@ -276,9 +289,4 @@ QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const 
     }
     
     return direction;
-}
-
-double EnemyManager::calculateDistance(const QPointF& pos1, const QPointF& pos2) const
-{
-    return std::sqrt(std::pow(pos2.x() - pos1.x(), 2) + std::pow(pos2.y() - pos1.y(), 2));
 }

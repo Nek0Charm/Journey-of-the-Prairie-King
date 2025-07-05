@@ -18,7 +18,7 @@ public:
     void spawnEnemyAtRandomPosition();
     
     // 敌人管理
-    void updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode = false);
+    void updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode = false, bool gameOver = false);
     
     // 潜行状态查询
     bool isPlayerStealthMode() const { return m_playerStealthMode; }
@@ -65,8 +65,7 @@ private:
     void removeInactiveEnemies();
     bool isPositionValid(const QPointF& position) const;
     bool isPositionValid(const QPointF& position, const int enemyId) const;
-    QPointF calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos) const;
-    double calculateDistance(const QPointF& pos1, const QPointF& pos2) const;
+    QPointF calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos, int enemyId) const;
 };
 
 #endif // ENEMYMANAGER_H

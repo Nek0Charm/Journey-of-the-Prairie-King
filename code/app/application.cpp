@@ -12,18 +12,21 @@ Application::Application(int &argc, char **argv)
     , m_deltaTime(0.0)
     , m_lastFrameTime(0) {
     qDebug() << "Application starting up...";
-    AudioManager::instance().initialize();
+    initalizeComponents();
     setupGameLoop();
+}
+
+void Application::initalizeComponents() {
+    AudioManager::instance().initialize();
+    GameMap::instance().loadFromFile(":/assert/picture/gamemap.json", "map_1", "1");
+    m_view = std::make_unique<MainWindow>();
+    m_viewModel = std::make_unique<GameViewModel>(this);
+    m_audioEventListener = std::make_unique<AudioEventListener>(this);
+    m_service = std::make_unique<GameService>(m_view.get(), m_viewModel.get(), m_audioEventListener.get());
 }
 
 
 void Application::setupGameLoop() {
-    GameMap::instance().loadFromFile(":/assert/picture/gamemap.json", "map_1", "1");
-    m_viewModel = std::make_unique<GameViewModel>(this);
-    m_view = std::make_unique<MainWindow>();
-    m_audioEventListener = std::make_unique<AudioEventListener>(this);
-    // m_audioEventListener->setGameViewModel(m_viewModel.get());
-    m_service = std::make_unique<GameService>(m_view.get(), m_viewModel.get(), m_audioEventListener.get());
     
     m_gameTimer.setInterval(FRAME_INTERVAL);
     m_gameTimer.setTimerType(Qt::PreciseTimer);
