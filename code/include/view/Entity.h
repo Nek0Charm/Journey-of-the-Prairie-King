@@ -90,6 +90,7 @@ public:
     void setVelocity(const QPointF& velocity);
     void setFrozen(bool frozen) { m_isFrozen = frozen; }
     bool isFrozen() const { return m_isFrozen; }
+    void deploy(); 
     MonsterType getType() const {return monsterType;}
     void onHit(); //
 private:

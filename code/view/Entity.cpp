@@ -122,7 +122,6 @@ MonsterEntity::MonsterEntity(const MonsterType &monsterType, QObject *parent) : 
         break;
     case MonsterType::spikeball:
         m_animations[MonsterState::Walking] = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_walk"), 8.0, true);
-        m_animations[MonsterState::Deployed] = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_deploy"), 8.0, false);
         m_animations[MonsterState::Hit] = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_hit"), 8.0, false);
         break;
     case MonsterType::ogre:
@@ -159,20 +158,23 @@ void MonsterEntity::setVelocity(const QPointF& velocity) {
     m_velocity = velocity;
 }
 
-void MonsterEntity::onHit() {
-    if (m_currentState != MonsterState::Hit) {
-        setState(MonsterState::Hit);
-        m_hitTimer = 0.10;
+void MonsterEntity::deploy() {
+    if (monsterType == MonsterType::spikeball && m_currentState != MonsterState::Deployed && m_currentState != MonsterState::Hit) {
+        delete m_animations[MonsterState::Hit];
+        m_animations[MonsterState::Deployed] = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_deploy"), 8.0, false);
+        m_animations[MonsterState::Hit] = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_deploy_hit"), 8.0, false);
+        setState(MonsterState::Deployed);
     }
+}
+void MonsterEntity::onHit() {
+    setState(MonsterState::Hit);
+    m_hitTimer = 0.10;
 }
 
 void MonsterEntity::setState(MonsterState newState) {
     if (m_currentState != newState) {
-        m_currentState = newState;
-        m_currentAnimation = m_animations.value(m_currentState, nullptr);
-        if (m_currentAnimation) {
-        m_currentAnimation->reset(); 
-        }
+            m_currentState = newState;
+            m_currentAnimation = m_animations.value(m_currentState, nullptr);
     }
 }
 
@@ -186,13 +188,16 @@ void MonsterEntity::update(double deltaTime) {
             m_hitTimer -= deltaTime;
             if (m_hitTimer <= 0) {
                 m_hitTimer = 0;
-                setState(MonsterState::Walking);
+                if (m_animations[MonsterState::Deployed] == nullptr) {
+                    setState(MonsterState::Walking);
+                } else {
+                    setState(MonsterState::Deployed);
+                }
             }
         case MonsterState::Walking:
             m_position += m_velocity * deltaTime;
             break;
         case MonsterState::Deployed:
-            // 部署后停止移动
             break;
         default:
             break;

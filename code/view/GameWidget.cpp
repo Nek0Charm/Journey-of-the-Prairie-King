@@ -458,12 +458,9 @@ void GameWidget::syncEnemies() {
         monster->setPosition(data.position);
         monster->setVelocity(data.velocity);
         
-        // 根据敌人类型和部署状态设置动画
         if (data.enemyType == 1) { // Spikeball
             if (data.isDeployed) {
-                monster->setState(MonsterState::Deployed);
-            } else {
-                monster->setState(MonsterState::Walking);
+                monster->deploy();
             }
         }
         // 根据玩家潜行状态设置敌人是否冻结
