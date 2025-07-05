@@ -350,7 +350,7 @@ void GameWidget::timerEvent() {
     static bool key1Pressed = false, key2Pressed = false, key3Pressed = false;
     
     if (vendor) {
-        qDebug() << "当前可购买的供应商物品:" << m_availableVendorItems;
+        // qDebug() << "当前可购买的供应商物品:" << m_availableVendorItems;
         
         if (keys[Qt::Key_1] && !key1Pressed && m_availableVendorItems.size() >= 1) {
             key1Pressed = true;

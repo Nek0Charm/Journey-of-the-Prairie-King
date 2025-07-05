@@ -214,6 +214,7 @@ int AudioManager::getSoundTypeVolume(SoundType type) const
 void AudioManager::playMusic(MusicType type)
 {
     if (!m_musicEnabled || m_muted) {
+        qDebug() << "[playMusic] Music is disabled or muted";
         return;
     }
     QString musicPath = getMusicPath(type);
@@ -221,7 +222,12 @@ void AudioManager::playMusic(MusicType type)
         qWarning() << "[playMusic] Music path not found for type:" << type;
         return;
     }
-    if (m_currentMusic == type && m_musicPlayer->playbackState() != QMediaPlayer::StoppedState) {
+    if (m_musicPlayer->playbackState() == QMediaPlayer::PlayingState) {
+        qDebug() << "[playMusic] Music is already playing:" << musicPath;
+        return;
+    } else if (m_musicPlayer->playbackState() == QMediaPlayer::PausedState) {
+        qDebug() << "[playMusic] Resuming paused music:" << musicPath;
+        m_musicPlayer->play();
         return;
     }
     m_currentMusic = type;
