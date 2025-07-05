@@ -51,31 +51,31 @@ void ItemEffectManager::applyItemEffect(int itemType, PlayerViewModel* player, E
             applyBadgeEffect(player, enemyManager, isImmediate);
             break;
             
-        // 供应商道具类型 - 直接复用现有效果
+        // 供应商道具类型 - 永久效果
         case vendor_boots_1:
         case vendor_boots_2:
-            applyCoffeeEffect(player, enemyManager, isImmediate);
-            qDebug() << "供应商靴子效果：永久应用咖啡效果（移动速度提升）";
+            applyVendorBootsEffect(player, enemyManager, itemType, isImmediate);
+            qDebug() << "供应商靴子效果：永久提升移动速度";
             break;
         case vendor_extra_life:
             applyExtraLifeEffect(player, enemyManager, isImmediate);
-            qDebug() << "供应商额外生命效果：永久应用额外生命效果";
+            qDebug() << "供应商额外生命效果：永久获得额外生命";
             break;
         case vendor_gun_1:
         case vendor_gun_2:
         case vendor_gun_3:
-            applyMachineGunEffect(player, enemyManager, isImmediate);
-            qDebug() << "供应商枪效果：永久应用机枪效果（射击速度提升）";
+            applyVendorGunEffect(player, enemyManager, itemType, isImmediate);
+            qDebug() << "供应商枪效果：永久提升射击速度";
             break;
         case vendor_ammo_1:
         case vendor_ammo_2:
         case vendor_ammo_3:
             applyVendorAmmoEffect(player, enemyManager, itemType, isImmediate);
-            qDebug() << "供应商弹药效果：子弹伤害值提升至";
+            qDebug() << "供应商弹药效果：永久提升子弹伤害";
             break;
         case vendor_badge:
-            applyBadgeEffect(player, enemyManager, isImmediate);
-            qDebug() << "供应商治安官徽章效果：永久应用治安官徽章效果";
+            applyVendorBadgeEffect(player, enemyManager, isImmediate);
+            qDebug() << "供应商治安官徽章效果：永久获得治安官徽章效果";
             break;
             
         default:
@@ -439,17 +439,79 @@ void ItemEffectManager::clearAllEffects(PlayerViewModel* player) {
 }
 
 void ItemEffectManager::applyVendorAmmoEffect(PlayerViewModel* player, EnemyManager* enemyManager, int itemType, bool isImmediate) {
-    // 根据道具类型直接设置子弹伤害值
-    int newDamage = 1; // 默认伤害值
-    if (itemType == vendor_ammo_1) {
-        newDamage = 2; // 弹药1：2点伤害
-    } else if (itemType == vendor_ammo_2) {
-        newDamage = 3; // 弹药2：3点伤害
-    } else if (itemType == vendor_ammo_3) {
-        newDamage = 4; // 弹药3：4点伤害
+    // 供应商弹药效果：永久提升子弹伤害值
+    int damageValue = 1; // 默认伤害值
+    
+    switch(itemType) {
+        case vendor_ammo_1:
+            damageValue = 2;
+            break;
+        case vendor_ammo_2:
+            damageValue = 3;
+            break;
+        case vendor_ammo_3:
+            damageValue = 4;
+            break;
     }
     
-    // 直接设置子弹伤害值
-    player->setBulletDamage(newDamage);
-    qDebug() << "供应商弹药效果：子弹伤害值提升至" << newDamage;
+    // 直接设置玩家的子弹伤害值，这是永久效果
+    player->setBulletDamage(damageValue);
+    qDebug() << "供应商弹药效果：子弹伤害值永久提升至" << damageValue;
+}
+
+void ItemEffectManager::applyVendorBootsEffect(PlayerViewModel* player, EnemyManager* enemyManager, int itemType, bool isImmediate) {
+    // 供应商靴子效果：永久提升移动速度
+    double baseSpeed = 100.0; // 基础移动速度
+    double speedMultiplier = 1.0;
+    
+    switch(itemType) {
+        case vendor_boots_1:
+            speedMultiplier = 1.2; // 提升20%
+            break;
+        case vendor_boots_2:
+            speedMultiplier = 1.4; // 提升40%
+            break;
+    }
+    
+    double newSpeed = baseSpeed * speedMultiplier;
+    player->setMoveSpeed(newSpeed);
+    qDebug() << "供应商靴子效果：移动速度永久提升至" << newSpeed;
+}
+
+void ItemEffectManager::applyVendorGunEffect(PlayerViewModel* player, EnemyManager* enemyManager, int itemType, bool isImmediate) {
+    // 供应商枪效果：永久提升射击速度
+    double newCooldown = 0.5; // 默认射击冷却时间
+    
+    switch(itemType) {
+        case vendor_gun_1:
+            newCooldown = 0.3; // 提升射击速度
+            break;
+        case vendor_gun_2:
+            newCooldown = 0.2; // 进一步提升射击速度
+            break;
+        case vendor_gun_3:
+            newCooldown = 0.1; // 最高射击速度
+            break;
+    }
+    
+    player->setShootCooldown(newCooldown);
+    qDebug() << "供应商枪效果：射击冷却时间永久设为" << newCooldown << "秒";
+}
+
+void ItemEffectManager::applyVendorBadgeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
+    // 供应商治安官徽章效果：永久获得治安官徽章效果
+    // 这个效果包含多个方面的提升
+    double baseSpeed = 100.0;
+    double baseCooldown = 0.5;
+    
+    // 永久提升移动速度
+    player->setMoveSpeed(baseSpeed * 1.3); // 提升30%
+    
+    // 永久提升射击速度
+    player->setShootCooldown(baseCooldown * 0.7); // 提升30%
+    
+    // 启用霰弹枪模式（永久）
+    player->setShotgunMode(true);
+    
+    qDebug() << "供应商治安官徽章效果：永久获得移动速度+30%、射击速度+30%、霰弹枪模式";
 }
