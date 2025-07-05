@@ -77,7 +77,9 @@ private:
     void removeInactiveEnemies();
     bool isPositionValid(const QPointF& position) const;
     bool isPositionValid(const QPointF& position, const int enemyId) const;
+    static double calculateDistance(const QPointF& p1, const QPointF& p2);
     QPointF calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos, int enemyId) const;
+    QPointF calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos) const;
     QPointF getRandomDeployPosition() const;
 };
 

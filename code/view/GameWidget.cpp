@@ -18,9 +18,13 @@ GameWidget::GameWidget(QWidget *parent)
     if (m_spriteSheet.isNull()) {
         qDebug() << "错误：加载 :/assert/picture/sprite.png 文件失败！";
     }
+    qDebug() << "开始创建GameMapView...";
     m_gameMap = new GameMapView("map_1");
+    qDebug() << "GameMapView创建完成，地址:" << m_gameMap;
     if (!m_gameMap->loadFromFile(":/assert/picture/gamemap.json", "map_1", "1")) { 
         qWarning() << "GameWidget: 地图未能加载，地图将不会被绘制。";
+    } else {
+        qDebug() << "GameWidget: 地图加载成功，尺寸:" << m_gameMap->getWidth() << "x" << m_gameMap->getHeight();
     }
     player = new PlayerEntity();
     vendor = new VendorEntity();
@@ -64,7 +68,11 @@ void GameWidget::gameLoop() {
             emit resumeGame();
             m_isTransitioning = false;
             delete m_gameMap;
-            m_gameMap = m_nextMap;
+            if (m_nextMap) {
+                m_gameMap = m_nextMap;
+            } else {
+                qWarning() << "[gameLoop] m_nextMap为null，未切换地图，保留原地图。";
+            }
             m_nextMap = nullptr;
         }
     } else {
@@ -152,6 +160,12 @@ void GameWidget::playerLivesDown() {
 }
 
 void GameWidget::paintEvent(QPaintEvent *event) {
+    qDebug() << "[paintEvent] m_gameMap:" << (m_gameMap ? "ok" : "null")
+             << "player:" << (player ? "ok" : "null")
+             << "m_enemyDataList size:" << m_enemyDataList.size()
+             << "m_bullets size:" << m_bullets.size()
+             << "m_items size:" << m_items.size()
+             << "m_monsters size:" << m_monsters.size();
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, false);
     QPointF viewOffsetMap(0, 0);
@@ -385,7 +399,7 @@ void GameWidget::timerEvent() {
     }
     if (keys[Qt::Key_M]) {
         startMapTransition("map_1", "2");
-    }}
+    }
     // 供应商物品购买 - 根据实际可购买的物品响应按键
     static bool key1Pressed = false, key2Pressed = false, key3Pressed = false;
     
@@ -695,3 +709,5 @@ void GameWidget::triggerLightning(const QPointF &startPosition) {
         m_lightningSegments.append(segmentPos);
     }
 }
+
+

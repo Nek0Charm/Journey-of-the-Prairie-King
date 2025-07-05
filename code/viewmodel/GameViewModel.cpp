@@ -11,6 +11,7 @@ GameViewModel::GameViewModel(QObject *parent)
 
 void GameViewModel::startGame()
 {
+    qDebug() << "[GameViewModel::startGame] called";
     if (m_gameState != GameState::PLAYING) {
         resetGame();
         m_gameState = GameState::PLAYING;

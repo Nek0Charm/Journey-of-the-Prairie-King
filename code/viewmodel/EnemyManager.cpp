@@ -303,7 +303,7 @@ void EnemyManager::updateSpikeballAI(EnemyData& enemy, const QPointF& playerPos,
         // 未部署状态：移动到目标位置
         if (!enemy.hasReachedTarget) {
             // 检查是否到达目标位置
-            double distanceToTarget = calculateDistance(enemy.position, enemy.targetPosition);
+            double distanceToTarget = EnemyManager::calculateDistance(enemy.position, enemy.targetPosition);
             if (distanceToTarget < 10.0) {
                 enemy.hasReachedTarget = true;
                 enemy.velocity = QPointF(0, 0);
@@ -330,7 +330,7 @@ void EnemyManager::updateOgreAI(EnemyData& enemy, const QPointF& playerPos)
     // 检查是否接触Spikeball，如果接触则破坏Spikeball
     for (auto& otherEnemy : m_enemies) {
         if (otherEnemy.id != enemy.id && otherEnemy.isActive && otherEnemy.enemyType == 1) {
-            double distance = calculateDistance(enemy.position, otherEnemy.position);
+            double distance = EnemyManager::calculateDistance(enemy.position, otherEnemy.position);
             if (distance < 20.0) { // 接触距离
                 // 破坏Spikeball
                 otherEnemy.health = 0;
@@ -352,7 +352,7 @@ void EnemyManager::createObstacle(const QPointF& position)
 bool EnemyManager::isObstacleAt(const QPointF& position) const
 {
     for (const auto& obstacle : m_obstacles) {
-        double distance = calculateDistance(position, obstacle);
+        double distance = EnemyManager::calculateDistance(position, obstacle);
         if (distance < 15.0) { // 障碍物影响范围
             return true;
         }
@@ -488,4 +488,14 @@ QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const 
     }
     
     return direction;
+}
+
+QPointF EnemyManager::calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos) const {
+    return calculateDirectionToPlayer(enemyPos, playerPos, -1);
+}
+
+double EnemyManager::calculateDistance(const QPointF& p1, const QPointF& p2) {
+    double dx = p1.x() - p2.x();
+    double dy = p1.y() - p2.y();
+    return std::sqrt(dx * dx + dy * dy);
 }
