@@ -24,6 +24,7 @@ public:
     void pauseGame();
     void resumeGame();
     void endGame();
+    void nextGame();
     void updateGame(double deltaTime);
 
     EnemyManager* getEnemyManager() const { return m_enemyManager.get(); }

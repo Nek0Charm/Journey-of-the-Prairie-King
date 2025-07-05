@@ -56,7 +56,8 @@ bool GameMap::loadFromFile(const QString& path, const QString& mapName, const QS
 }
 
 bool GameMap::isWalkable(int row, int col) const{
-    return getTileIdAt(row, col) != 7;
+    return getTileIdAt(row, col) == 1 || getTileIdAt(row, col) == 3 || 
+           getTileIdAt(row, col) == 4 || getTileIdAt(row, col) == 5;
 }
 
 /*

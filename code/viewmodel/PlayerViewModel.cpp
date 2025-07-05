@@ -1,4 +1,6 @@
 #include "viewmodel/PlayerViewModel.h"
+#include "common/GameMap.h"
+#include "viewmodel/CollisionSystem.h"
 #include <QVector>
 
 PlayerViewModel::PlayerViewModel(QObject *parent)
@@ -11,14 +13,22 @@ PlayerViewModel::PlayerViewModel(QObject *parent)
 void PlayerViewModel::move(double deltaTime)
 {
     QPointF orig_pos = m_stats.position;
-
+    QPointF movement = QPointF(0, 0);
     if(m_stats.moving)
-        m_stats.position += m_stats.movingDirection * m_stats.moveSpeed * deltaTime;
+        movement= m_stats.movingDirection * m_stats.moveSpeed * deltaTime;
+
+    if(!CollisionSystem::instance().isRectCollidingWithMap(QPointF(orig_pos.x() + movement.x(), orig_pos.y()), 14)) {
+        m_stats.position.setX(orig_pos.x() + movement.x());
+    } 
+    if(!CollisionSystem::instance().isRectCollidingWithMap(QPointF(orig_pos.x(), orig_pos.y() + movement.y()), 14)) {
+        m_stats.position.setY(orig_pos.y() + movement.y());
+    }
+    
     m_stats.position.setX(std::clamp(m_stats.position.x(), 16.0, static_cast<double>(MAP_WIDTH)-32.0));
     m_stats.position.setY(std::clamp(m_stats.position.y(), 16.0, static_cast<double>(MAP_HEIGHT)-32.0));
-    if(orig_pos != m_stats.position) {
-        emit positionChanged(m_stats.position);
-    }
+
+    emit positionChanged(m_stats.position);
+
 }
 
 void PlayerViewModel::shoot(const QPointF& direction)
@@ -207,5 +217,4 @@ void PlayerViewModel::teleportToRandomPosition()
     
     qDebug() << "传送至随机位置:" << newPosition;
 }
-
 

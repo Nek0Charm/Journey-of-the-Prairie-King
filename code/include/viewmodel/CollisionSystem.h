@@ -43,8 +43,14 @@ public:
     double getEnemyCollisionRadius() const { return m_enemyWidth; }
     double getBulletCollisionRadius() const { return m_bulletWidth; }
     bool isCollision(const QPointF& pos1, const QPointF& pos2, double radius1, double radius2) const;
-
-
+    bool isRectCollision(const QPointF& pos1, int size1,
+                        const QPointF& pos2, int size2) const;
+    // 点与地图瓦片碰撞检测
+    bool isPointInWalkableTile(const QPointF& point) const;
+    // 矩形与地图碰撞检测
+    bool isRectCollidingWithMap(const QPointF& position, int size) const;
+    // 获取最近的可行走位置
+    QPointF getNearestWalkablePosition(const QPointF& position, int size) const;
 signals:
     void playerHitByEnemy(int enemyId);
     void enemyHitByBullet(int bulletId, int enemyId);

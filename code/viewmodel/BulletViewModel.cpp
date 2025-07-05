@@ -1,4 +1,5 @@
 #include "viewmodel/BulletViewModel.h"
+#include "viewmodel/CollisionSystem.h"
 
 BulletViewModel::BulletViewModel(QObject *parent)
     : QObject(parent) {
@@ -24,6 +25,8 @@ void BulletViewModel::updateBullets(double deltaTime){
             if(bullet.position.x() < 0 || bullet.position.x() > MAP_WIDTH ||
                bullet.position.y() < 0 || bullet.position.y() > MAP_HEIGHT) {
                 bullet.isActive = false;
+            } else if(CollisionSystem::instance().isRectCollidingWithMap(bullet.position, 5)) {
+                bullet.isActive = false; 
             }
         }
     }

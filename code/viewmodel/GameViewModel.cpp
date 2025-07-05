@@ -1,5 +1,6 @@
 #include "viewmodel/GameViewModel.h"
 #include <QRandomGenerator>
+#include "common/GameMap.h"
 
 GameViewModel::GameViewModel(QObject *parent)
     : QObject(parent)
@@ -47,6 +48,13 @@ void GameViewModel::endGame()
     }
 }
 
+void GameViewModel::nextGame() {
+    m_enemyManager->clearAllEnemies();
+    m_gameState = GameState::PAUSED;
+    m_gameTime = 0.0;
+
+}
+
 void GameViewModel::playerAttack(const QPointF& direction) {
     if (m_gameState == GameState::PLAYING && m_player) {
         m_player->shoot(direction);
@@ -72,7 +80,8 @@ void GameViewModel::updateGame(double deltaTime)
     m_gameTime = std::min(m_gameTime, MAX_GAMETIME);
     if(m_gameTime == MAX_GAMETIME && m_enemyManager->getActiveEnemyCount() == 0) {
         emit gameTimeChanged(m_gameTime);
-        endGame();
+        GameMap::instance().loadFromFile(":/assert/picture/gamemap.json", "map_1", "2");
+        nextGame();
         return;
     }
     emit gameTimeChanged(m_gameTime);

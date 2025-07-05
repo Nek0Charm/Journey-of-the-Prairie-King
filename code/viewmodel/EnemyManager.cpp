@@ -72,14 +72,13 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
         if (enemy.isActive) {
             // 如果玩家处于潜行模式，敌人停止移动
             enemy.time += deltaTime;
-            if( enemy.time >= (enemy.isSmart ?0.25 :1)) {
+            enemy.targetPosition = playerPos;   
+            if(!enemy.isSmart && enemy.time >= 1) {
                 enemy.time = 0.0;
-                enemy.targetPosition = playerPos;
-                if(!enemy.isSmart) {
-                    int px = QRandomGenerator::global()->bounded(208)+16;
-                    int py = QRandomGenerator::global()->bounded(208)+64;
-                    enemy.targetPosition = QPointF(px, py);
-                }
+                int px = QRandomGenerator::global()->bounded(208)+16;
+                int py = QRandomGenerator::global()->bounded(208)+64;
+                enemy.targetPosition = QPointF(px, py);
+                
             }
             if (playerStealthMode) {
                 enemy.velocity = QPointF(0, 0);
@@ -92,11 +91,15 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
             } else {
                 updateEnemyAI(enemy, enemy.targetPosition);
             }
-            
-            if(!isPositionValid(enemy.position + enemy.velocity * deltaTime, enemy.id)) {
-                continue;
+            QPointF new_pos = enemy.position;
+            new_pos.setX(new_pos.x() + enemy.velocity.x() * deltaTime);
+            if(!CollisionSystem::instance().isRectCollidingWithMap(new_pos,16)) {
+                enemy.position.setX(new_pos.x());
             }
-            enemy.position += enemy.velocity * deltaTime;
+            new_pos.setY(new_pos.y() + enemy.velocity.y() * deltaTime);
+            if(!CollisionSystem::instance().isRectCollidingWithMap(new_pos,16)) {
+                enemy.position.setY(new_pos.y());
+            }
         }
     }
     if(!gameOver) spawnEnemies(deltaTime);
@@ -200,11 +203,9 @@ void EnemyManager::updateEnemyAI(EnemyData& enemy, const QPointF& playerPos)
 {
     // 计算到玩家的方向
     QPointF direction = QPointF(0, 0);
-    if(enemy.isSmart) {
-        direction = calculateDirectionToPlayer(enemy.position, playerPos, enemy.id);
-    } else {
-        direction = calculateDirectionToPlayer(enemy.position,QPointF(255, 255)-playerPos, enemy.id);
-    }
+
+    direction = calculateDirectionToPlayer(enemy.position, playerPos, enemy.id);
+
     // 设置速度
     enemy.velocity = direction * enemy.moveSpeed;
 }

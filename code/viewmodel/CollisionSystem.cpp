@@ -2,6 +2,7 @@
 #include "viewmodel/PlayerViewModel.h"
 #include "viewmodel/EnemyManager.h"
 #include "viewmodel/BulletViewModel.h"
+#include "common/GameMap.h"
 
 CollisionSystem::CollisionSystem(QObject *parent)
     : QObject(parent)
@@ -88,13 +89,57 @@ double CollisionSystem::calculateDistance(const QPointF& pos1, const QPointF& po
 bool CollisionSystem::isCollision(const QPointF& pos1, const QPointF& pos2, 
                                  double radius1, double radius2) const
 {
-    return (pos1.x() < pos2.x() + radius2 
-            && pos1.x() + radius1 > pos2.x()
-            && pos1.y() < pos2.y() + radius2
-            && pos1.y() + radius1 > pos2.y());
+    QRectF rect1(pos1.x(), pos1.y(), radius1, radius1);
+    QRectF rect2(pos2.x(), pos2.y(), radius2, radius2);
+    return rect1.intersects(rect2);
 }
 
 void CollisionSystem::logCollision(const QString& type, int id1, int id2)
 {
     qDebug() << "Collision detected:" << type << "between" << id1 << "and" << id2;
 } 
+
+bool CollisionSystem::isPointInWalkableTile(const QPointF& point) const
+{
+    int row = static_cast<int>(point.y() / 16);
+    int col = static_cast<int>(point.x() / 16);
+    return GameMap::instance().isWalkable(row, col);
+}
+
+bool CollisionSystem::isRectCollidingWithMap(const QPointF& position, int size) const
+{
+    int bx = position.x() == static_cast<int>(position.x()) ? 0:size/16;
+    int by = position.y() == static_cast<int>(position.y()) ? 0:size/16;
+
+    int row1 = static_cast<int>(position.y() / 16);
+    int col1 = static_cast<int>(position.x() / 16);
+    int row2 = static_cast<int>((position.y() + size-1) / 16);
+    int col2 = static_cast<int>((position.x() + size-1) / 16);
+
+    for (int r = row1; r <= row2; ++r) {
+        for (int c = col1; c <= col2; ++c) {
+            if (!GameMap::instance().isWalkable(r, c)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+QPointF CollisionSystem::getNearestWalkablePosition(const QPointF& position, int size) const
+{
+    QPointF nearestPos = position;
+    int row = static_cast<int>(position.y() / 16);
+    int col = static_cast<int>(position.x() / 16);
+
+    for (int r = row; r < GameMap::instance().getHeight(); ++r) {
+        for (int c = col; c < GameMap::instance().getWidth(); ++c) {
+            if (!isRectCollidingWithMap(QPointF(c * 16, r * 16), size)){
+                nearestPos.setX(c * 16 );
+                nearestPos.setY(r * 16 );
+                return nearestPos;
+            }
+        }
+    }
+    return nearestPos; 
+}
