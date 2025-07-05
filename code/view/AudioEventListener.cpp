@@ -1,6 +1,7 @@
 #include "view/AudioEventListener.h"
 #include "view/AudioManager.h"
 #include "view/GameWidget.h"
+#include "AudioEventListener.h"
 // 音频事件监听器实现 - 负责监听游戏事件信号并调用AudioManager播放相应的音效
 // 遵循MVVM架构，只监听ViewModel层的信号
 
@@ -35,6 +36,8 @@ void AudioEventListener::onPlayerShot(const QPointF& direction)
     AudioManager::instance().playSound(SHOOT);
 }
 
+
+
 // 游戏状态变化事件音效槽函数实现
 void AudioEventListener::onGameStateChanged(GameState state)
 {
@@ -59,6 +62,12 @@ void AudioEventListener::onGameStateChanged(GameState state)
     }
 }
 
+void AudioEventListener::onUsedTombstone() {
+    AudioManager::instance().playMusic(UNDEAD);
+}
+void AudioEventListener::onTombstoneFinished() {
+    AudioManager::instance().playMusic(OVERWORLD);
+} 
 // 敌人爆炸事件音效槽函数实现
 void AudioEventListener::onEnemyExplosion(int enemyId, const QPointF& position)
 {

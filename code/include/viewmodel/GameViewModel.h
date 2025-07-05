@@ -27,6 +27,7 @@ public:
     void endGame();
     void updateGame(double deltaTime);
 
+    ItemEffectManager* getItemEffectManager() const { return m_itemEffectManager.get(); }
     EnemyManager* getEnemyManager() const { return m_enemyManager.get(); }
     PlayerViewModel* getPlayer() const { return m_player.get(); }
     ItemViewModel* getItemViewModel() const { return m_item.get(); }

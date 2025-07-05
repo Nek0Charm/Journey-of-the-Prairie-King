@@ -17,8 +17,7 @@ enum SoundType {
     EXPLOSION,        // 敌人爆炸音效
     FOOTSTEP,         // 脚步声
     GUNLOAD,          // 装弹音效
-    SECRET,           // 
-    UNDEAD,           // 
+    SECRET,           //
     COIN_PICKUP,      // 金币拾取音效
     BUTTON_CLICK      // 按钮点击音效
 };
@@ -28,7 +27,8 @@ enum MusicType {
     MENU = 0,         // 菜单背景音乐
     OVERWORLD,       
     THE_OUTLAW,       
-    FINAL_BOSS       
+    FINAL_BOSS,     // 最终BOSS背景音乐
+    UNDEAD
 };
 
 // 音频管理器 - 单例模式，负责管理游戏中的所有音频资源
