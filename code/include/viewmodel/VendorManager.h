@@ -63,6 +63,7 @@ private:
     void unlockNextItem(int slotIndex);
     int getSlotIndex(int itemType) const;
     bool isItemAvailable(int itemType) const;
+    bool isItemAvailableForSlot(const VendorItemConfig& item) const;
 };
 
 #endif // VENDORMANAGER_H 
