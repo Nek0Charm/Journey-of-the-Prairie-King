@@ -13,9 +13,6 @@ public:
     bool loadFromFile(const QString& path, const QString& mapName, const QString& layoutName);
     bool isWalkable(int row, int col) const;
     int getTileIdAt(int row, int col) const;
-    QString getTileSpriteName(int tileId) const;
-    void paint(QPainter *painter, const QPixmap &spriteSheet, const QPointF &viewOffset);
-    void update(double deltaTime);
     int getWidth() const;
     int getHeight() const;
 private:

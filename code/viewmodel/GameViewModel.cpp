@@ -81,7 +81,7 @@ void GameViewModel::updateGame(double deltaTime)
     m_player->update(deltaTime);
     
     // 更新敌人（传递玩家潜行状态）
-    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition(), m_player->isStealthMode(), m_gameTime == MAX_GAMETIME);
+    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition(), m_player->isStealthMode(), m_player->isZombieMode(), m_gameTime == MAX_GAMETIME);
 
     m_collisionSystem->checkCollisions(*m_player, 
                                       m_enemyManager->getEnemies(),

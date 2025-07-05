@@ -63,7 +63,7 @@ void EnemyManager::spawnEnemyAtRandomPosition()
     spawnEnemy(position);
 }
 
-void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode, bool gameOver)
+void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode, bool playerZombieMode, bool gameOver)
 {
     // 更新潜行状态
     m_playerStealthMode = playerStealthMode;
@@ -83,6 +83,12 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
             }
             if (playerStealthMode) {
                 enemy.velocity = QPointF(0, 0);
+            } else if(playerZombieMode){
+                int ex = (2*enemy.position-enemy.targetPosition).x();
+                int ey = (2*enemy.position-enemy.targetPosition).y();
+                ex = std::max(16, std::min(ex, 223));
+                ey = std::max(16, std::min(ey, 223));
+                updateEnemyAI(enemy, QPointF(ex, ey));
             } else {
                 updateEnemyAI(enemy, enemy.targetPosition);
             }
