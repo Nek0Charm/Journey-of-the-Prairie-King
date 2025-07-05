@@ -46,7 +46,7 @@ QList<int> VendorManager::getAvailableUpgradeItems() const {
     for (const auto& item : m_vendorItems) {
         if (item.slotIndex == 0 && isItemAvailableForSlot(item)) {
             availableItems.append(item.itemType);
-            slotInfo << QString("[0]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[0]);
+            slotInfo << QString("[0]%1(ID:%2,进度:%3)").arg(item.itemType).arg(item.itemType).arg(m_slotProgress[0]);
             break;
         }
     }
@@ -54,7 +54,7 @@ QList<int> VendorManager::getAvailableUpgradeItems() const {
     for (const auto& item : m_vendorItems) {
         if (item.slotIndex == 1 && isItemAvailableForSlot(item)) {
             availableItems.append(item.itemType);
-            slotInfo << QString("[1]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[1]);
+            slotInfo << QString("[1]%1(ID:%2,进度:%3)").arg(item.itemType).arg(item.itemType).arg(m_slotProgress[1]);
             break;
         }
     }
@@ -62,7 +62,7 @@ QList<int> VendorManager::getAvailableUpgradeItems() const {
     for (const auto& item : m_vendorItems) {
         if (item.slotIndex == 2 && isItemAvailableForSlot(item)) {
             availableItems.append(item.itemType);
-            slotInfo << QString("[2]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[2]);
+            slotInfo << QString("[2]%1(ID:%2,进度:%3)").arg(item.itemType).arg(item.itemType).arg(m_slotProgress[2]);
             break;
         }
     }
@@ -97,12 +97,12 @@ bool VendorManager::purchaseItem(int itemType, PlayerViewModel* player) {
             unlockNextItem(slotIndex);
         }
         emit itemPurchased(itemType);
-        qDebug() << QString("[购买成功] 槽位%1 物品:%2(ID:%3) 价格:%4 进度:%5").arg(slotIndex).arg(ItemEffectManager::getItemName(itemType)).arg(itemType).arg(price).arg(m_slotProgress[slotIndex]);
+        qDebug() << QString("[购买成功] 槽位%1 物品:%2(ID:%3) 价格:%4 进度:%5").arg(slotIndex).arg(itemType).arg(itemType).arg(price).arg(m_slotProgress[slotIndex]);
         // 购买成功后，更新物品列表，但不隐藏供应商
         emit vendorItemsChanged(getAvailableUpgradeItems());
         return true;
     }
-    qDebug() << QString("[购买失败] 金币不足 物品:%1(ID:%2) 价格:%3 当前金币:%4").arg(ItemEffectManager::getItemName(itemType)).arg(itemType).arg(price).arg(player->getCoins());
+    qDebug() << QString("[购买失败] 金币不足 物品:%1(ID:%2) 价格:%3 当前金币:%4").arg(itemType).arg(itemType).arg(price).arg(player->getCoins());
     return false;
 }
 

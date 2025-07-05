@@ -14,7 +14,6 @@ void ItemEffectManager::applyItemEffect(int itemType, PlayerViewModel* player, E
 
 void ItemEffectManager::applyItemEffect(int itemType, PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
     QString prefix = isImmediate ? "立即使用" : "使用";
-    qDebug() << prefix << getItemName(itemType);
     
     switch(itemType) {
         case coin:
@@ -55,124 +54,44 @@ void ItemEffectManager::applyItemEffect(int itemType, PlayerViewModel* player, E
         case vendor_boots_1:
         case vendor_boots_2:
             applyVendorBootsEffect(player, enemyManager, itemType, isImmediate);
-            qDebug() << "供应商靴子效果：永久提升移动速度";
             break;
         case vendor_extra_life:
             applyExtraLifeEffect(player, enemyManager, isImmediate);
-            qDebug() << "供应商额外生命效果：永久获得额外生命";
             break;
         case vendor_gun_1:
         case vendor_gun_2:
         case vendor_gun_3:
             applyVendorGunEffect(player, enemyManager, itemType, isImmediate);
-            qDebug() << "供应商枪效果：永久提升射击速度";
             break;
         case vendor_ammo_1:
         case vendor_ammo_2:
         case vendor_ammo_3:
             applyVendorAmmoEffect(player, enemyManager, itemType, isImmediate);
-            qDebug() << "供应商弹药效果：永久提升子弹伤害";
             break;
         case vendor_badge:
             applyVendorBadgeEffect(player, enemyManager, isImmediate);
-            qDebug() << "供应商治安官徽章效果：永久获得治安官徽章效果";
             break;
             
         default:
-            qDebug() << prefix << "未知道具:" << itemType;
             break;
     }
     
     emit itemEffectApplied(itemType, isImmediate);
 }
 
-//转换成中文这样debug信息清楚一点
-QString ItemEffectManager::getItemName(int itemType) {
-    switch(itemType) {
-        case coin: return "1 Coin";
-        case five_coins: return "5 Coin";
-        case extra_life: return "额外生命";
-        case coffee: return "咖啡";
-        case machine_gun: return "重机枪";
-        case bomb: return "清屏核弹";
-        case shotgun: return "霰弹枪";
-        case smoke_bomb: return "烟雾弹";
-        case tombstone: return "墓碑";
-        case wheel: return "轮子";
-        case badge: return "治安官徽章";
-        
-        // 供应商道具名称
-        case vendor_boots_1:
-        case vendor_boots_2:
-            return "靴子";
-        case vendor_extra_life:
-            return "额外生命";
-        case vendor_gun_1:
-        case vendor_gun_2:
-        case vendor_gun_3:
-            return "枪";
-        case vendor_ammo_1:
-        case vendor_ammo_2:
-        case vendor_ammo_3:
-            return "弹药";
-        case vendor_badge:
-            return "治安官徽章";
-        
-        default: return "未知道具";
-    }
-}
-
-QString ItemEffectManager::getItemDescription(int itemType) {
-    switch(itemType) {
-        case coin: return "增加1个硬币数量";
-        case five_coins: return "增加5个硬币数量";
-        case extra_life: return "你的总生命值加一";
-        case coffee: return "增加你的移动速率";
-        case machine_gun: return "大幅增加开火速率";
-        case bomb: return "瞬间摧毁所有屏幕上的敌人";
-        case shotgun: return "每次射击会朝开火方向射出三枚方向呈锥状分散的子弹";
-        case smoke_bomb: return "将你的角色传送至屏幕上随机地点并赋予潜行";
-        case tombstone: return "一道闪电击中你的角色，在一定时间内将你转变成僵尸";
-        case wheel: return "你可以一次对8个方向射出子弹";
-        case badge: return "提高开火速率和移动速率，并使你能像使用霰弹枪那样锥状射击";
-        
-        // 供应商道具描述
-        case vendor_boots_1:
-        case vendor_boots_2:
-            return "提高移动速度";
-        case vendor_extra_life:
-            return "获得额外一条生命，当供应商下一次出现的时候，可以再次购买";
-        case vendor_gun_1:
-        case vendor_gun_2:
-        case vendor_gun_3:
-            return "提高射击速度";
-        case vendor_ammo_1:
-        case vendor_ammo_2:
-        case vendor_ammo_3:
-            return "把子弹的杀伤值提高到2/3/4。子弹具有穿透性";
-        case vendor_badge:
-            return "获得一枚治安官徽章，当供应商下一次出现的时候，可以再次购买";
-        
-        default: return "未知效果";
-    }
-}
-
 void ItemEffectManager::applyCoinEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
     // 金币效果：收集金币
     player->addCoins(1);
-    qDebug() << "收集到金币，当前金币数量:" << player->getCoins();
 }
 
 void ItemEffectManager::applyFiveCoinsEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
     // 五个金币效果：收集五个金币
     player->addCoins(5);
-    qDebug() << "收集到五个金币，当前金币数量:" << player->getCoins();
 }
 
 void ItemEffectManager::applyExtraLifeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
     // 额外生命效果：增加一条生命
     player->addLife();
-    qDebug() << "获得额外生命";
 }
 
 void ItemEffectManager::applyCoffeeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
@@ -185,7 +104,6 @@ void ItemEffectManager::applyCoffeeEffect(PlayerViewModel* player, EnemyManager*
     
     addEffect(MOVE_SPEED_BOOST, duration, currentSpeed, newSpeed);
     applyEffectToPlayer(MOVE_SPEED_BOOST, newSpeed, player);
-    qDebug() << "咖啡效果：移动速度提升至" << newSpeed << "，持续" << duration << "秒";
 }
 
 void ItemEffectManager::applyMachineGunEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
@@ -196,14 +114,12 @@ void ItemEffectManager::applyMachineGunEffect(PlayerViewModel* player, EnemyMana
     
     addEffect(SHOOT_SPEED_BOOST, duration, originalCooldown, newCooldown);
     applyEffectToPlayer(SHOOT_SPEED_BOOST, newCooldown, player);
-    qDebug() << "机枪效果：射击冷却时间设为0.1秒，持续" << duration << "秒";
 }
 
 void ItemEffectManager::applyBombEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
     // 清屏核弹效果：瞬间摧毁所有屏幕上的敌人
     // 被这种方式杀死的敌人不会掉落物品->clear掉整个敌人列表，而道具生成逻辑是根据destroy信号
     enemyManager->clearAllEnemies();
-    qDebug() << "清屏核弹效果：瞬间摧毁所有屏幕上的敌人";
 }
 
 void ItemEffectManager::applyShotgunEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
@@ -219,8 +135,6 @@ void ItemEffectManager::applyShotgunEffect(PlayerViewModel* player, EnemyManager
     // 添加霰弹枪模式效果
     addEffect(SHOTGUN_MODE, duration, 0.0, 1.0);
     applyEffectToPlayer(SHOTGUN_MODE, 1.0, player);
-    
-    qDebug() << "霰弹枪效果：激活锥状射击模式，每次射出三枚子弹，持续" << duration << "秒";
 }
 
 void ItemEffectManager::applySmokeBombEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
@@ -233,8 +147,6 @@ void ItemEffectManager::applySmokeBombEffect(PlayerViewModel* player, EnemyManag
     // 添加潜行模式效果
     addEffect(STEALTH_MODE, duration, 0.0, 1.0);
     applyEffectToPlayer(STEALTH_MODE, 1.0, player);
-    
-    qDebug() << "烟雾弹效果：传送至随机地点并赋予潜行，持续" << duration << "秒";
 }
 
 void ItemEffectManager::applyTombstoneEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
@@ -253,7 +165,6 @@ void ItemEffectManager::applyTombstoneEffect(PlayerViewModel* player, EnemyManag
     addEffect(ZOMBIE_MODE, duration, 0.0, 1.0);
     applyEffectToPlayer(ZOMBIE_MODE, 1.0, player);
     emit usedTombstone(); // 发出墓碑使用信号
-    qDebug() << "墓碑效果：转变成僵尸，移动速度提升至" << newSpeed << "，获得接触击杀能力，持续" << duration << "秒";
 }
 
 void ItemEffectManager::applyWheelEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
@@ -262,7 +173,6 @@ void ItemEffectManager::applyWheelEffect(PlayerViewModel* player, EnemyManager* 
     
     addEffect(WHEEL_MODE, duration, 0.0, 1.0);  // 使用0.0和1.0作为占位符
     applyEffectToPlayer(WHEEL_MODE, 1.0, player);
-    qDebug() << "轮子效果：激活8方向射击模式，持续" << duration << "秒";
 }
 
 void ItemEffectManager::applyBadgeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate) {
@@ -289,8 +199,6 @@ void ItemEffectManager::applyBadgeEffect(PlayerViewModel* player, EnemyManager* 
     // 添加治安官徽章模式效果（包含霰弹枪功能）
     addEffect(BADGE_MODE, duration, 0.0, 1.0);
     applyEffectToPlayer(BADGE_MODE, 1.0, player);
-    
-    qDebug() << "治安官徽章效果：移动速度提升至" << newSpeed << "，提高开火速率，包含霰弹枪效果，持续" << duration << "秒";
 }
 
 // 效果管理方法实现
@@ -303,13 +211,11 @@ void ItemEffectManager::addEffect(EffectType type, double duration, double origi
     double endTime = m_currentTime + duration;
     ItemEffect effect(type, endTime, originalValue, effectValue);
     m_activeEffects[type] = effect;
-    qDebug() << "添加效果:" << type << "持续时间:" << duration << "秒";
 }
 
 void ItemEffectManager::removeEffect(EffectType type) {
     if (m_activeEffects.contains(type)) {
         m_activeEffects.remove(type);
-        qDebug() << "移除效果:" << type;
     }
 }
 
@@ -367,31 +273,24 @@ void ItemEffectManager::restorePlayerFromEffect(EffectType type, double original
     switch(type) {
         case MOVE_SPEED_BOOST:
             player->setMoveSpeed(originalValue);
-            qDebug() << "移动速度恢复到:" << originalValue;
             break;
         case SHOOT_SPEED_BOOST:
             player->setShootCooldown(originalValue);
-            qDebug() << "射击冷却恢复到:" << originalValue;
             break;
         case WHEEL_MODE:
             player->setWheelMode(false);
-            qDebug() << "8方向射击模式关闭";
             break;
         case SHOTGUN_MODE:
             player->setShotgunMode(false);
-            qDebug() << "霰弹枪模式关闭";
             break;
         case BADGE_MODE:
             player->setBadgeMode(false);
-            qDebug() << "治安官徽章模式关闭";
             break;
         case ZOMBIE_MODE:
             player->setZombieMode(false);
-            qDebug() << "僵尸模式关闭";
             break;
         case STEALTH_MODE:
             player->setStealthMode(false);
-            qDebug() << "潜行模式关闭";
             break;
     }
 }
@@ -413,8 +312,6 @@ void ItemEffectManager::checkAndRemoveExpiredEffects(double currentTime, PlayerV
         if (type) {
             emit tombstoneFinished(); // 如果是墓碑效果，发出墓碑完成信号
         }
-        
-        qDebug() << "效果过期:" << type;
     }
     
     // 清理过期的效果

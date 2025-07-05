@@ -75,12 +75,6 @@ public:
     void applyItemEffect(int itemType, PlayerViewModel* player, EnemyManager* enemyManager);
     void applyItemEffect(int itemType, PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
     
-    // 获取道具名称
-    static QString getItemName(int itemType);
-    
-    // 获取道具描述
-    static QString getItemDescription(int itemType);
-    
     // 效果管理方法
     void updateEffects(double deltaTime, PlayerViewModel* player);
     void addEffect(EffectType type, double duration, double originalValue, double effectValue);

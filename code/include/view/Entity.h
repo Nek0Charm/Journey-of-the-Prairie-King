@@ -128,39 +128,6 @@ enum class ItemState {
     Picked   
 };
 
-// 使用与ItemEffectManager相同的枚举定义
-enum class ItemType {
-        coin,
-        five_coins,
-        extra_life,
-        coffee,
-        machine_gun,
-        bomb,
-        shotgun,
-        smoke_bomb,
-        tombstone,
-        wheel,
-        badge,
-        
-        // 供应商升级道具类型
-        // 卡槽1：靴子系列
-        vendor_boots_1,      // 靴子1 - 8金币
-        vendor_boots_2,      // 靴子2 - 20金币
-        vendor_extra_life,   // 额外生命 - 10金币
-        
-        // 卡槽2：枪系列
-        vendor_gun_1,        // 枪1 - 10金币
-        vendor_gun_2,        // 枪2 - 20金币
-        vendor_gun_3,        // 枪3 - 30金币
-        
-        // 卡槽3：弹药系列
-        vendor_ammo_1,       // 弹药1 - 15金币
-        vendor_ammo_2,       // 弹药2 - 30金币
-        vendor_ammo_3,       // 弹药3 - 45金币
-        
-        // 通用
-        vendor_badge         // 治安官徽章 - 10金币
-};
 class ItemEntity : public Entity {
     Q_OBJECT
 public:
@@ -172,9 +139,9 @@ public:
     void setLingerTimer(double timer) { m_lingerTimer = timer; }
     ItemState getState() { return m_currentState; }
     bool isVisible();
-    static QString typeToString(ItemType type);
+    static QString typeToString(int type); // 改为使用int类型
 private:
-    ItemType m_itemType;
+    int m_itemType; // 改为使用int类型
     ItemState m_currentState;
     double m_lingerTimer;
 };

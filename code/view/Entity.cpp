@@ -302,7 +302,7 @@ void DeadMonsterEntity::paint(QPainter *painter, const QPixmap &spriteSheet, con
 ItemEntity::ItemEntity(int itemtype, QObject *parent, QPointF pos)
 : Entity(parent), m_lingerTimer(15), m_currentState(ItemState::Drop) {   
     setPosition(pos);
-    m_itemType = static_cast<ItemType>(itemtype);
+    m_itemType = itemtype;
     qDebug() << "m_itemType" << itemtype;
 }
 
@@ -331,71 +331,71 @@ bool ItemEntity::isVisible() {
     return !(m_currentState == ItemState::Flash) || (static_cast<int>(m_lingerTimer * 6) % 2 == 0);
 }
 
-QString ItemEntity::typeToString(ItemType type) {
+QString ItemEntity::typeToString(int type) {
     QString stringtype;
     switch (type) {
-    case ItemType::coin:
+    case 0: // coin
         stringtype = "coin";
         break;
-    case ItemType::five_coins:
+    case 1: // five_coins
         stringtype = "five_coins";
         break;
-    case ItemType::extra_life:
+    case 2: // extra_life
         stringtype = "extra_life";
         break;
-    case ItemType::coffee:
+    case 3: // coffee
         stringtype = "coffee";
         break;
-    case ItemType::machine_gun:
+    case 4: // machine_gun
         stringtype = "machine_gun";
         break;
-    case ItemType::bomb:
+    case 5: // bomb
         stringtype = "bomb";
         break;
-    case ItemType::shotgun:
+    case 6: // shotgun
         stringtype = "shotgun";
         break;
-    case ItemType::smoke_bomb:
+    case 7: // smoke_bomb
         stringtype = "smoke_bomb";
         break;
-    case ItemType::tombstone:
+    case 8: // tombstone
         stringtype = "tombstone";
         break;
-    case ItemType::wheel:
+    case 9: // wheel
         stringtype = "wheel";
         break;
-    case ItemType::badge:
+    case 10: // badge
         stringtype = "badge";
         break;
     // 供应商道具类型映射
-    case ItemType::vendor_boots_1:
+    case 11: // vendor_boots_1
         stringtype = "boots_1";  // 靴子1
         break;
-    case ItemType::vendor_boots_2:
+    case 12: // vendor_boots_2
         stringtype = "boots_2";  // 靴子2
         break;
-    case ItemType::vendor_extra_life:
+    case 13: // vendor_extra_life
         stringtype = "more_live";  // 额外生命
         break;
-    case ItemType::vendor_gun_1:
+    case 14: // vendor_gun_1
         stringtype = "gun_1";  // 枪1
         break;
-    case ItemType::vendor_gun_2:
+    case 15: // vendor_gun_2
         stringtype = "gun_2";  // 枪2
         break;
-    case ItemType::vendor_gun_3:
+    case 16: // vendor_gun_3
         stringtype = "gun_3";  // 枪3
         break;
-    case ItemType::vendor_ammo_1:
+    case 17: // vendor_ammo_1
         stringtype = "bullet_1";  // 弹药1
         break;
-    case ItemType::vendor_ammo_2:
+    case 18: // vendor_ammo_2
         stringtype = "bullet_2";  // 弹药2
         break;
-    case ItemType::vendor_ammo_3:
+    case 19: // vendor_ammo_3
         stringtype = "bullet_3";  // 弹药3
         break;
-    case ItemType::vendor_badge:
+    case 20: // vendor_badge
         stringtype = "badge";  // 治安官徽章
         break;
     default:
@@ -478,7 +478,7 @@ void VendorEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QP
         double allItemsWidth = (m_availableItems.size() * 16 * scale) + ((m_availableItems.size() - 1) * itemSpacing);
         double currentItemX = tableclothDestRect.center().x() - allItemsWidth / 2.0;
         for (int itemType : m_availableItems) {
-            QString itemName = ItemEntity::typeToString(static_cast<ItemType>(itemType));
+            QString itemName = ItemEntity::typeToString(itemType);
             QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemName);
             
             if (!itemSourceRect.isNull()) {
