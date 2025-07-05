@@ -1,5 +1,7 @@
 #include <QRandomGenerator>
+#include <QPointF>
 #include <cmath>
+#include <QtMath>
 #include "viewmodel/EnemyManager.h"
 #include "viewmodel/CollisionSystem.h"
 #include "common/GameMap.h"
@@ -46,7 +48,7 @@ void EnemyManager::spawnEnemies(double deltaTime)
     }
 }
 
-void EnemyManager::spawnEnemy(const QPointF& position)
+void EnemyManager::spawnEnemy(const QPointF& position, int enemyType)
 {
     if (getActiveEnemyCount() >= m_maxEnemies) {
         return;
@@ -54,79 +56,70 @@ void EnemyManager::spawnEnemy(const QPointF& position)
     
     EnemyData enemy;
     enemy.id = m_nextEnemyId++;
-    enemy.health = 1;
     enemy.position = position;
     enemy.velocity = QPointF(0, 0);
+    enemy.isActive = true;
+    enemy.hasReachedTarget = false;
+    enemy.hasCreatedObstacle = false;
+    
+    // 使用Orc的稳定生成逻辑：简单的随机目标位置
     int px = QRandomGenerator::global()->bounded(128)+64;
     int py = QRandomGenerator::global()->bounded(128)+64;
     enemy.targetPosition = QPointF(px, py);
-    enemy.moveSpeed = m_enemyMoveSpeed;
-    enemy.isActive = true;
-    enemy.isSmart = QRandomGenerator::global()->bounded(3) != 2; 
-    enemy.enemyType = 0; // 普通兽人
+    
+    // 根据敌人类型设置属性
+    switch (enemyType) {
+        case 0: // 普通兽人
+            enemy.health = 1;
+            enemy.moveSpeed = m_enemyMoveSpeed;
+            enemy.isSmart = QRandomGenerator::global()->bounded(3) != 2;
+            enemy.enemyType = 0;
+            qDebug() << "普通兽人 spawned at position:" << position << "ID:" << enemy.id;
+            break;
+            
+        case 1: // Spikeball
+            enemy.health = 2;
+            enemy.moveSpeed = m_enemyMoveSpeed * 0.8;
+            enemy.isSmart = true;
+            enemy.enemyType = 1;
+            enemy.isDeployed = false;
+            enemy.deployTimer = 0.0;
+            enemy.deployDelay = 3.0;
+            qDebug() << "Spikeball spawned at position:" << position << "ID:" << enemy.id << "Target:" << enemy.targetPosition;
+            break;
+            
+        case 2: // Ogre
+            enemy.health = 3;
+            enemy.moveSpeed = m_enemyMoveSpeed * 0.6;
+            enemy.isSmart = true;
+            enemy.enemyType = 2;
+            enemy.damageResistance = 0.5;
+            qDebug() << "Ogre spawned at position:" << position << "ID:" << enemy.id;
+            break;
+            
+        default:
+            return; // 无效的敌人类型
+    }
     
     m_enemies.append(enemy);
     
     emit enemySpawned(enemy);
     emit enemyCountChanged(getActiveEnemyCount());
-    
-    qDebug() << "Enemy spawned at position:" << position << "ID:" << enemy.id;
+}
+
+void EnemyManager::spawnEnemy(const QPointF& position)
+{
+    spawnEnemy(position, 0); // 默认生成普通兽人
 }
 
 void EnemyManager::spawnSpikeball(const QPointF& position)
 {
-    if (getActiveEnemyCount() >= m_maxEnemies) {
-        return;
-    }
-    
-    EnemyData enemy;
-    enemy.id = m_nextEnemyId++;
-    enemy.health = 2; // Spikeball活动时血量为2
-    enemy.position = position;
-    enemy.velocity = QPointF(0, 0);
-    enemy.moveSpeed = m_enemyMoveSpeed * 0.8; // 稍微慢一点
-    enemy.isActive = true;
-    enemy.isSmart = true;
-    enemy.enemyType = 1; // Spikeball
-    enemy.isDeployed = false;
-    enemy.deployTimer = 0.0;
-    enemy.deployDelay = 3.0;
-    enemy.targetPosition = getRandomDeployPosition();
-    enemy.hasReachedTarget = false;
-    enemy.hasCreatedObstacle = false;
-    
-    m_enemies.append(enemy);
-    
-    emit enemySpawned(enemy);
-    emit enemyCountChanged(getActiveEnemyCount());
-    
-    qDebug() << "Spikeball spawned at position:" << position << "ID:" << enemy.id << "Target:" << enemy.targetPosition;
+    spawnEnemy(position, 1); // 生成Spikeball
 }
 
 void EnemyManager::spawnOgre(const QPointF& position)
 {
-    if (getActiveEnemyCount() >= m_maxEnemies) {
-        return;
-    }
-    
-    EnemyData enemy;
-    enemy.id = m_nextEnemyId++;
-    enemy.health = 3; // Ogre血量为3
-    enemy.position = position;
-    enemy.velocity = QPointF(0, 0);
-    enemy.moveSpeed = m_enemyMoveSpeed * 0.6; // 移动速度慢
-    enemy.isActive = true;
-    enemy.isSmart = true;
-    enemy.enemyType = 2; // Ogre
-    enemy.damageResistance = 0.5; // 伤害抗性50%
-    enemy.hasCreatedObstacle = false;
-    
-    m_enemies.append(enemy);
-    
-    emit enemySpawned(enemy);
-    emit enemyCountChanged(getActiveEnemyCount());
-    
-    qDebug() << "Ogre spawned at position:" << position << "ID:" << enemy.id;
+    spawnEnemy(position, 2); // 生成Ogre
 }
 
 void EnemyManager::spawnEnemyAtRandomPosition()
@@ -149,17 +142,26 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
             enemy.time += deltaTime;
             if( enemy.time >= (enemy.isSmart ?0.25 :1)) {
                 enemy.time = 0.0;
-                enemy.targetPosition = playerPos;
-                if(!enemy.isSmart) {
-                    int px = QRandomGenerator::global()->bounded(208)+16;
-                    int py = QRandomGenerator::global()->bounded(208)+64;
-                    enemy.targetPosition = QPointF(px, py);
+                // Spikeball不应该改变目标位置，它有自己的部署目标
+                if (enemy.enemyType != 1) {
+                    enemy.targetPosition = playerPos;
+                    if(!enemy.isSmart) {
+                        int px = QRandomGenerator::global()->bounded(208)+16;
+                        int py = QRandomGenerator::global()->bounded(208)+64;
+                        enemy.targetPosition = QPointF(px, py);
+                    }
                 }
             }
             if (playerStealthMode) {
                 enemy.velocity = QPointF(0, 0);
             } else {
-                updateEnemyAI(enemy, enemy.targetPosition);
+                if (enemy.enemyType == 1) {
+                    // Spikeball使用专门的AI逻辑
+                    updateSpikeballAI(enemy, enemy.targetPosition, deltaTime);
+                } else {
+                    // 其他敌人使用普通AI逻辑
+                    updateEnemyAI(enemy, enemy.targetPosition);
+                }
             }
             
             if(!isPositionValid(enemy.position + enemy.velocity * deltaTime, enemy.id)) {
@@ -290,34 +292,57 @@ void EnemyManager::updateEnemyAI(EnemyData& enemy, const QPointF& playerPos)
 
 void EnemyManager::updateSpikeballAI(EnemyData& enemy, const QPointF& playerPos, double deltaTime)
 {
+    // 部署后不再更新AI，彻底静止
     if (enemy.isDeployed) {
-        // 已部署状态：停止移动，血量变为6
         enemy.velocity = QPointF(0, 0);
-        enemy.health = 6;
-        
-        // 如果还没创建障碍物，创建障碍物
-        if (!enemy.hasCreatedObstacle) {
-            createObstacle(enemy.position);
-            enemy.hasCreatedObstacle = true;
-            qDebug() << "Spikeball deployed and created obstacle at:" << enemy.position;
-        }
-    } else {
-        // 未部署状态：移动到目标位置
-        if (!enemy.hasReachedTarget) {
-            // 检查是否到达目标位置
-            double distanceToTarget = EnemyManager::calculateDistance(enemy.position, enemy.targetPosition);
-            if (distanceToTarget < 10.0) {
-                enemy.hasReachedTarget = true;
-                enemy.velocity = QPointF(0, 0);
-                // 直接进入部署状态
-                enemy.isDeployed = true;
-                enemy.health = 6; // 部署后血量变为6
-                qDebug() << "Spikeball reached target position and deployed at:" << enemy.targetPosition;
-            } else {
-                // 继续移动到目标位置
-                QPointF direction = calculateDirectionToPlayer(enemy.position, enemy.targetPosition);
-                enemy.velocity = direction * enemy.moveSpeed;
+        return;
+    }
+    // 未部署状态：移动到目标位置
+    if (!enemy.hasReachedTarget) {
+        // 检查是否到达目标位置
+        double distanceToTarget = EnemyManager::calculateDistance(enemy.position, enemy.targetPosition);
+        qDebug() << "Spikeball ID:" << enemy.id << "距离目标:" << distanceToTarget << "位置:" << enemy.position << "目标:" << enemy.targetPosition;
+        if (distanceToTarget < 10.0) {
+            enemy.hasReachedTarget = true;
+            enemy.velocity = QPointF(0, 0);
+            // 直接进入部署状态
+            enemy.isDeployed = true;
+            enemy.health = 6; // 部署后血量变为6
+            qDebug() << "Spikeball reached target position and deployed at:" << enemy.targetPosition;
+        } else {
+            // 继续移动到目标位置
+            QPointF direction = calculateDirectionToPlayer(enemy.position, enemy.targetPosition);
+            
+            // 如果路径被阻塞，使用简单的直线方向作为备选
+            if (direction == QPointF(0, 0)) {
+                QPointF diff = enemy.targetPosition - enemy.position;
+                double length = std::sqrt(diff.x() * diff.x() + diff.y() * diff.y());
+                if (length > 0.1) {
+                    direction = diff / length;
+                    qDebug() << "Spikeball ID:" << enemy.id << "使用直线路径，方向:" << direction;
+                } else {
+                    // 如果距离太近，随机选择一个方向
+                    double angle = QRandomGenerator::global()->bounded(2 * M_PI);
+                    direction = QPointF(std::cos(angle), std::sin(angle));
+                    qDebug() << "Spikeball ID:" << enemy.id << "距离太近，使用随机方向:" << direction;
+                }
             }
+            
+            // 确保方向不为零向量
+            if (direction == QPointF(0, 0)) {
+                // 最后的备选方案：向地图中心移动
+                QPointF center(128, 128);
+                QPointF diff = center - enemy.position;
+                double length = std::sqrt(diff.x() * diff.x() + diff.y() * diff.y());
+                if (length > 0.1) {
+                    direction = diff / length;
+                } else {
+                    direction = QPointF(1, 0); // 向右移动
+                }
+                qDebug() << "Spikeball ID:" << enemy.id << "使用备选方向:" << direction;
+            }
+            
+            enemy.velocity = direction * enemy.moveSpeed;
         }
     }
 }

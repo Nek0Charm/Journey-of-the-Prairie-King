@@ -19,6 +19,7 @@ public:
     // 敌人生成
     void spawnEnemies(double deltaTime);
     void spawnEnemy(const QPointF& position);
+    void spawnEnemy(const QPointF& position, int enemyType); // 统一生成函数
     void spawnEnemyAtRandomPosition();
     void spawnSpikeball(const QPointF& position);
     void spawnOgre(const QPointF& position);

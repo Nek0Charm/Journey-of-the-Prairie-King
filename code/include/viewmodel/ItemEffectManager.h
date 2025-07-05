@@ -113,7 +113,10 @@ private:
     void applyBadgeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
     void applyVendorAmmoEffect(PlayerViewModel* player, EnemyManager* enemyManager, int itemType, bool isImmediate);
     
-
+    // 供应商永久效果函数
+    void applyVendorBootsEffect(PlayerViewModel* player, EnemyManager* enemyManager, int itemType, bool isImmediate);
+    void applyVendorGunEffect(PlayerViewModel* player, EnemyManager* enemyManager, int itemType, bool isImmediate);
+    void applyVendorBadgeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
     
     // 效果管理私有方法
     void applyEffectToPlayer(EffectType type, double effectValue, PlayerViewModel* player);
