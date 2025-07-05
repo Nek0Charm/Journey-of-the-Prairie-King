@@ -220,7 +220,7 @@ void GameViewModel::handlePlayerHitByEnemy(int enemyId)
 {
     m_player->getBulletViewModel()->clearAllBullets();
     m_enemyManager->clearAllEnemies();
-    m_enemyManager->removeEnemy(enemyId);
+    m_player->getBulletViewModel()->clearAllBullets();
     m_player->takeDamage();
     m_player->setPositon({MAP_WIDTH / 2.0, MAP_HEIGHT / 2.0});
     m_gameTime = std::max(m_gameTime - 5.0, 0.0);

@@ -53,6 +53,7 @@ void BulletViewModel::removeBullets() {
 }
 void BulletViewModel::clearAllBullets(){
     m_bullets.clear();
+    emit bulletsChanged(m_bullets);
 }
 
 QList<BulletData> BulletViewModel::getActiveBullets() const{
