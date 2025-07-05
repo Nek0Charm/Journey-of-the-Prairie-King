@@ -18,6 +18,7 @@ public:
 };
 
 enum class PlayerState {
+    Disappearing,
     Idle,
     WalkDown,
     WalkUp,
@@ -31,10 +32,14 @@ enum class PlayerState {
     ShootUpWalk,
     ShootLeftWalk,
     ShootRightWalk,
+    Lifting,
+    Kiss,
+    WalkLiftingHeart,
     Dying,
     Zombie
 };
 class PlayerEntity : public Entity {
+    Q_OBJECT
 public:
     PlayerEntity(QObject* parent = nullptr);
     ~PlayerEntity() override;
@@ -45,12 +50,15 @@ public:
     bool isInvincible() const {return m_isInvincible;}
     void setInvincible(bool res) {m_isInvincible = res;}
     void setInvincibilityTime(int t) {m_invincibilityTimer = t;}
+public slots:
+    void onGameWin();
 private:
     QMap<PlayerState, Animation*> m_animations;
     PlayerState m_currentState; 
     Animation* m_currentAnimation;
-    int m_invincibilityTimer = 0;
+    double m_invincibilityTimer = 0;
     bool m_isInvincible = false;
+    bool m_isGamewin = false;
 };
 
 
@@ -172,6 +180,7 @@ enum class VendorState {
     LookDown,
     LookLeft,
     LookRight,
+    Singing,
     Disappearing,
 };
  
@@ -192,6 +201,7 @@ public:
 public slots:
     void onVendorAppear();
     void onVendorDisappear();
+    void onGameWin();
 private:
     QMap<VendorState, Animation*> m_animations;
     VendorState m_currentState;

@@ -11,11 +11,12 @@
     "player_body_right": { "x": 351, "y": 96, "w": 16, "h": 14 },
     "player_body_up": { "x": 335, "y": 96, "w": 16, "h": 14 },
     "player_body_down": { "x": 367, "y": 96, "w": 16, "h": 15 },
+    "player_body_lift": { "x": 255, "y":112, "w": 16, "h": 13 },
 
     "player_walk_leg_1": { "x": 351, "y": 112, "w": 16, "h": 3 },
-    "player_walk_leg_2": { "x": 351, "y": 115, "w": 16, "h": 3 },
-    "player_walk_leg_3": { "x": 351, "y": 118, "w": 16, "h": 3 },
-    "player_walk_leg_4": { "x": 351, "y": 121, "w": 16, "h": 3 },
+    "player_walk_leg_2": { "x": 351, "y": 116, "w": 16, "h": 3 },
+    "player_walk_leg_3": { "x": 351, "y": 121, "w": 16, "h": 3 },
+    "player_walk_leg_4": { "x": 351, "y": 125, "w": 16, "h": 3 },
 
     "player_lift_1": { "x": 255, "y": 112, "w": 16, "h": 16 },
     "player_lift_2": { "x": 271, "y": 112, "w": 16, "h": 16 },
@@ -28,13 +29,18 @@
 
     "player_zombie_1": { "x": 223, "y": 112, "w": 16, "h": 16},
     "player_zombie_2": { "x": 239, "y": 112, "w": 16, "h": 16},
-
+    "kiss": {"x": 415, "y": 148, "w": 28, "h": 28},
     "vendor_walk_1": { "x": 335, "y": 80, "w": 16, "h": 16 },
     "vendor_walk_2": { "x": 351, "y": 80, "w": 16, "h": 16 },
     "vendor_look_left": { "x": 383, "y": 80, "w": 16, "h": 16 },
     "vendor_look_down": { "x": 367, "y": 80, "w": 16, "h": 16 },
     "vendor_look_right": { "x": 399, "y": 80, "w": 16, "h": 16 },
+    "vendor_singing_1": { "x": 95, "y": 144, "w": 16, "h": 16 },
+    "vendor_singing_2": { "x": 111, "y": 144, "w": 16, "h": 16 },
+    "vendor_singing_3": { "x": 127, "y": 144, "w": 16, "h": 16 },
+    "vendor_singing_4": { "x": 143, "y": 144, "w": 16, "h": 16 },
     "tablecloth": { "x": 400, "y": 96, "w": 63, "h": 32 },
+    "heart": {"x": 399, "y": 131, "w": 16, "h": 12},
 
     "player_bullet": { "x": 389, "y": 112, "w": 4, "h": 4 },
     "coin": { "x": 143, "y": 160, "w": 16, "h": 16 },
@@ -135,7 +141,8 @@
     "map_1_8": { "x": 447, "y": 32, "w": 16, "h": 16 },
     "map_1_9": { "x": 463, "y": 32, "w": 16, "h": 16 },
     "map_1_10": { "x": 479, "y": 32, "w": 16, "h": 16 },
-    "map_1_11": { "x": 495, "y": 32, "w": 16, "h": 16 }
+    "map_1_11": { "x": 495, "y": 32, "w": 16, "h": 16 },
+    "house": { "x": 159, "y": 51, "w": 64, "h": 77 }
   },
 
  "composites": {
@@ -202,6 +209,30 @@
     "player_walk_down_frame_4": [
       { "frame": "player_walk_leg_4", "offset": { "x": 0, "y": 13 } },
       { "frame": "player_body_down", "offset": { "x": 0, "y": 0 } }
+    ],
+    "player_walk_lifting_heart_1": [
+      { "frame": "heart", "offset": { "x": 0, "y": 0 } },
+      { "frame": "player_walk_leg_1", "offset": { "x": 0, "y": 25 } },
+      { "frame": "player_body_lift", "offset": { "x": 0, "y": 12 } }
+    ],
+    "player_walk_lifting_heart_2": [
+      { "frame": "heart", "offset": { "x": 0, "y": 0 } },
+      { "frame": "player_walk_leg_2", "offset": { "x": 0, "y": 25 } },
+      { "frame": "player_body_lift", "offset": { "x": 0, "y": 12 } }
+    ],
+    "player_walk_lifting_heart_3": [
+      { "frame": "heart", "offset": { "x": 0, "y": 0 } },
+      { "frame": "player_walk_leg_3", "offset": { "x": 0, "y": 25 } },
+      { "frame": "player_body_lift", "offset": { "x": 0, "y": 12 } }
+    ],
+    "player_walk_lifting_heart_4": [
+      { "frame": "heart", "offset": { "x": 0, "y": 0 } },
+      { "frame": "player_walk_leg_4", "offset": { "x": 0, "y": 25 } },
+      { "frame": "player_body_lift", "offset": { "x": 0, "y": 12 } }
+    ],
+    "player_lifting": [
+      { "frame": "player_walk_leg_2", "offset": { "x": 0, "y": 13 } },
+      { "frame": "player_body_lift", "offset": { "x": 0, "y": 0 } }
     ]
   },
   "animations": {
@@ -244,6 +275,15 @@
     "player_shoot_right": [
       "player_walk_right_frame_2"
     ],
+    "player_lifting_heart": [
+      "player_walk_lifting_heart_2"
+    ],
+    "player_walk_lifting_heart": [
+      "player_walk_lifting_heart_1",
+      "player_walk_lifting_heart_2",
+      "player_walk_lifting_heart_3",
+      "player_walk_lifting_heart_4"
+    ],
     "player_dying": [
       "player_dying_1",
       "player_dying_2",
@@ -259,6 +299,9 @@
       "player_lift_1",
       "player_lift_2"
     ],
+    "kiss": [
+      "kiss"
+    ],
     "vendor_walk": [
       "vendor_walk_1",
       "vendor_walk_2"
@@ -271,6 +314,12 @@
     ],
     "vendor_look_right": [
       "vendor_look_right"
+    ],
+    "vendor_singing": [
+      "vendor_singing_1",
+      "vendor_singing_2",
+      "vendor_singing_3",
+      "vendor_singing_4"
     ],
     "orc_walk": [
       "orc_walk_1",

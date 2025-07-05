@@ -23,6 +23,9 @@ PlayerEntity::PlayerEntity(QObject *parent) : Entity(parent) {
     m_animations[PlayerState::ShootUpWalk]    = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_up"), 8.0, true);
     m_animations[PlayerState::ShootLeftWalk]  = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_left"), 8.0, true);
     m_animations[PlayerState::ShootRightWalk] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_right"), 8.0, true);
+    m_animations[PlayerState::Lifting] = new Animation(SpriteManager::instance().getAnimationSequence("player_lifting_heart"), 8.0, true);
+    m_animations[PlayerState::Kiss] = new Animation(SpriteManager::instance().getAnimationSequence("kiss"), 8.0, true);
+    m_animations[PlayerState::WalkLiftingHeart] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_lifting_heart"), 8.0, true);
     m_animations[PlayerState::Dying] = new Animation(SpriteManager::instance().getAnimationSequence("player_dying"), 8.0, false);
     m_animations[PlayerState::Zombie] = new Animation(SpriteManager::instance().getAnimationSequence("player_zombie"), 8.0, true);
     m_currentAnimation = m_animations.value(m_currentState, nullptr);
@@ -35,7 +38,6 @@ PlayerEntity::~PlayerEntity() {
 
 void PlayerEntity::setState(PlayerState newState) {
     if (m_currentState == newState) return; 
-
     m_currentState = newState;
     m_currentAnimation = m_animations.value(m_currentState, nullptr);
     if (m_currentAnimation) {
@@ -47,25 +49,44 @@ bool PlayerEntity::isVisible() const {
     if (!m_isInvincible) {
         return true;
     }
-    return static_cast<int>(m_invincibilityTimer / 10) % 2 == 0;
+    return static_cast<int>(m_invincibilityTimer * 6) % 2 == 0;
 }
 
-void PlayerEntity::update(double deltaTime) {
+void PlayerEntity::update(double deltaTime) {  
     if (m_isInvincible) {
         m_invincibilityTimer -= deltaTime; 
         if (m_invincibilityTimer <= 0) {
             m_isInvincible = false; 
             m_invincibilityTimer = 0;
-            // qDebug() << "无敌时间结束。";
         }
+    }
+    if (m_isGamewin) {
+        m_invincibilityTimer -= deltaTime;
+        // qDebug() << "m_time" << m_invincibilityTimer;
+        if (m_invincibilityTimer <= 16 && m_invincibilityTimer >= 7) {
+            setState(PlayerState::WalkLiftingHeart);
+            m_position += QPointF(deltaTime*16, 0);
+        } else if (m_invincibilityTimer < 7 && m_invincibilityTimer >= 0) {
+            setState(PlayerState::Lifting);
+        } else if (m_invincibilityTimer < 0) {
+            setState(PlayerState::Kiss);
+        }
+        
     }
     if (m_currentAnimation) {
         m_currentAnimation->update(deltaTime);
     }
 }
 
+void PlayerEntity::onGameWin() {
+    setState(PlayerState::Disappearing);
+    setPosition(QPointF(0, 7.2*16));
+    m_invincibilityTimer = 20;
+    m_isGamewin = true;
+}
+
 void PlayerEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) {
-    if (!m_currentAnimation) return;
+    if (!m_currentAnimation || m_currentState == PlayerState::Disappearing) return;
     if (!isVisible()) return;
     const QString& currentFrameName = m_currentAnimation->getCurrentFrameName();
     QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
@@ -353,6 +374,7 @@ VendorEntity::VendorEntity(QObject *parent): Entity(parent) {
     m_animations[VendorState::Walk] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_walk"), 8.0, true);
     m_animations[VendorState::LookLeft] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_look_left"), 8.0, true);
     m_animations[VendorState::LookRight] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_look_right"), 8.0, true);
+    m_animations[VendorState::Singing] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_singing"), 4.0, true);
     m_currentAnimation = m_animations.value(m_currentState, nullptr);
 }
 
@@ -371,7 +393,7 @@ void VendorEntity::update(double deltaTime, const QPointF& playerPosition) {
         m_position += QPointF(0, 16 * deltaTime);
         double distance = QLineF(m_position, playerPosition).length();
     }
-    if (m_lingerTimer <= 0) {
+    if (m_lingerTimer <= 0 && m_currentState != VendorState::Singing) {
         if (playerPosition.x() - m_position.x() > 16) {
             setState(VendorState::LookRight);
         } else if (m_position.x() - playerPosition.x() > 16) {
@@ -379,7 +401,13 @@ void VendorEntity::update(double deltaTime, const QPointF& playerPosition) {
         } else {
             setState(VendorState::LookDown);
         }
+    } else if (m_currentState == VendorState::Singing) {
+        m_lingerTimer -= deltaTime;
+        if (m_lingerTimer <= 0) {
+            setState(VendorState::Disappearing);
+        }
     }
+    
     if (m_currentAnimation) {
         // qDebug() << "VendorEntity::update: Current animation is not null";
         m_currentAnimation->update(deltaTime);
@@ -400,7 +428,7 @@ void VendorEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QP
     QRectF vendorDestRect(vendorScreenAnchor, vendorSourceRect.size() * scale);
     painter->drawPixmap(vendorDestRect, spriteSheet, vendorSourceRect);
 
-    if (m_currentState != VendorState::Walk) {
+    if (m_currentState != VendorState::Walk && m_currentState != VendorState::Singing) {
         QRect tableclothSourceRect = SpriteManager::instance().getSpriteRect("tablecloth");
         if (tableclothSourceRect.isNull()) return;
         QSizeF tableclothScaledSize(tableclothSourceRect.width() * scale, tableclothSourceRect.height() * scale);
@@ -439,4 +467,10 @@ void VendorEntity::onVendorAppear() {
     setState(VendorState::Walk);
     m_lingerTimer = 6.0;
     m_position = QPointF(16*8, 0);
+}
+
+void VendorEntity::onGameWin() {
+    setState(VendorState::Singing);
+    m_lingerTimer = 20;
+    setPosition(QPointF(16*10,16*8));
 }

@@ -37,7 +37,9 @@ signals:
     void useItem();
     void vendorAppear();
     void vendorDisappear();
-    void purchaseVendorItem(int itemType);  // 购买供应商物品的信号
+    void purchaseVendorItem(int itemType);  // 购买供应商物品的信号    void gameWin();
+    void pauseGame();
+    void resumeGame();
 
 public slots:
     // void onStateUpdated();
@@ -64,6 +66,7 @@ public slots:
     
     // 更新供应商可购买物品列表
     void updateVendorItems();
+    void onGameWin();
 
 private:
     QTimer* keyRespondTimer;
@@ -78,7 +81,7 @@ private:
     QMap<int, DeadMonsterEntity*> m_deadmonsters;
     QMap<int, ItemEntity*> m_items;
 
-
+    bool m_isGamePaused = false;
     bool m_isExplosionSequenceActive = false;   
     double m_explosionSequenceTimer = 0.0;    
     double m_nextExplosionSpawnTimer = 0.0; 
@@ -100,6 +103,7 @@ private:
     bool m_hasPossessedItem;
     
     // 道具使用相关
+    bool m_pauseKeyPressed = false;
     bool m_spaceKeyPressed = false;  // 防止空格键重复触发  
     bool m_isZombieMode = false;
     bool m_isBoomActive = false;
