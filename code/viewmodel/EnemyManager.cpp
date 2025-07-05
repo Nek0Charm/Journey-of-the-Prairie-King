@@ -63,7 +63,7 @@ void EnemyManager::spawnEnemyAtRandomPosition()
     spawnEnemy(position);
 }
 
-void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode)
+void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode, bool gameOver)
 {
     // 更新潜行状态
     m_playerStealthMode = playerStealthMode;
@@ -93,7 +93,7 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
             enemy.position += enemy.velocity * deltaTime;
         }
     }
-    spawnEnemies(deltaTime);
+    if(!gameOver) spawnEnemies(deltaTime);
     
     removeInactiveEnemies();
 
