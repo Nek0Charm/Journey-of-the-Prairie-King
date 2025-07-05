@@ -37,7 +37,8 @@ signals:
     void useItem();
     void vendorAppear();
     void vendorDisappear();
-    void purchaseVendorItem(int itemType);  // 购买供应商物品的信号    void gameWin();
+    void purchaseVendorItem(int itemType);  // 购买供应商物品的信号    
+    void gameWin();
     void pauseGame();
     void resumeGame();
 
@@ -88,6 +89,7 @@ private:
     bool m_isSmokeReleased = false;
     double m_smokeReleaseTimer = 0.0;
     double m_nextSmokeReleaseTimer = 0.0;
+    void triggerLightning(const QPointF& startPosition);
     /*
     这些变量需要随着GameViewModel内值的变化而变化
     */
@@ -108,6 +110,8 @@ private:
     bool m_isZombieMode = false;
     bool m_isBoomActive = false;
     bool m_isStealthMode = false;
+    double m_lightningEffectTimer = 0.0;
+    QList<QPointF> m_lightningSegments;
     
     // 供应商相关
     QList<int> m_availableVendorItems;  // 当前可购买的供应商物品列表

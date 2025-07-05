@@ -72,6 +72,9 @@
     "explode_4": { "x": 383, "y": 144, "w": 16, "h": 16 },
     "explode_5": { "x": 399, "y": 144, "w": 16, "h": 16 },
 
+    "lightning_1": { "x": 239, "y": 96, "w": 16, "h": 16 },
+    "lightning_2": { "x": 255, "y": 96, "w": 16, "h": 16 },
+
     "ui_circle": {"x": 465, "y": 96, "w": 11, "h": 16 },
     "ui_item_ground": {"x": 165, "y": 134, "w": 22, "h": 22 },
     "ui_helth": {"x": 272, "y": 131, "w": 14, "h": 11 },
@@ -296,6 +299,9 @@
       "player_zombie_2"
     ],
     "player_lift": [
+      "player_lift_1"
+    ],
+    "player_lightning": [
       "player_lift_1",
       "player_lift_2"
     ],

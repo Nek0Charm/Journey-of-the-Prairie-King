@@ -82,6 +82,15 @@ void GameWidget::gameLoop() {
             ++it;
         }
     }    
+    if (m_lightningEffectTimer > 0) {
+        m_lightningEffectTimer -= deltaTime;
+        if (m_lightningEffectTimer < 0) {
+            m_lightningEffectTimer = 0;
+            m_lightningSegments.clear();
+            m_isGamePaused = false;
+            emit resumeGame();
+        }
+    }
     if(m_gameMap) {
         m_gameMap->update(deltaTime);
     }  
@@ -118,7 +127,26 @@ void GameWidget::paintEvent(QPaintEvent *event) {
         viewOffset.setY(offsetY);
     }
     painter.fillRect(rect(), Qt::black); 
-
+    if (m_lightningEffectTimer > 0) {
+        QRect lightningSourceRect_1 = SpriteManager::instance().getSpriteRect("lightning_2");
+        QRect lightningSourceRect_2 = SpriteManager::instance().getSpriteRect("lightning_1");
+        if (lightningSourceRect_1.isNull()) return;
+        for (int i = 0; i < m_lightningSegments.size(); ++i) {
+            const QPointF& segmentPos = m_lightningSegments[i];
+            QRect currentSourceRect;
+            if (i % 2 == 0) {
+                currentSourceRect = lightningSourceRect_1;
+            } else {
+                currentSourceRect = lightningSourceRect_2.isNull() ? lightningSourceRect_1 : lightningSourceRect_2;
+            }
+            QPointF destinationAnchor = segmentPos * SCALE;
+            QRectF destRect(destinationAnchor, currentSourceRect.size() * SCALE);
+            destRect.translate(viewOffset);
+            painter.drawPixmap(destRect, m_spriteSheet, currentSourceRect);
+        }
+        player->paint(&painter, m_spriteSheet, viewOffset);
+        return;
+    }
     m_gameMap->paint(&painter, m_spriteSheet, viewOffset);
     for (auto it: m_deadmonsters) {
         it->paint(&painter, m_spriteSheet, viewOffset);
@@ -302,12 +330,10 @@ void GameWidget::timerEvent() {
     }
     if (keys[Qt::Key_E]) {
         emit vendorAppear();
-        // 强制激活供应商状态
         if (vendor) {
             vendor->onVendorAppear();
         }
     }
-    
     // 供应商物品购买 - 根据实际可购买的物品响应按键
     static bool key1Pressed = false, key2Pressed = false, key3Pressed = false;
     
@@ -463,6 +489,9 @@ void GameWidget::updateItemEffect(int itemType) {
         player->setInvincibilityTime(3);
         releaseSmoke(0.5);
         break;
+    case 8: // Lightning
+        triggerLightning(player->getPosition());
+        break;
     default:
         break;
     }
@@ -572,11 +601,26 @@ void GameWidget::updateVendorItems() {
 
 void GameWidget::setAvailableVendorItems(const QList<int>& items) {
     m_availableVendorItems = items;
-    qDebug() << "设置可购买的供应商物品:" << m_availableVendorItems;
+    // qDebug() << "设置可购买的供应商物品:" << m_availableVendorItems;
     updateVendorItems();  // 立即更新供应商显示
 }
 
 void GameWidget::onGameWin() {
     m_isGamePaused = true;
     emit gameWin(); 
+}
+
+void GameWidget::triggerLightning(const QPointF &startPosition) {
+    emit pauseGame();
+    m_isGamePaused = true;
+    player->setState(PlayerState::Lightning);
+    m_lightningSegments.clear();
+    m_lightningEffectTimer = 1.0;
+    QRect segmentSourceRect = SpriteManager::instance().getSpriteRect("lightning_1");
+    if (segmentSourceRect.isNull()) return;
+    int segmentHeight = segmentSourceRect.height();
+    for (int i = 1; i < 20; ++i) {
+        QPointF segmentPos = startPosition - QPointF(0, i * segmentHeight);
+        m_lightningSegments.append(segmentPos);
+    }
 }
