@@ -132,9 +132,6 @@ void GameViewModel::setupConnections()
     connect(m_player.get(), &PlayerViewModel::playerDied,
             this, &GameViewModel::handlePlayerDeath);
 
-    connect(m_player.get(), &PlayerViewModel::livesChanged,
-            this, &GameViewModel::playerLivesChanged);
-
     connect(m_player.get(), &PlayerViewModel::livesDown,
             this, &GameViewModel::playerLivesDown);
             

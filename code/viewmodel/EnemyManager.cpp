@@ -72,7 +72,7 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
         if (enemy.isActive) {
             // 如果玩家处于潜行模式，敌人停止移动
             enemy.time += deltaTime;
-            if( enemy.time >= 1.0) {
+            if( enemy.time >= (enemy.isSmart ?0.25 :1)) {
                 enemy.time = 0.0;
                 enemy.targetPosition = playerPos;
                 if(!enemy.isSmart) {
