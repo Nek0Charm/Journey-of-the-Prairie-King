@@ -76,16 +76,14 @@ void GameViewModel::updateGame(double deltaTime)
         return;
     }
     emit gameTimeChanged(m_gameTime);
-    
+    m_collisionSystem->checkCollisions(*m_player, 
+                                      m_enemyManager->getEnemies(),
+                                      m_player->getActiveBullets());
     // 更新玩家
     m_player->update(deltaTime);
     
     // 更新敌人（传递玩家潜行状态）
     m_enemyManager->updateEnemies(deltaTime, m_player->getPosition(), m_player->isStealthMode(), m_gameTime == MAX_GAMETIME);
-
-    m_collisionSystem->checkCollisions(*m_player, 
-                                      m_enemyManager->getEnemies(),
-                                      m_player->getActiveBullets());
     
     m_item->updateItems(deltaTime, m_player->getPosition());
     

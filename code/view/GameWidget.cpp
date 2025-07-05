@@ -96,6 +96,16 @@ void GameWidget::gameLoop() {
     }  
     updateExplosion(deltaTime);
     updateSmoke(deltaTime); 
+    if (m_pausedTime > 0) {
+        m_pausedTime -= deltaTime;
+        if (m_pausedTime <= 0) {
+            m_pausedTime = 0;
+            player->setInvincibilityTime(1.5);
+            player->setInvincible(true);
+            m_isGamePaused = false;
+            emit resumeGame();
+        }
+    }
     this->update();
 }
 
@@ -110,8 +120,10 @@ void GameWidget::playerLivesDown() {
         return;
     }
     // qDebug() << "受伤了";
-    player->setInvincible(true);
-    player->setInvincibilityTime(3.0);
+    player->setState(PlayerState::Dying);
+    m_isGamePaused = true;
+    emit pauseGame();
+    m_pausedTime = 3.0;
 }
 
 void GameWidget::paintEvent(QPaintEvent *event) {

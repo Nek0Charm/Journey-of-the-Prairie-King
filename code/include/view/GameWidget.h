@@ -89,6 +89,7 @@ private:
     bool m_isSmokeReleased = false;
     double m_smokeReleaseTimer = 0.0;
     double m_nextSmokeReleaseTimer = 0.0;
+    double m_pausedTime = 0.0;
     void triggerLightning(const QPointF& startPosition);
     /*
     这些变量需要随着GameViewModel内值的变化而变化
