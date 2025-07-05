@@ -57,55 +57,58 @@ GameWidget::~GameWidget() {
 void GameWidget::gameLoop() {
     timerEvent();
     double deltaTime = m_elapsedTimer.restart() / 1000.0;
-    syncEnemies(); 
-    if (player) {
-        player->update(deltaTime);
-    }
-    if (vendor) {
-        vendor->update(deltaTime, player->getPosition());
-    }
-    for (auto& it: m_monsters) {
-        it->update(deltaTime);
-    }
-    syncItems();
-    for (auto item : m_items) {
-        item->update(deltaTime);
-    }
-    for (auto it = m_deadmonsters.begin(); it != m_deadmonsters.end(); ) {
-        DeadMonsterEntity* deadMonster = it.value();
-        int monsterId = it.key();
-        deadMonster->update(deltaTime);
-        if (deadMonster->ShouldbeRemove()) {
-            delete deadMonster;
-            it = m_deadmonsters.erase(it);
-        } else {
-            ++it;
-        }
-    }    
-    if (m_lightningEffectTimer > 0) {
-        m_lightningEffectTimer -= deltaTime;
-        if (m_lightningEffectTimer < 0) {
-            m_lightningEffectTimer = 0;
-            m_lightningSegments.clear();
+    if (m_isTransitioning) {
+        m_transitionTimer += deltaTime;
+        if (m_transitionTimer >= m_transitionDuration) {
             m_isGamePaused = false;
             emit resumeGame();
+            m_isTransitioning = false;
+            delete m_gameMap;
+            m_gameMap = m_nextMap;
+            m_nextMap = nullptr;
+        }
+    } else {
+        syncEnemies(); 
+        if (player) player->update(deltaTime);
+        if (vendor)  vendor->update (deltaTime, player->getPosition());
+        for (auto& it: m_monsters) it->update(deltaTime);
+        syncItems();
+        for (auto item : m_items) item->update(deltaTime);
+        for (auto it = m_deadmonsters.begin(); it != m_deadmonsters.end(); ) {
+            DeadMonsterEntity* deadMonster = it.value();
+            int monsterId = it.key();
+            deadMonster->update(deltaTime);
+            if (deadMonster->ShouldbeRemove()) {
+                delete deadMonster;
+                it = m_deadmonsters.erase(it);
+            } else {
+                ++it;
+            }
+        }    
+        if (m_lightningEffectTimer > 0) {
+            m_lightningEffectTimer -= deltaTime;
+            if (m_lightningEffectTimer < 0) {
+                m_lightningEffectTimer = 0;
+                m_lightningSegments.clear();
+                m_isGamePaused = false;
+                emit resumeGame();
+            }
+        }
+        updateExplosion(deltaTime);
+        updateSmoke(deltaTime); 
+        if (m_pausedTime > 0) {
+            m_pausedTime -= deltaTime;
+            if (m_pausedTime <= 0) {
+                m_pausedTime = 0;
+                player->setInvincibilityTime(1.5);
+                player->setInvincible(true);
+                m_isGamePaused = false;
+                emit resumeGame();
+            }
         }
     }
-    if(m_gameMap) {
-        m_gameMap->update(deltaTime);
-    }  
-    updateExplosion(deltaTime);
-    updateSmoke(deltaTime); 
-    if (m_pausedTime > 0) {
-        m_pausedTime -= deltaTime;
-        if (m_pausedTime <= 0) {
-            m_pausedTime = 0;
-            player->setInvincibilityTime(1.5);
-            player->setInvincible(true);
-            m_isGamePaused = false;
-            emit resumeGame();
-        }
-    }
+    if (m_gameMap) m_gameMap->update(deltaTime);
+    if (m_nextMap) m_nextMap->update(deltaTime);
     this->update();
 }
 
@@ -113,6 +116,28 @@ void GameWidget::playerPositionChanged(QPointF position) {
     if (!m_isGamePaused) {
         player->setPosition(position);
     }
+}
+
+void GameWidget::startMapTransition(const QString &nextMapName, const QString &nextLayoutName) {
+    if (m_isTransitioning) return;
+    m_isGamePaused = true;
+    emit pauseGame();
+    m_nextMap = new GameMapView(nextMapName);
+    if (!m_nextMap->loadFromFile(":/assert/picture/gamemap.json", nextMapName, nextLayoutName)) {
+        qWarning() << "转场失败：无法加载下一关地图" << nextMapName;
+        delete m_nextMap;
+        m_nextMap = nullptr;
+        return;
+    }
+    m_isTransitioning = true;
+    m_transitionDuration = 2.0;
+    m_transitionTimer = 0.0;
+    double worldContentWidth = (m_gameMap->getWidth() * 16) * SCALE;
+    double worldContentHeight = (m_gameMap->getHeight() * 16) * SCALE;
+    m_transitionStartOffset.setX((this->width() - worldContentWidth) / 2.0);
+    m_transitionStartOffset.setY((this->height() - worldContentHeight) / 2.0);
+    m_transitionEndOffset.setX(m_transitionStartOffset.x());
+    m_transitionEndOffset.setY(m_transitionStartOffset.y() - worldContentHeight);
 }
 
 void GameWidget::playerLivesDown() {
@@ -129,14 +154,25 @@ void GameWidget::playerLivesDown() {
 void GameWidget::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, false);
+    QPointF viewOffsetMap(0, 0);
     QPointF viewOffset(0, 0);
-     if (m_gameMap && m_gameMap->getWidth() > 0) {
+    QRectF gameWorldClipRect;
+    if (m_gameMap && m_gameMap->getWidth() > 0) {
         double worldContentWidth = (m_gameMap->getWidth() * 16) * SCALE;
         double worldContentHeight = (m_gameMap->getHeight() * 16) * SCALE;
         double offsetX = (this->width() - worldContentWidth) / 2.0;
         double offsetY = (this->height() - worldContentHeight) / 2.0;
         viewOffset.setX(offsetX);
         viewOffset.setY(offsetY);
+        viewOffsetMap = viewOffset;
+        gameWorldClipRect.setRect(offsetX, offsetY, worldContentWidth, worldContentHeight);
+    }
+    if (m_isTransitioning) {
+        double progress = m_transitionTimer / m_transitionDuration;
+        if (progress > 1.0) progress = 1.0;
+        double currentOffsetY = m_transitionStartOffset.y() * (1.0 - progress) + m_transitionEndOffset.y() * progress;
+        viewOffsetMap.setX(m_transitionStartOffset.x());
+        viewOffsetMap.setY(currentOffsetY);
     }
     painter.fillRect(rect(), Qt::black); 
     if (m_lightningEffectTimer > 0) {
@@ -153,26 +189,24 @@ void GameWidget::paintEvent(QPaintEvent *event) {
             }
             QPointF destinationAnchor = segmentPos * SCALE;
             QRectF destRect(destinationAnchor, currentSourceRect.size() * SCALE);
-            destRect.translate(viewOffset);
+            destRect.translate(viewOffsetMap);
             painter.drawPixmap(destRect, m_spriteSheet, currentSourceRect);
         }
-        player->paint(&painter, m_spriteSheet, viewOffset);
+        player->paint(&painter, m_spriteSheet, viewOffsetMap);
         return;
     }
-    m_gameMap->paint(&painter, m_spriteSheet, viewOffset);
-    for (auto it: m_deadmonsters) {
-        it->paint(&painter, m_spriteSheet, viewOffset);
+    painter.setClipRect(gameWorldClipRect);
+    if (m_gameMap) m_gameMap->paint(&painter, m_spriteSheet, viewOffsetMap);
+    if (m_isTransitioning && m_nextMap) {
+        double mapHeight = (m_gameMap->getHeight() * 16) * SCALE;
+        QPointF nextMapOffset = viewOffsetMap + QPointF(0, mapHeight);
+        m_nextMap->paint(&painter, m_spriteSheet, nextMapOffset);
     }
-    for (auto it: m_items) {
-        it->paint(&painter, m_spriteSheet, viewOffset);
-    }
-    player->paint(&painter, m_spriteSheet, viewOffset);
-    for (MonsterEntity* monster : m_monsters) {
-        monster->paint(&painter, m_spriteSheet, viewOffset); 
-    }
-    paintUi(&painter, viewOffset);
-    vendor->paint(&painter, m_spriteSheet, viewOffset);
-
+    for (auto it: m_deadmonsters) it->paint(&painter, m_spriteSheet, viewOffsetMap);
+    for (auto it: m_items) it->paint(&painter, m_spriteSheet, viewOffsetMap);
+    player->paint(&painter, m_spriteSheet, viewOffsetMap);
+    for (MonsterEntity* monster : m_monsters) monster->paint(&painter, m_spriteSheet, viewOffsetMap); 
+    vendor->paint(&painter, m_spriteSheet, viewOffsetMap);
     QRect bulletSourceRect = SpriteManager::instance().getSpriteRect("player_bullet");
     if (!bulletSourceRect.isNull()) {
         for (const auto& bullet : m_bullets) {
@@ -181,19 +215,16 @@ void GameWidget::paintEvent(QPaintEvent *event) {
             // qDebug() << bullet.position;
             QSizeF scaledSize(bulletSourceRect.width() * SCALE, bulletSourceRect.height() * SCALE);
             QRectF destRect(topLeft, scaledSize);
-            destRect.translate(viewOffset);
+            destRect.translate(viewOffsetMap);
             painter.drawPixmap(destRect, m_spriteSheet, bulletSourceRect);
         }
     }
+    painter.setClipping(false); 
+    paintUi(&painter, viewOffset);
 }
 
 void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     double ui_margin = 3.0;
-    
-    QRect circleRect = SpriteManager::instance().getSpriteRect("ui_circle");
-    QRectF circleRectF(0, -(circleRect.height()+ui_margin/4)*SCALE, circleRect.width()*SCALE , circleRect.height()*SCALE);
-    circleRectF.translate(viewOffset);
-    painter->drawPixmap(circleRectF, m_spriteSheet, circleRect);
 
     QRect itemRect = SpriteManager::instance().getSpriteRect("ui_item_ground");
     QRectF itemRectF(-(itemRect.width() + ui_margin)*SCALE, 0, itemRect.width()*SCALE, itemRect.height()*SCALE);
@@ -225,26 +256,30 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset) {
     moneyRectF.translate(viewOffset);
     painter->drawPixmap(moneyRectF, m_spriteSheet, moneyRect);
 
-    if (m_maxTime > 0) { 
-        double barWidth = 15*16*SCALE; 
-        double barHeight = 4*SCALE; 
-        QColor barBackgroundColor = Qt::darkGray;
-        QColor barFillColor = Qt::green;
-
-        QPointF barTopLeft(
-            circleRectF.right() + (ui_margin/2)*SCALE, 
-            circleRectF.center().y() - barHeight / 2.0 + 3 * SCALE
-        );
-        QRectF barBackgroundRect(barTopLeft, QSizeF(barWidth, barHeight));
-        double timeRatio = m_currentTime / m_maxTime;
-        double fillWidth = barWidth * timeRatio;
-        QRectF barFillRect(barTopLeft, QSizeF(fillWidth, barHeight));
-        painter->fillRect(barBackgroundRect, barBackgroundColor);
-        painter->fillRect(barFillRect, barFillColor);
-        painter->setPen(Qt::black);
-        painter->drawRect(barBackgroundRect);
+    if(!m_isTransitioning) {    
+        QRect circleRect = SpriteManager::instance().getSpriteRect("ui_circle");
+        QRectF circleRectF(0, -(circleRect.height()+ui_margin/4)*SCALE, circleRect.width()*SCALE , circleRect.height()*SCALE);
+        circleRectF.translate(viewOffset);
+        painter->drawPixmap(circleRectF, m_spriteSheet, circleRect);
+        if (m_maxTime > 0) { 
+            double barWidth = 15*16*SCALE; 
+            double barHeight = 4*SCALE; 
+            QColor barBackgroundColor = Qt::darkGray;
+            QColor barFillColor = Qt::green;
+            QPointF barTopLeft(
+                circleRectF.right() + (ui_margin/2)*SCALE, 
+                circleRectF.center().y() - barHeight / 2.0 + 3 * SCALE
+            );
+            QRectF barBackgroundRect(barTopLeft, QSizeF(barWidth, barHeight));
+            double timeRatio = m_currentTime / m_maxTime;
+            double fillWidth = barWidth * timeRatio;
+            QRectF barFillRect(barTopLeft, QSizeF(fillWidth, barHeight));
+            painter->fillRect(barBackgroundRect, barBackgroundColor);
+            painter->fillRect(barFillRect, barFillColor);
+            painter->setPen(Qt::black);
+            painter->drawRect(barBackgroundRect);
+        }
     }
-
     QString healthText = QString("x%1").arg(m_healthCount-1);
     QFont Hfont = painter->font();
     Hfont.setPointSize(16); 
@@ -346,6 +381,9 @@ void GameWidget::timerEvent() {
             vendor->onVendorAppear();
         }
     }
+    if (keys[Qt::Key_M]) {
+        startMapTransition("map_1", "2");
+    }
     // 供应商物品购买 - 根据实际可购买的物品响应按键
     static bool key1Pressed = false, key2Pressed = false, key3Pressed = false;
     
@@ -403,7 +441,6 @@ void GameWidget::syncEnemies() {
         }
         monster->setPosition(data.position);
         monster->setVelocity(data.velocity);
-        
         // 根据玩家潜行状态设置敌人是否冻结
         monster->setFrozen(m_playerStealthMode);
     }

@@ -47,6 +47,7 @@ public slots:
     void die(int id);
     void gameLoop(); // 临时函数
     void playerPositionChanged(QPointF position);
+    void startMapTransition(const QString& nextMapName, const QString& nextLayoutName);
     // GameViewModel的游戏时间是已游玩时间，而GameWidget的游戏时间是剩余时间
     void updateGameTime(double gameTime);
     void updateBullets(QList<BulletData> bullets);
@@ -75,6 +76,7 @@ private:
     QTimer* m_timer;            // 临时变量
     QElapsedTimer m_elapsedTimer; // 临时变量
     GameMapView* m_gameMap;
+    GameMapView* m_nextMap = nullptr;
     QPixmap m_spriteSheet;
     PlayerEntity* player;
     VendorEntity* vendor;
@@ -82,6 +84,11 @@ private:
     QMap<int, DeadMonsterEntity*> m_deadmonsters;
     QMap<int, ItemEntity*> m_items;
 
+    bool m_isTransitioning;
+    double m_transitionDuration;
+    double m_transitionTimer;
+    QPointF m_transitionStartOffset;
+    QPointF m_transitionEndOffset;
     bool m_isGamePaused = false;
     bool m_isExplosionSequenceActive = false;   
     double m_explosionSequenceTimer = 0.0;    
