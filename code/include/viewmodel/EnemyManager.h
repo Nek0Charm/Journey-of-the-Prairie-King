@@ -57,6 +57,7 @@ signals:
     void enemyDamaged(int enemyId, int remainingHealth);
     void enemyCountChanged(int count);
     void enemiesChanged(const QList<EnemyData>& enemies);
+    void enemyHitByBullet(int enemyId); // 新增信号：敌
     
 private:
     QList<EnemyData> m_enemies;

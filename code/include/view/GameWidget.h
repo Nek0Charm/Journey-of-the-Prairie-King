@@ -66,7 +66,7 @@ public slots:
     void onVendorAppeared();      // 供应商出现时的槽
     void onVendorDisappeared();   // 供应商消失时的槽
     void onVendorItemPurchased(int itemType);  // 供应商物品购买成功时的槽
-    
+    void onEnemyHitByBullet(int enemyId); // 敌人被子弹击中时的槽
     // 更新供应商可购买物品列表
     void updateVendorItems();
     void onGameWin();

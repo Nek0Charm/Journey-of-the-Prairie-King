@@ -59,7 +59,7 @@ void GameService::setupConnections() {
     
     // 连接敌人爆炸事件信号
     connect(m_gameViewModel->getEnemyManager(), &EnemyManager::enemyDestroyed, m_audioEventListener, &AudioEventListener::onEnemyExplosion);
-    
+    connect(m_gameViewModel->getEnemyManager(), &EnemyManager::enemyHitByBullet, m_mainWindow->getGameWidget(), &GameWidget::onEnemyHitByBullet);
     // 新增：连接游戏状态变化信号
     connect(m_gameViewModel, &GameViewModel::gameStateChanged, m_audioEventListener, &AudioEventListener::onGameStateChanged);
     

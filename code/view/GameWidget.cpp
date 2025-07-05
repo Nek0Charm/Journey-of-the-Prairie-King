@@ -160,12 +160,12 @@ void GameWidget::playerLivesDown() {
 }
 
 void GameWidget::paintEvent(QPaintEvent *event) {
-    qDebug() << "[paintEvent] m_gameMap:" << (m_gameMap ? "ok" : "null")
-             << "player:" << (player ? "ok" : "null")
-             << "m_enemyDataList size:" << m_enemyDataList.size()
-             << "m_bullets size:" << m_bullets.size()
-             << "m_items size:" << m_items.size()
-             << "m_monsters size:" << m_monsters.size();
+    // qDebug() << "[paintEvent] m_gameMap:" << (m_gameMap ? "ok" : "null")
+    //          << "player:" << (player ? "ok" : "null")
+    //          << "m_enemyDataList size:" << m_enemyDataList.size()
+    //          << "m_bullets size:" << m_bullets.size()
+    //          << "m_items size:" << m_items.size()
+    //          << "m_monsters size:" << m_monsters.size();
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, false);
     QPointF viewOffsetMap(0, 0);
@@ -657,6 +657,21 @@ void GameWidget::onVendorDisappeared() {
 void GameWidget::onVendorItemPurchased(int itemType) {
     qDebug() << "供应商物品购买成功，物品类型:" << itemType;
     // 这里可以添加购买成功后的UI反馈
+}
+
+void GameWidget::onEnemyHitByBullet(int enemyId) {
+    qDebug() << "敌人ID:" << enemyId << "被子弹击中";
+    if (m_monsters.contains(enemyId)) {
+        MonsterEntity* monster = m_monsters[enemyId];
+        if (monster) {
+            monster->onHit();
+            qDebug() << "敌人状态已更新为Hit";
+        } else {
+            qDebug() << "警告：未找到对应的MonsterEntity";
+        }
+    } else {
+        qDebug() << "警告：敌人ID" << enemyId << "不在当前敌人列表中";
+    }
 }
 
 void GameWidget::updateVendorItems() {
