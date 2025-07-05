@@ -22,7 +22,8 @@ public:
                                    const QList<EnemyData>& enemies);
     
     void checkBulletEnemyCollisions(const QList<BulletData>& bullets,
-                                   const QList<EnemyData>& enemies);
+                                   const QList<EnemyData>& enemies,
+                                   int bulletDamage = 1);
 
     // 碰撞查询
     bool checkPlayerEnemyCollision(const QPointF& playerPos, 
@@ -41,6 +42,11 @@ public:
     double getPlayerCollisionRadius() const { return m_playerWidth; }
     double getEnemyCollisionRadius() const { return m_enemyWidth; }
     double getBulletCollisionRadius() const { return m_bulletWidth; }
+
+    // 处理子弹穿透逻辑
+    void handleBulletPenetration(const BulletData& bullet, 
+                                const QList<EnemyData>& enemies,
+                                int bulletDamage);
 
 signals:
     void playerHitByEnemy(int enemyId);

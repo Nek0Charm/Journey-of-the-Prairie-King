@@ -63,6 +63,7 @@ struct BulletData {
     QPointF position;
     QPointF velocity;
     bool isActive; // 是否处于活动状态
+    int damage;    // 子弹伤害值，用于穿透性功能
 };
 
 struct EnemyData {

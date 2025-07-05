@@ -109,6 +109,7 @@ private:
     void applyTombstoneEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
     void applyWheelEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
     void applyBadgeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    void applyVendorAmmoEffect(PlayerViewModel* player, EnemyManager* enemyManager, int itemType, bool isImmediate);
     
 
     

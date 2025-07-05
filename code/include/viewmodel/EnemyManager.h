@@ -34,7 +34,7 @@ public:
     bool isObstacleAt(const QPointF& position) const;
     void clearObstacles();
     
-    void damageEnemy(int bulletId ,int enemyId);
+    void damageEnemy(int bulletId, int enemyId, int damage = 1);
     void removeEnemy(int enemyId);
     void clearAllEnemies();
     

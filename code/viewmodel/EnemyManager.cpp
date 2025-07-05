@@ -176,19 +176,19 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
     emit enemiesChanged(m_enemies);
 }
 
-void EnemyManager::damageEnemy(int bulletId,int enemyId)
+void EnemyManager::damageEnemy(int bulletId, int enemyId, int damage)
 {
     for (auto& enemy : m_enemies) {
         if (enemy.id == enemyId && enemy.isActive) {
             // 根据敌人类型处理伤害
-            int damage = 1;
+            int actualDamage = damage;
             if (enemy.enemyType == 2) { // Ogre
                 // Ogre有伤害抗性，只受50%伤害
-                damage = static_cast<int>(damage * enemy.damageResistance);
-                if (damage < 1) damage = 1; // 至少造成1点伤害
+                actualDamage = static_cast<int>(damage * enemy.damageResistance);
+                if (actualDamage < 1) actualDamage = 1; // 至少造成1点伤害
             }
             
-            enemy.health -= damage;
+            enemy.health -= actualDamage;
                         
             if (enemy.health <= 0) {
                 // 在标记为非活动状态之前，先发出信号并传递位置信息

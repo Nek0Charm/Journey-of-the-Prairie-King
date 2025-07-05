@@ -219,14 +219,23 @@ void GameViewModel::handlePlayerHitByEnemy(int enemyId)
 
 void GameViewModel::handleEnemyHitByBullet(int bulletId, int enemyId)
 {
-    m_enemyManager->damageEnemy(bulletId, enemyId);
-    m_player->removeBullet(bulletId);
+    // 获取子弹的当前伤害值
+    int bulletDamage = m_player->getBulletViewModel()->getBulletDamage(bulletId);
+    
+    // 对敌人造成伤害，传递子弹的伤害值
+    m_enemyManager->damageEnemy(bulletId, enemyId, bulletDamage);
+    
+    // 减少子弹的伤害值
+    bulletDamage--;
+    
+    // 更新子弹伤害值，如果伤害值为0或负数，子弹会被自动标记为非活动状态
+    m_player->getBulletViewModel()->updateBulletDamage(bulletId, bulletDamage);
 }
 
 void GameViewModel::handleEnemyHitByZombie(int enemyId)
 {
     // 僵尸模式：直接击杀敌人
-    m_enemyManager->damageEnemy(0, enemyId); // 使用0作为占位符bulletId
+    m_enemyManager->damageEnemy(0, enemyId, 999); // 使用999作为占位符bulletId，999伤害确保击杀
     qDebug() << "僵尸模式接触击杀敌人:" << enemyId;
 }
 

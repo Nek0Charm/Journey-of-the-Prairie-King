@@ -70,8 +70,8 @@ void ItemEffectManager::applyItemEffect(int itemType, PlayerViewModel* player, E
         case vendor_ammo_1:
         case vendor_ammo_2:
         case vendor_ammo_3:
-            applyShotgunEffect(player, enemyManager, isImmediate);
-            qDebug() << "供应商弹药效果：永久应用霰弹枪效果（子弹穿透）";
+            applyVendorAmmoEffect(player, enemyManager, itemType, isImmediate);
+            qDebug() << "供应商弹药效果：子弹伤害值提升至";
             break;
         case vendor_badge:
             applyBadgeEffect(player, enemyManager, isImmediate);
@@ -432,4 +432,20 @@ void ItemEffectManager::clearAllEffects(PlayerViewModel* player) {
     m_currentTime = 0.0;
     
     qDebug() << "清除所有道具效果";
+}
+
+void ItemEffectManager::applyVendorAmmoEffect(PlayerViewModel* player, EnemyManager* enemyManager, int itemType, bool isImmediate) {
+    // 根据道具类型直接设置子弹伤害值
+    int newDamage = 1; // 默认伤害值
+    if (itemType == vendor_ammo_1) {
+        newDamage = 2; // 弹药1：2点伤害
+    } else if (itemType == vendor_ammo_2) {
+        newDamage = 3; // 弹药2：3点伤害
+    } else if (itemType == vendor_ammo_3) {
+        newDamage = 4; // 弹药3：4点伤害
+    }
+    
+    // 直接设置子弹伤害值
+    player->setBulletDamage(newDamage);
+    qDebug() << "供应商弹药效果：子弹伤害值提升至" << newDamage;
 }
