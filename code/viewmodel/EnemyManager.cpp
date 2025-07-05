@@ -159,7 +159,13 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
             if (playerStealthMode) {
                 enemy.velocity = QPointF(0, 0);
             } else {
-                updateEnemyAI(enemy, enemy.targetPosition);
+                if (enemy.enemyType == 1) {
+                    // Spikeball使用专门的AI逻辑
+                    updateSpikeballAI(enemy, enemy.targetPosition, deltaTime);
+                } else {
+                    // 其他敌人使用普通AI逻辑
+                    updateEnemyAI(enemy, enemy.targetPosition);
+                }
             }
             
             if(!isPositionValid(enemy.position + enemy.velocity * deltaTime, enemy.id)) {
