@@ -49,7 +49,27 @@ public:
         smoke_bomb,
         tombstone,
         wheel,
-        badge
+        badge,
+        
+        // 供应商升级道具类型
+        // 卡槽1：靴子系列
+        vendor_boots_1,      // 靴子1 - 8金币
+        vendor_boots_2,      // 靴子2 - 20金币
+        vendor_extra_life,   // 额外生命 - 10金币
+        
+        // 卡槽2：枪系列
+        vendor_gun_1,        // 枪1 - 10金币
+        vendor_gun_2,        // 枪2 - 20金币
+        vendor_gun_3,        // 枪3 - 30金币
+        vendor_gun_4,        // 枪-加强版 - 99金币（困难模式）
+        
+        // 卡槽3：弹药系列
+        vendor_ammo_1,       // 弹药1 - 15金币
+        vendor_ammo_2,       // 弹药2 - 30金币
+        vendor_ammo_3,       // 弹药3 - 45金币
+        
+        // 通用
+        vendor_badge         // 治安官徽章 - 10金币
     };
     
     // 应用道具效果
@@ -90,6 +110,19 @@ private:
     void applyTombstoneEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
     void applyWheelEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
     void applyBadgeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    
+    // 供应商道具效果实现
+    void applyVendorBoots1Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    void applyVendorBoots2Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    void applyVendorExtraLifeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    void applyVendorGun1Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    void applyVendorGun2Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    void applyVendorGun3Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    void applyVendorGun4Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    void applyVendorAmmo1Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    void applyVendorAmmo2Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    void applyVendorAmmo3Effect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
+    void applyVendorBadgeEffect(PlayerViewModel* player, EnemyManager* enemyManager, bool isImmediate);
     
     // 效果管理私有方法
     void applyEffectToPlayer(EffectType type, double effectValue, PlayerViewModel* player);

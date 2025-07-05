@@ -2,7 +2,7 @@
 
 EndWidget::EndWidget(QWidget *parent) : QWidget(parent)
 {
-    int scaleFactor = 2;
+    int scaleFactor = 1;
     this->setStyleSheet("background-color: black;"); 
     m_gameOverLabel = new QLabel(this);
     QPixmap gameOverPixmap(":/assert/picture/gameover.png");
