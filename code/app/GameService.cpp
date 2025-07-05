@@ -89,4 +89,8 @@ void GameService::setupConnections() {
     // 连接供应商物品列表更新
     connect(m_gameViewModel, &GameViewModel::vendorItemsChanged,
             m_mainWindow->getGameWidget(), &GameWidget::setAvailableVendorItems);
+            
+    // 连接供应商出现请求到VendorManager
+    connect(m_mainWindow->getGameWidget(), &GameWidget::vendorAppear,
+            m_gameViewModel->getVendorManager(), &VendorManager::showVendor);
 }

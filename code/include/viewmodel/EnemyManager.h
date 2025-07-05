@@ -2,6 +2,10 @@
 #define ENEMYMANAGER_H
 
 #include <memory>
+#include <QObject>
+#include <QList>
+#include <QPointF>
+#include <QDebug>
 
 class EnemyManager : public QObject {
     Q_OBJECT
@@ -16,6 +20,8 @@ public:
     void spawnEnemies(double deltaTime);
     void spawnEnemy(const QPointF& position);
     void spawnEnemyAtRandomPosition();
+    void spawnSpikeball(const QPointF& position);
+    void spawnOgre(const QPointF& position);
     
     // 敌人管理
     void updateEnemies(double deltaTime, const QPointF& playerPos, bool playerStealthMode = false);
@@ -23,7 +29,10 @@ public:
     // 潜行状态查询
     bool isPlayerStealthMode() const { return m_playerStealthMode; }
     
-
+    // 障碍物管理
+    void createObstacle(const QPointF& position);
+    bool isObstacleAt(const QPointF& position) const;
+    void clearObstacles();
     
     void damageEnemy(int bulletId ,int enemyId);
     void removeEnemy(int enemyId);
@@ -51,6 +60,7 @@ signals:
     
 private:
     QList<EnemyData> m_enemies;
+    QList<QPointF> m_obstacles; // 障碍物位置列表
     int m_nextEnemyId = 0;
     double m_spawnTimer = 0.0;
     double m_spawnInterval = 2.0;
@@ -62,11 +72,14 @@ private:
     
     QPointF getRandomSpawnPosition() const;
     void updateEnemyAI(EnemyData& enemy, const QPointF& playerPos);
+    void updateSpikeballAI(EnemyData& enemy, const QPointF& playerPos, double deltaTime);
+    void updateOgreAI(EnemyData& enemy, const QPointF& playerPos);
     void removeInactiveEnemies();
     bool isPositionValid(const QPointF& position) const;
     bool isPositionValid(const QPointF& position, const int enemyId) const;
     QPointF calculateDirectionToPlayer(const QPointF& enemyPos, const QPointF& playerPos) const;
     double calculateDistance(const QPointF& pos1, const QPointF& pos2) const;
+    QPointF getRandomDeployPosition() const;
 };
 
 #endif // ENEMYMANAGER_H

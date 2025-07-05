@@ -37,7 +37,8 @@ signals:
     void useItem();
     void vendorAppear();
     void vendorDisappear();
-    void purchaseVendorItem(int itemType);  // 购买供应商物品的信号    void gameWin();
+    void purchaseVendorItem(int itemType);  // 购买供应商物品的信号
+    void gameWin(); // 游戏胜利信号
     void pauseGame();
     void resumeGame();
 
@@ -111,6 +112,9 @@ private:
     
     // 供应商相关
     QList<int> m_availableVendorItems;  // 当前可购买的供应商物品列表
+    
+    // 辅助函数：将EnemyData的enemyType转换为MonsterType
+    MonsterType enemyTypeToMonsterType(int enemyType);
 };
 
 #endif

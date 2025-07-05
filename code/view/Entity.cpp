@@ -149,10 +149,43 @@ void MonsterEntity::setVelocity(const QPointF& velocity) {
     m_velocity = velocity;
 }
 
+void MonsterEntity::setState(MonsterState newState) {
+    if (m_currentState != newState) {
+        m_currentState = newState;
+        // 根据状态切换动画
+        if (monsterType == MonsterType::spikeball) {
+            if (m_currentState == MonsterState::Deployed) {
+                // 删除当前动画
+                if (m_animation) {
+                    delete m_animation;
+                }
+                // 播放部署动画（一次）
+                m_animation = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_deploy"), 8.0, false);
+            } else {
+                // 删除当前动画
+                if (m_animation) {
+                    delete m_animation;
+                }
+                // 播放行走动画（循环）
+                m_animation = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_walk"), 8.0, true);
+            }
+        }
+    }
+}
+
 void MonsterEntity::update(double deltaTime) {
     // if (shouldBeRemoved()) return;
     if (m_animation) {
         m_animation->update(deltaTime);
+        
+        // 检查Spikeball的部署动画状态
+        if (monsterType == MonsterType::spikeball && m_currentState == MonsterState::Deployed && m_animation->isFinished()) {
+            // 部署动画完成，切换到静态画面
+            QStringList staticFrame;
+            staticFrame << "spikeball_deploy_4"; // 使用部署动画的最后一帧
+            delete m_animation;
+            m_animation = new Animation(staticFrame, 0.0, false); // 0.0速度，不循环
+        }
     }
     // 如果被冻结，完全不更新
     if (m_isFrozen) {
@@ -162,6 +195,11 @@ void MonsterEntity::update(double deltaTime) {
     switch (m_currentState) {
         case MonsterState::Walking:
             m_position += m_velocity * deltaTime;
+            break;
+        case MonsterState::Deployed:
+            // 部署后停止移动
+            break;
+        default:
             break;
     }
 }

@@ -306,6 +306,8 @@ void GameWidget::timerEvent() {
         if (vendor) {
             vendor->onVendorAppear();
         }
+        // 通知VendorManager激活供应商状态
+        emit vendorAppear();  // 这个信号会通过GameService连接到VendorManager
     }
     
     // 供应商物品购买 - 根据实际可购买的物品响应按键
@@ -358,13 +360,22 @@ void GameWidget::syncEnemies() {
     for (const auto& data : m_enemyDataList) {
         MonsterEntity* monster = nullptr;
         if (!m_monsters.contains(data.id)) {
-            monster = new MonsterEntity(MonsterType::orc);
+            monster = new MonsterEntity(enemyTypeToMonsterType(data.enemyType));
             m_monsters[data.id] = monster;
         } else {
             monster = m_monsters[data.id];
         }
         monster->setPosition(data.position);
         monster->setVelocity(data.velocity);
+        
+        // 根据敌人类型和部署状态设置动画
+        if (data.enemyType == 1) { // Spikeball
+            if (data.isDeployed) {
+                monster->setState(MonsterState::Deployed);
+            } else {
+                monster->setState(MonsterState::Walking);
+            }
+        }
         
         // 根据玩家潜行状态设置敌人是否冻结
         monster->setFrozen(m_playerStealthMode);
@@ -552,11 +563,8 @@ void GameWidget::onVendorDisappeared() {
 }
 
 void GameWidget::onVendorItemPurchased(int itemType) {
-    // 供应商物品购买成功时的处理逻辑
-    qDebug() << "成功购买供应商物品:" << itemType;
-    
-    // 购买成功后，更新供应商的可购买物品列表
-    updateVendorItems();
+    qDebug() << "供应商物品购买成功，物品类型:" << itemType;
+    // 这里可以添加购买成功后的UI反馈
 }
 
 void GameWidget::updateVendorItems() {
@@ -579,4 +587,18 @@ void GameWidget::setAvailableVendorItems(const QList<int>& items) {
 void GameWidget::onGameWin() {
     m_isGamePaused = true;
     emit gameWin(); 
+}
+
+// 辅助函数：将EnemyData的enemyType转换为MonsterType
+MonsterType GameWidget::enemyTypeToMonsterType(int enemyType) {
+    switch (enemyType) {
+        case 0: // 普通兽人
+            return MonsterType::orc;
+        case 1: // Spikeball
+            return MonsterType::spikeball;
+        case 2: // Ogre
+            return MonsterType::ogre;
+        default:
+            return MonsterType::orc; // 默认返回兽人
+    }
 }

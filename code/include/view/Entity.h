@@ -64,6 +64,8 @@ private:
 
 enum class MonsterState {
     Walking,
+    WaitingToDeploy,  // 新增：已到达目标，等待部署
+    Deployed,  // 部署状态
     Dying, 
     Dead   
 };
@@ -84,12 +86,13 @@ public:
     ~MonsterEntity() override;
     void update(double deltaTime) override;
     void paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) override;
-    void setState(MonsterState newState) { m_currentState = newState; }
+    void setState(MonsterState newState);
     void setVelocity(const QPointF& velocity);
     void setFrozen(bool frozen) { m_isFrozen = frozen; }
     bool isFrozen() const { return m_isFrozen; }
     MonsterType getType() const {return monsterType;}
 private:
+    void updateAnimation(); // 新增：根据状态更新动画
     Animation* m_animation;    
     QPointF m_velocity; 
     MonsterType  monsterType;

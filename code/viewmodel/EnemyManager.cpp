@@ -11,6 +11,7 @@ EnemyManager::EnemyManager(QObject *parent)
     , m_maxEnemies(10)
     , m_enemyMoveSpeed(40.0)
 {
+    m_obstacles.clear();
 }
 
 void EnemyManager::spawnEnemies(double deltaTime)
@@ -20,7 +21,24 @@ void EnemyManager::spawnEnemies(double deltaTime)
     if (m_spawnTimer >= m_spawnInterval && getActiveEnemyCount() < m_maxEnemies) {
         int spawnCount = QRandomGenerator::global()->bounded(1, 4);
         for (int i = 0; i < spawnCount; ++i) {
-            spawnEnemyAtRandomPosition();
+            // 随机选择敌人类型
+            int enemyType = QRandomGenerator::global()->bounded(10); // 0-9
+            QPointF position = getRandomSpawnPosition();
+            
+            if (position == QPointF(0, 0)) {
+                continue;
+            }
+            
+            if (enemyType < 6) {
+                // 60%概率生成普通兽人
+                spawnEnemy(position);
+            } else if (enemyType < 8) {
+                // 20%概率生成Spikeball
+                spawnSpikeball(position);
+            } else {
+                // 20%概率生成Ogre
+                spawnOgre(position);
+            }
         }
         m_spawnTimer = 0.0;
         m_spawnInterval = std::max(0.9, m_spawnInterval * 0.95); // 减少生成间隔
@@ -41,6 +59,7 @@ void EnemyManager::spawnEnemy(const QPointF& position)
     enemy.moveSpeed = m_enemyMoveSpeed;
     enemy.isActive = true;
     enemy.isSmart = QRandomGenerator::global()->bounded(3) != 2; 
+    enemy.enemyType = 0; // 普通兽人
     
     m_enemies.append(enemy);
     
@@ -48,6 +67,62 @@ void EnemyManager::spawnEnemy(const QPointF& position)
     emit enemyCountChanged(getActiveEnemyCount());
     
     qDebug() << "Enemy spawned at position:" << position << "ID:" << enemy.id;
+}
+
+void EnemyManager::spawnSpikeball(const QPointF& position)
+{
+    if (getActiveEnemyCount() >= m_maxEnemies) {
+        return;
+    }
+    
+    EnemyData enemy;
+    enemy.id = m_nextEnemyId++;
+    enemy.health = 2; // Spikeball活动时血量为2
+    enemy.position = position;
+    enemy.velocity = QPointF(0, 0);
+    enemy.moveSpeed = m_enemyMoveSpeed * 0.8; // 稍微慢一点
+    enemy.isActive = true;
+    enemy.isSmart = true;
+    enemy.enemyType = 1; // Spikeball
+    enemy.isDeployed = false;
+    enemy.deployTimer = 0.0;
+    enemy.deployDelay = 3.0;
+    enemy.targetPosition = getRandomDeployPosition();
+    enemy.hasReachedTarget = false;
+    enemy.hasCreatedObstacle = false;
+    
+    m_enemies.append(enemy);
+    
+    emit enemySpawned(enemy);
+    emit enemyCountChanged(getActiveEnemyCount());
+    
+    qDebug() << "Spikeball spawned at position:" << position << "ID:" << enemy.id << "Target:" << enemy.targetPosition;
+}
+
+void EnemyManager::spawnOgre(const QPointF& position)
+{
+    if (getActiveEnemyCount() >= m_maxEnemies) {
+        return;
+    }
+    
+    EnemyData enemy;
+    enemy.id = m_nextEnemyId++;
+    enemy.health = 3; // Ogre血量为3
+    enemy.position = position;
+    enemy.velocity = QPointF(0, 0);
+    enemy.moveSpeed = m_enemyMoveSpeed * 0.6; // 移动速度慢
+    enemy.isActive = true;
+    enemy.isSmart = true;
+    enemy.enemyType = 2; // Ogre
+    enemy.damageResistance = 0.5; // 伤害抗性50%
+    enemy.hasCreatedObstacle = false;
+    
+    m_enemies.append(enemy);
+    
+    emit enemySpawned(enemy);
+    emit enemyCountChanged(getActiveEnemyCount());
+    
+    qDebug() << "Ogre spawned at position:" << position << "ID:" << enemy.id;
 }
 
 void EnemyManager::spawnEnemyAtRandomPosition()
@@ -70,13 +145,28 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
             if (playerStealthMode) {
                 enemy.velocity = QPointF(0, 0);
             } else {
-                updateEnemyAI(enemy, playerPos);
+                // 根据敌人类型调用不同的AI更新方法
+                switch (enemy.enemyType) {
+                    case 1: // Spikeball
+                        updateSpikeballAI(enemy, playerPos, deltaTime);
+                        break;
+                    case 2: // Ogre
+                        updateOgreAI(enemy, playerPos);
+                        break;
+                    default: // 普通兽人
+                        updateEnemyAI(enemy, playerPos);
+                        break;
+                }
             }
             
-            if(!isPositionValid(enemy.position + enemy.velocity * deltaTime, enemy.id)) {
-                continue;
+            // 更新敌人位置
+            QPointF newPosition = enemy.position + enemy.velocity * deltaTime;
+            if(isPositionValid(newPosition, enemy.id)) {
+                enemy.position = newPosition;
+            } else {
+                // 如果新位置无效，尝试调整移动方向或停止移动
+                enemy.velocity = QPointF(0, 0);
             }
-            enemy.position += enemy.velocity * deltaTime;
         }
     }
     spawnEnemies(deltaTime);
@@ -90,7 +180,15 @@ void EnemyManager::damageEnemy(int bulletId,int enemyId)
 {
     for (auto& enemy : m_enemies) {
         if (enemy.id == enemyId && enemy.isActive) {
-            enemy.health -= 1;
+            // 根据敌人类型处理伤害
+            int damage = 1;
+            if (enemy.enemyType == 2) { // Ogre
+                // Ogre有伤害抗性，只受50%伤害
+                damage = static_cast<int>(damage * enemy.damageResistance);
+                if (damage < 1) damage = 1; // 至少造成1点伤害
+            }
+            
+            enemy.health -= damage;
                         
             if (enemy.health <= 0) {
                 // 在标记为非活动状态之前，先发出信号并传递位置信息
@@ -98,6 +196,8 @@ void EnemyManager::damageEnemy(int bulletId,int enemyId)
                 enemy.isActive = false;
                 qDebug() << "Enemy destroyed, ID:" << enemyId << "at position:" << enemyPosition;
                 emit enemyDestroyed(enemy.id, enemyPosition);
+            } else {
+                emit enemyDamaged(enemyId, enemy.health);
             }
             break;
         }
@@ -174,8 +274,6 @@ QPointF EnemyManager::getRandomSpawnPosition() const
     return position;
 }
 
-
-
 void EnemyManager::updateEnemyAI(EnemyData& enemy, const QPointF& playerPos)
 {
     // 计算到玩家的方向
@@ -189,6 +287,108 @@ void EnemyManager::updateEnemyAI(EnemyData& enemy, const QPointF& playerPos)
     enemy.velocity = direction * enemy.moveSpeed;
 }
 
+void EnemyManager::updateSpikeballAI(EnemyData& enemy, const QPointF& playerPos, double deltaTime)
+{
+    if (enemy.isDeployed) {
+        // 已部署状态：停止移动，血量变为6
+        enemy.velocity = QPointF(0, 0);
+        enemy.health = 6;
+        
+        // 如果还没创建障碍物，创建障碍物
+        if (!enemy.hasCreatedObstacle) {
+            createObstacle(enemy.position);
+            enemy.hasCreatedObstacle = true;
+            qDebug() << "Spikeball deployed and created obstacle at:" << enemy.position;
+        }
+    } else {
+        // 未部署状态：移动到目标位置
+        if (!enemy.hasReachedTarget) {
+            // 检查是否到达目标位置
+            double distanceToTarget = calculateDistance(enemy.position, enemy.targetPosition);
+            if (distanceToTarget < 10.0) {
+                enemy.hasReachedTarget = true;
+                enemy.velocity = QPointF(0, 0);
+                // 直接进入部署状态
+                enemy.isDeployed = true;
+                enemy.health = 6; // 部署后血量变为6
+                qDebug() << "Spikeball reached target position and deployed at:" << enemy.targetPosition;
+            } else {
+                // 继续移动到目标位置
+                QPointF direction = calculateDirectionToPlayer(enemy.position, enemy.targetPosition);
+                enemy.velocity = direction * enemy.moveSpeed;
+            }
+        }
+    }
+}
+
+void EnemyManager::updateOgreAI(EnemyData& enemy, const QPointF& playerPos)
+{
+    // 计算到玩家的方向
+    QPointF direction = calculateDirectionToPlayer(enemy.position, playerPos);
+    // 设置速度
+    enemy.velocity = direction * enemy.moveSpeed;
+    
+    // 检查是否接触Spikeball，如果接触则破坏Spikeball
+    for (auto& otherEnemy : m_enemies) {
+        if (otherEnemy.id != enemy.id && otherEnemy.isActive && otherEnemy.enemyType == 1) {
+            double distance = calculateDistance(enemy.position, otherEnemy.position);
+            if (distance < 20.0) { // 接触距离
+                // 破坏Spikeball
+                otherEnemy.health = 0;
+                otherEnemy.isActive = false;
+                qDebug() << "Ogre destroyed Spikeball ID:" << otherEnemy.id;
+                emit enemyDestroyed(otherEnemy.id, otherEnemy.position);
+            }
+        }
+    }
+}
+
+void EnemyManager::createObstacle(const QPointF& position)
+{
+    // 在指定位置创建障碍物
+    m_obstacles.append(position);
+    qDebug() << "Obstacle created at:" << position;
+}
+
+bool EnemyManager::isObstacleAt(const QPointF& position) const
+{
+    for (const auto& obstacle : m_obstacles) {
+        double distance = calculateDistance(position, obstacle);
+        if (distance < 15.0) { // 障碍物影响范围
+            return true;
+        }
+    }
+    return false;
+}
+
+void EnemyManager::clearObstacles()
+{
+    m_obstacles.clear();
+    qDebug() << "All obstacles cleared";
+}
+
+QPointF EnemyManager::getRandomDeployPosition() const
+{
+    // 在地图中央区域随机选择一个部署位置
+    double centerX = MAP_WIDTH / 2.0;
+    double centerY = MAP_HEIGHT / 2.0;
+    int range = 80; // 部署范围
+    
+    QPointF position;
+    int attempts = 0;
+    const int maxAttempts = 10;
+    
+    do {
+        position = QPointF(
+            centerX + QRandomGenerator::global()->bounded(-range, range),
+            centerY + QRandomGenerator::global()->bounded(-range, range)
+        );
+        attempts++;
+    } while (isObstacleAt(position) && attempts < maxAttempts);
+    
+    return position;
+}
+
 void EnemyManager::removeInactiveEnemies()
 {
     for (int i = m_enemies.size() - 1; i >= 0; --i) {
@@ -200,6 +400,7 @@ void EnemyManager::removeInactiveEnemies()
 
 bool EnemyManager::isPositionValid(const QPointF& position) const
 {
+    // 检查是否与其他敌人重叠
     for(const auto& enemy : m_enemies) {
         if (enemy.isActive ) {
             if(enemy.position.x() < position.x() + ENEMY_WIDTH &&
@@ -210,11 +411,18 @@ bool EnemyManager::isPositionValid(const QPointF& position) const
             }
         }
     }
+    
+    // 检查是否与障碍物重叠
+    if (isObstacleAt(position)) {
+        return false;
+    }
+    
     return true;
 }
 
 bool EnemyManager::isPositionValid(const QPointF& position, const int enemyId) const
 {
+    // 检查是否与其他敌人重叠
     for(const auto& enemy : m_enemies) {
         if (enemy.isActive && enemy.id != enemyId) {
             if(enemy.position.x() < position.x() + ENEMY_WIDTH &&
@@ -225,6 +433,12 @@ bool EnemyManager::isPositionValid(const QPointF& position, const int enemyId) c
             }
         }
     }
+    
+    // 检查是否与障碍物重叠
+    if (isObstacleAt(position)) {
+        return false;
+    }
+    
     return true;
 }
 
