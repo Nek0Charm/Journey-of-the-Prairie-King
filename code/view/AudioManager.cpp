@@ -214,6 +214,7 @@ int AudioManager::getSoundTypeVolume(SoundType type) const
 void AudioManager::playMusic(MusicType type)
 {
     if (!m_musicEnabled || m_muted) {
+        qDebug() << "[playMusic] Music is disabled or muted";
         return;
     }
     QString musicPath = getMusicPath(type);
@@ -221,7 +222,12 @@ void AudioManager::playMusic(MusicType type)
         qWarning() << "[playMusic] Music path not found for type:" << type;
         return;
     }
-    if (m_currentMusic == type && m_musicPlayer->playbackState() != QMediaPlayer::StoppedState) {
+    if (m_musicPlayer->playbackState() == QMediaPlayer::PlayingState && m_currentMusic == type) {
+        qDebug() << "[playMusic] Music is already playing:" << musicPath;
+        return;
+    } else if (m_musicPlayer->playbackState() == QMediaPlayer::PausedState) {
+        qDebug() << "[playMusic] Resuming paused music:" << musicPath;
+        m_musicPlayer->play();
         return;
     }
     m_currentMusic = type;
@@ -346,7 +352,6 @@ QString AudioManager::getSoundPath(SoundType type) const
         case FOOTSTEP:    return basePath + "/Cowboy_Footstep.wav";
         case GUNLOAD:     return basePath + "/cowboy_gunload.wav";
         case SECRET:      return basePath + "/Cowboy_Secret.wav";
-        case UNDEAD:      return basePath + "/cowboy_undead.wav";
         case COIN_PICKUP: return basePath + "/Pickup_Coin15.wav";
         case BUTTON_CLICK:return basePath + "/Cowboy_gunshot.wav"; 
         default:          return "";
@@ -381,6 +386,7 @@ QString AudioManager::getMusicPath(MusicType type) const
         case THE_OUTLAW:  return basePath + "/TheOutlaw.wav";
         case FINAL_BOSS:  return basePath + "/FinalBossEnding.wav";
         case MENU:        return basePath + "/Overworld.wav"; 
+        case UNDEAD:      return basePath + "/cowboy_undead.wav";
         default:          return "";
     }
 }

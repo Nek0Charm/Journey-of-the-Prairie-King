@@ -95,6 +95,8 @@ public:
 signals:
     void itemEffectApplied(int itemType, bool isImmediate);
     void effectExpired(EffectType type);
+    void usedTombstone();
+    void tombstoneFinished();
 
 private:
     // 具体的道具效果实现

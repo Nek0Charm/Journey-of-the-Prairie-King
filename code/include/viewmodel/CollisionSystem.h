@@ -1,9 +1,9 @@
 #ifndef COLLISIONSYSTEM_H
 #define COLLISIONSYSTEM_H
 
-#include "viewmodel/PlayerViewModel.h"
-#include "viewmodel/EnemyManager.h"
-#include "viewmodel/BulletViewModel.h"
+class PlayerViewModel;
+class EnemyManager;
+class BulletViewModel;
 
 class CollisionSystem : public QObject
 {
@@ -11,6 +11,7 @@ class CollisionSystem : public QObject
 
 public:
     explicit CollisionSystem(QObject *parent = nullptr);
+    static CollisionSystem& instance();
     ~CollisionSystem() = default;
 
     // 碰撞检测
@@ -42,6 +43,8 @@ public:
     double getPlayerCollisionRadius() const { return m_playerWidth; }
     double getEnemyCollisionRadius() const { return m_enemyWidth; }
     double getBulletCollisionRadius() const { return m_bulletWidth; }
+    bool isCollision(const QPointF& pos1, const QPointF& pos2, double radius1, double radius2) const;
+
 
     // 处理子弹穿透逻辑
     void handleBulletPenetration(const BulletData& bullet, 
@@ -59,7 +62,6 @@ private:
     double m_bulletWidth = 5.0;
 
     double calculateDistance(const QPointF& pos1, const QPointF& pos2) const;
-    bool isCollision(const QPointF& pos1, const QPointF& pos2, double radius1, double radius2) const;
     void logCollision(const QString& type, int id1, int id2);
 };
 

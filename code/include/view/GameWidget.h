@@ -38,6 +38,7 @@ signals:
     void vendorAppear();
     void vendorDisappear();
     void purchaseVendorItem(int itemType);  // 购买供应商物品的信号
+    
     void gameWin(); // 游戏胜利信号
     void pauseGame();
     void resumeGame();
@@ -47,6 +48,7 @@ public slots:
     void die(int id);
     void gameLoop(); // 临时函数
     void playerPositionChanged(QPointF position);
+    void startMapTransition(const QString& nextMapName, const QString& nextLayoutName);
     // GameViewModel的游戏时间是已游玩时间，而GameWidget的游戏时间是剩余时间
     void updateGameTime(double gameTime);
     void updateBullets(QList<BulletData> bullets);
@@ -75,6 +77,7 @@ private:
     QTimer* m_timer;            // 临时变量
     QElapsedTimer m_elapsedTimer; // 临时变量
     GameMapView* m_gameMap;
+    GameMapView* m_nextMap = nullptr;
     QPixmap m_spriteSheet;
     PlayerEntity* player;
     VendorEntity* vendor;
@@ -82,6 +85,11 @@ private:
     QMap<int, DeadMonsterEntity*> m_deadmonsters;
     QMap<int, ItemEntity*> m_items;
 
+    bool m_isTransitioning;
+    double m_transitionDuration;
+    double m_transitionTimer;
+    QPointF m_transitionStartOffset;
+    QPointF m_transitionEndOffset;
     bool m_isGamePaused = false;
     bool m_isExplosionSequenceActive = false;   
     double m_explosionSequenceTimer = 0.0;    
@@ -89,6 +97,8 @@ private:
     bool m_isSmokeReleased = false;
     double m_smokeReleaseTimer = 0.0;
     double m_nextSmokeReleaseTimer = 0.0;
+    double m_pausedTime = 0.0;
+    void triggerLightning(const QPointF& startPosition);
     /*
     这些变量需要随着GameViewModel内值的变化而变化
     */
@@ -109,6 +119,8 @@ private:
     bool m_isZombieMode = false;
     bool m_isBoomActive = false;
     bool m_isStealthMode = false;
+    double m_lightningEffectTimer = 0.0;
+    QList<QPointF> m_lightningSegments;
     
     // 供应商相关
     QList<int> m_availableVendorItems;  // 当前可购买的供应商物品列表

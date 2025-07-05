@@ -252,7 +252,7 @@ void ItemEffectManager::applyTombstoneEffect(PlayerViewModel* player, EnemyManag
     // 添加僵尸模式效果
     addEffect(ZOMBIE_MODE, duration, 0.0, 1.0);
     applyEffectToPlayer(ZOMBIE_MODE, 1.0, player);
-    
+    emit usedTombstone(); // 发出墓碑使用信号
     qDebug() << "墓碑效果：转变成僵尸，移动速度提升至" << newSpeed << "，获得接触击杀能力，持续" << duration << "秒";
 }
 
@@ -410,6 +410,10 @@ void ItemEffectManager::checkAndRemoveExpiredEffects(double currentTime, PlayerV
         effect.isActive = false;
         restorePlayerFromEffect(type, effect.originalValue, player);
         emit effectExpired(type);
+        if (type) {
+            emit tombstoneFinished(); // 如果是墓碑效果，发出墓碑完成信号
+        }
+        
         qDebug() << "效果过期:" << type;
     }
     

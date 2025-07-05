@@ -69,23 +69,21 @@ void GameViewModel::updateGame(double deltaTime)
     }
 
     m_gameTime += deltaTime;
-    if(m_gameTime > MAX_GAMETIME) {
-        m_gameTime = 0.0; 
+    m_gameTime = std::min(m_gameTime, MAX_GAMETIME);
+    if(m_gameTime == MAX_GAMETIME && m_enemyManager->getActiveEnemyCount() == 0) {
         emit gameTimeChanged(m_gameTime);
         endGame();
         return;
     }
     emit gameTimeChanged(m_gameTime);
-    
+    m_collisionSystem->checkCollisions(*m_player, 
+                                      m_enemyManager->getEnemies(),
+                                      m_player->getActiveBullets());
     // 更新玩家
     m_player->update(deltaTime);
     
     // 更新敌人（传递玩家潜行状态）
-    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition(), m_player->isStealthMode());
-
-    m_collisionSystem->checkCollisions(*m_player, 
-                                      m_enemyManager->getEnemies(),
-                                      m_player->getActiveBullets());
+    m_enemyManager->updateEnemies(deltaTime, m_player->getPosition(), m_player->isStealthMode(), m_gameTime == MAX_GAMETIME);
     
     m_item->updateItems(deltaTime, m_player->getPosition());
     
@@ -154,9 +152,6 @@ void GameViewModel::setupConnections()
     connect(m_player.get(), &PlayerViewModel::playerDied,
             this, &GameViewModel::handlePlayerDeath);
 
-    connect(m_player.get(), &PlayerViewModel::livesChanged,
-            this, &GameViewModel::playerLivesChanged);
-
     connect(m_player.get(), &PlayerViewModel::livesDown,
             this, &GameViewModel::playerLivesDown);
             
@@ -214,6 +209,7 @@ void GameViewModel::handlePlayerHitByEnemy(int enemyId)
     m_enemyManager->removeEnemy(enemyId);
     m_player->setPositon({MAP_WIDTH / 2.0, MAP_HEIGHT / 2.0});
     m_enemyManager->clearAllEnemies();
+    m_player->getBulletViewModel()->clearAllBullets();
     m_gameTime = std::max(m_gameTime - 5.0, 0.0);
 }
 

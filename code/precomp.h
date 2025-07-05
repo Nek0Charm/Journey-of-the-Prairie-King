@@ -71,6 +71,7 @@ struct EnemyData {
     int health = 1;
     QPointF position;
     QPointF velocity;
+    QPointF targetPosition;
     double moveSpeed = 40.0;
     bool isActive = true;
     bool isSmart = true;
@@ -93,6 +94,7 @@ struct EnemyData {
     
     // 障碍物相关
     bool hasCreatedObstacle = false; // 是否已创建障碍物
+    double time = 0.0;
 };
 
 struct ItemData {

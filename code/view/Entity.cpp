@@ -24,6 +24,7 @@ PlayerEntity::PlayerEntity(QObject *parent) : Entity(parent) {
     m_animations[PlayerState::ShootLeftWalk]  = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_left"), 8.0, true);
     m_animations[PlayerState::ShootRightWalk] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_right"), 8.0, true);
     m_animations[PlayerState::Lifting] = new Animation(SpriteManager::instance().getAnimationSequence("player_lifting_heart"), 8.0, true);
+    m_animations[PlayerState::Lightning] = new Animation(SpriteManager::instance().getAnimationSequence("player_lightning"), 4.0, true);
     m_animations[PlayerState::Kiss] = new Animation(SpriteManager::instance().getAnimationSequence("kiss"), 8.0, true);
     m_animations[PlayerState::WalkLiftingHeart] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_lifting_heart"), 8.0, true);
     m_animations[PlayerState::Dying] = new Animation(SpriteManager::instance().getAnimationSequence("player_dying"), 8.0, false);
@@ -306,9 +307,6 @@ ItemEntity::ItemEntity(int itemtype, QObject *parent, QPointF pos)
 }
 
 void ItemEntity::update(double deltaTime) {
-    if (m_lingerTimer > 0) {
-        m_lingerTimer -= deltaTime;
-    }
     if (m_currentState == ItemState::Drop && m_lingerTimer <= 3.0) {
         setState(ItemState::Flash);
     }

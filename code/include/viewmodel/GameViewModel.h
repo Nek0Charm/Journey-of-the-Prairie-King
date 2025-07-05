@@ -27,19 +27,13 @@ public:
     void endGame();
     void updateGame(double deltaTime);
 
+    ItemEffectManager* getItemEffectManager() const { return m_itemEffectManager.get(); }
     EnemyManager* getEnemyManager() const { return m_enemyManager.get(); }
     PlayerViewModel* getPlayer() const { return m_player.get(); }
-    ItemViewModel* getItem()    const { return m_item.get(); }
+    ItemViewModel* getItemViewModel() const { return m_item.get(); }
+
     void playerAttack(const QPointF& direction);
     void setPlayerMoveDirection(const QPointF& direction, bool isMoving);
-    
-    QPointF getPlayerPosition() const { return m_player->getPosition();}
-    int getPlayerLives() const { return m_player->getLives();}
-
-    double getGameTime() const { return m_gameTime;}
-
-    // 道具相关接口 
-    ItemViewModel* getItemViewModel() const { return m_item.get(); }
     void useItem() { if(m_item) m_item->usePossessedItem(); }
     QList<ItemData> getActiveItems() const { 
         return m_item ? m_item->getActiveItems() : QList<ItemData>(); 
@@ -59,12 +53,9 @@ public:
 signals:
     void gameStateChanged(GameState state);
     void playerDied();
-    void playerLivesChanged();
     void playerLivesDown();
     void playerPositonChanged(const QPointF& position);
     void itemUsed(int itemType); 
-    void boomUsed();
-    void itemPicked(int itemType);
     void gameTimeChanged(double gameTime);
     void enemiesChanged(QList<EnemyData> enemies);
     void itemsChanged(QList<ItemData> items);

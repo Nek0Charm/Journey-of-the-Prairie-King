@@ -67,6 +67,10 @@ void GameService::setupConnections() {
     // 新增：连接shot信号到onPlayerShot槽
     connect(m_gameViewModel->getPlayer(), &PlayerViewModel::shot, m_audioEventListener, &AudioEventListener::onPlayerShot);
     
+    connect(m_gameViewModel->getItemEffectManager(), &ItemEffectManager::usedTombstone,
+            m_audioEventListener, &AudioEventListener::onUsedTombstone);
+    connect(m_gameViewModel->getItemEffectManager(), &ItemEffectManager::tombstoneFinished,
+            m_audioEventListener, &AudioEventListener::onTombstoneFinished);
 
     connect(m_gameViewModel, &GameViewModel::itemUsed,
             m_mainWindow->getGameWidget(), &GameWidget::updateItemEffect);
