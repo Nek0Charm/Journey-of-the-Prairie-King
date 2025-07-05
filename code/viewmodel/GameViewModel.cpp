@@ -12,6 +12,7 @@ GameViewModel::GameViewModel(QObject *parent)
 
 void GameViewModel::startGame()
 {
+    qDebug() << "[GameViewModel::startGame] called";
     if (m_gameState != GameState::PLAYING) {
         resetGame();
         m_gameState = GameState::PLAYING;
@@ -50,9 +51,8 @@ void GameViewModel::endGame()
 
 void GameViewModel::nextGame() {
     m_enemyManager->clearAllEnemies();
-    m_gameState = GameState::PAUSED;
     m_gameTime = 0.0;
-
+    emit mapChanged();
 }
 
 void GameViewModel::playerAttack(const QPointF& direction) {
@@ -85,7 +85,9 @@ void GameViewModel::updateGame(double deltaTime)
         return;
     }
     emit gameTimeChanged(m_gameTime);
-    
+    m_collisionSystem->checkCollisions(*m_player, 
+                                      m_enemyManager->getEnemies(),
+                                      m_player->getActiveBullets());
     // 更新玩家
     m_player->update(deltaTime);
     
@@ -100,6 +102,28 @@ void GameViewModel::updateGame(double deltaTime)
     
     // 更新道具效果
     m_itemEffectManager->updateEffects(deltaTime, m_player.get());
+    
+    // 检查供应商出现
+    m_vendorManager->checkVendorAppearance(m_currentArea);
+    
+    // 只在供应商激活时才发出供应商物品列表变化信号
+    static QList<int> lastVendorItems;
+    static bool lastVendorActive = false;
+    bool currentVendorActive = m_vendorManager->isVendorActive();
+    
+    if (currentVendorActive) {
+        QList<int> currentVendorItems = m_vendorManager->getAvailableUpgradeItems();
+        if (lastVendorItems != currentVendorItems || !lastVendorActive) {
+            lastVendorItems = currentVendorItems;
+            emit vendorItemsChanged(currentVendorItems);
+        }
+    } else if (lastVendorActive) {
+        // 供应商刚刚消失，清空物品列表
+        lastVendorItems.clear();
+        emit vendorItemsChanged(QList<int>());
+    }
+    
+    lastVendorActive = currentVendorActive;
     
     // 检查游戏状态
     checkGameState();
@@ -121,7 +145,7 @@ void GameViewModel::handlePlayerDeath()
 
 void GameViewModel::setupConnections()
 {
-    if (!m_player || !m_enemyManager || !m_collisionSystem) {
+    if (!m_player || !m_enemyManager || !m_collisionSystem || !m_vendorManager) {
         return;
     }
 
@@ -155,6 +179,14 @@ void GameViewModel::setupConnections()
             this, &GameViewModel::handleItemUsed);
     connect(m_item.get(), &ItemViewModel::itemUsedImmediately,
             this, &GameViewModel::handleItemUsedImmediately);
+
+    // 连接供应商信号
+    connect(m_vendorManager.get(), &VendorManager::vendorAppeared,
+            this, &GameViewModel::vendorAppeared);
+    connect(m_vendorManager.get(), &VendorManager::vendorDisappeared,
+            this, &GameViewModel::vendorDisappeared);
+    connect(m_vendorManager.get(), &VendorManager::itemPurchased,
+            this, &GameViewModel::vendorItemPurchased);
 }
 
 void GameViewModel::initializeComponents()
@@ -164,6 +196,7 @@ void GameViewModel::initializeComponents()
     m_enemyManager = std::make_unique<EnemyManager>(this);
     m_collisionSystem = std::make_unique<CollisionSystem>(this);
     m_itemEffectManager = std::make_unique<ItemEffectManager>(this);
+    m_vendorManager = std::make_unique<VendorManager>(this);
 }
 
 void GameViewModel::resetGame()
@@ -185,23 +218,33 @@ void GameViewModel::resetGame()
 
 void GameViewModel::handlePlayerHitByEnemy(int enemyId)
 {
-    m_player->takeDamage();
-    m_enemyManager->removeEnemy(enemyId);
-    m_player->setPositon({MAP_WIDTH / 2.0, MAP_HEIGHT / 2.0});
+    m_player->getBulletViewModel()->clearAllBullets();
     m_enemyManager->clearAllEnemies();
+    m_enemyManager->removeEnemy(enemyId);
+    m_player->takeDamage();
+    m_player->setPositon({MAP_WIDTH / 2.0, MAP_HEIGHT / 2.0});
     m_gameTime = std::max(m_gameTime - 5.0, 0.0);
 }
 
 void GameViewModel::handleEnemyHitByBullet(int bulletId, int enemyId)
 {
-    m_enemyManager->damageEnemy(bulletId, enemyId);
-    m_player->removeBullet(bulletId);
+    // 获取子弹的当前伤害值
+    int bulletDamage = m_player->getBulletViewModel()->getBulletDamage(bulletId);
+    
+    // 对敌人造成伤害，传递子弹的伤害值
+    m_enemyManager->damageEnemy(bulletId, enemyId, bulletDamage);
+    
+    // 减少子弹的伤害值
+    bulletDamage--;
+    
+    // 更新子弹伤害值，如果伤害值为0或负数，子弹会被自动标记为非活动状态
+    m_player->getBulletViewModel()->updateBulletDamage(bulletId, bulletDamage);
 }
 
 void GameViewModel::handleEnemyHitByZombie(int enemyId)
 {
     // 僵尸模式：直接击杀敌人
-    m_enemyManager->damageEnemy(0, enemyId); // 使用0作为占位符bulletId
+    m_enemyManager->damageEnemy(0, enemyId, 999); // 使用999作为占位符bulletId，999伤害确保击杀
     qDebug() << "僵尸模式接触击杀敌人:" << enemyId;
 }
 
@@ -219,4 +262,29 @@ void GameViewModel::handleItemUsed(int itemType) {
 }
 void GameViewModel::handleItemUsedImmediately(int itemType) {
     handleItemUsed(itemType);
+}
+
+// 供应商相关方法实现
+void GameViewModel::purchaseVendorItem(int itemType) {
+    if (m_vendorManager && m_player) {
+        if (m_vendorManager->purchaseItem(itemType, m_player.get())) {
+            // 购买成功后，应用物品效果
+            m_itemEffectManager->applyItemEffect(itemType, m_player.get(), m_enemyManager.get(), true);
+        }
+    }
+}
+
+QList<int> GameViewModel::getAvailableVendorItems() const {
+    return m_vendorManager ? m_vendorManager->getAvailableUpgradeItems() : QList<int>();
+}
+
+bool GameViewModel::canPurchaseVendorItem(int itemType) const {
+    if (!m_vendorManager || !m_player) {
+        return false;
+    }
+    return m_vendorManager->canPurchaseItem(itemType, m_player->getCoins());
+}
+
+int GameViewModel::getVendorItemPrice(int itemType) const {
+    return m_vendorManager ? m_vendorManager->getItemPrice(itemType) : 0;
 }

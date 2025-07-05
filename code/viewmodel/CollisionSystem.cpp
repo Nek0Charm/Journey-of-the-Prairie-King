@@ -21,8 +21,8 @@ void CollisionSystem::checkCollisions(const PlayerViewModel& player,
     // 检查玩家与敌人的碰撞
     checkPlayerEnemyCollisions(player, enemies);
     
-    // 检查子弹与敌人的碰撞
-    checkBulletEnemyCollisions(bullets, enemies);
+    // 检查子弹与敌人的碰撞，传递子弹伤害值
+    checkBulletEnemyCollisions(bullets, enemies, 1); // 默认伤害值为1，实际应该从子弹数据获取
 }
 
 void CollisionSystem::checkPlayerEnemyCollisions(const PlayerViewModel& player,
@@ -48,15 +48,26 @@ void CollisionSystem::checkPlayerEnemyCollisions(const PlayerViewModel& player,
 }
 
 void CollisionSystem::checkBulletEnemyCollisions(const QList<BulletData>& bullets,
-                                               const QList<EnemyData>& enemies)
+                                               const QList<EnemyData>& enemies,
+                                               int bulletDamage)
 {
     for (const auto& bullet : bullets) {
         if (!bullet.isActive) continue;
         
+        // 使用子弹自身的伤害值
+        int currentDamage = bullet.damage;
+        if (currentDamage <= 0) continue; // 如果子弹没有伤害了，跳过
+        
+        // 检查与所有敌人的碰撞
         for (const auto& enemy : enemies) {
-            if (enemy.isActive && checkBulletEnemyCollision(bullet.position, enemy.position)) {
+            if (!enemy.isActive) continue;
+            
+            if (checkBulletEnemyCollision(bullet.position, enemy.position)) {
+                // 发出子弹击中敌人的信号，让GameViewModel处理伤害计算和子弹穿透
                 emit enemyHitByBullet(bullet.id, enemy.id);
                 logCollision("Bullet-Enemy", bullet.id, enemy.id);
+                
+                // 只处理第一个碰撞的敌人，让GameViewModel处理后续的穿透逻辑
                 break;
             }
         }

@@ -8,12 +8,13 @@ BulletViewModel::~BulletViewModel() {
     clearAllBullets();
 }
 
-void BulletViewModel::createBullet(const QPointF& position, const QPointF& direction, double speed) {
+void BulletViewModel::createBullet(const QPointF& position, const QPointF& direction, double speed, int damage) {
     BulletData bullet;
     bullet.id = m_nextBulletId++;
     bullet.position = position;
     bullet.velocity = normalize(direction) * speed;
     bullet.isActive = true;
+    bullet.damage = damage;
 
     m_bullets.append(bullet);
 }
@@ -64,12 +65,32 @@ QList<BulletData> BulletViewModel::getActiveBullets() const{
     return activeBullets;
 }
 
-
-
 QPointF BulletViewModel::normalize(const QPointF& point) {
     qreal length = sqrt(point.x() * point.x() + point.y() * point.y());
     if (length > 0) {
         return QPointF(point.x() / length, point.y() / length);
     }
     return point;
+}
+
+int BulletViewModel::getBulletDamage(int bulletId) const {
+    for (const auto& bullet : m_bullets) {
+        if (bullet.id == bulletId) {
+            return bullet.damage;
+        }
+    }
+    return 0; // 如果找不到子弹，返回0
+}
+
+void BulletViewModel::updateBulletDamage(int bulletId, int newDamage) {
+    for (auto& bullet : m_bullets) {
+        if (bullet.id == bulletId) {
+            bullet.damage = newDamage;
+            // 如果伤害值小于等于0，标记子弹为非活动状态
+            if (bullet.damage <= 0) {
+                bullet.isActive = false;
+            }
+            break;
+        }
+    }
 }

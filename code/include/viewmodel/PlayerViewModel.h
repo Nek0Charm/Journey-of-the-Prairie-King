@@ -23,6 +23,7 @@ public:
         bool badgeMode = false;   // 治安官徽章模式（包含霰弹枪效果）
         bool stealthMode = false;  // 潜行模式
         bool zombieMode = false;   // 僵尸模式
+        int bulletDamage = 1;      // 子弹伤害值，默认为1
         
         // 移动速度限制
         static constexpr double BASE_MOVE_SPEED = 100.0;  // 基础移动速度
@@ -98,6 +99,10 @@ public:
     // 僵尸模式相关
     void setZombieMode(bool enabled) {m_stats.zombieMode = enabled; emit zombieModeChanged(enabled);}
     bool isZombieMode() const {return m_stats.zombieMode;}
+    
+    // 子弹伤害值相关
+    void setBulletDamage(int damage) {m_stats.bulletDamage = damage;}
+    int getBulletDamage() const {return m_stats.bulletDamage;}
 
 signals:
     void playerDied();

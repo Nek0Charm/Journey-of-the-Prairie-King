@@ -34,6 +34,9 @@ public slots:
     // 游戏状态变化槽函数
     void onGameStateChanged(GameState state); // 游戏状态变化（背景音乐）
 
+    void onUsedTombstone();
+    void onTombstoneFinished();
+
 private:
     
     // 连接所有游戏事件信号

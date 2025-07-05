@@ -1,6 +1,27 @@
-file(GLOB_RECURSE SOURCES 
-    "main.cpp"
-    "./*.cpp"
+# 手动列出所有源文件
+set(SOURCES
+    main.cpp
+    app/GameService.cpp
+    app/application.cpp
+    common/GameMap.cpp
+    view/Animation.cpp
+    view/AudioEventListener.cpp
+    view/AudioManager.cpp
+    view/EndWidget.cpp
+    view/Entity.cpp
+    view/GameMap.cpp
+    view/GameWidget.cpp
+    view/MainWindow.cpp
+    view/SpriteManager.cpp
+    view/StartWidget.cpp
+    viewmodel/BulletViewModel.cpp
+    viewmodel/CollisionSystem.cpp
+    viewmodel/EnemyManager.cpp
+    viewmodel/GameViewModel.cpp
+    viewmodel/ItemEffectManager.cpp
+    viewmodel/ItemViewModel.cpp
+    viewmodel/PlayerViewModel.cpp
+    viewmodel/VendorManager.cpp
 )
 
 # 收集头文件

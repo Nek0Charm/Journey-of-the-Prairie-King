@@ -16,6 +16,7 @@ public:
     void setupConnections();
     void update();
     GameWidget *getGameWidget() const { return m_gameWidget; }
+
 signals:
     void startGameRequested();
     void exitGameRequested();

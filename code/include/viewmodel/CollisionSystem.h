@@ -23,7 +23,8 @@ public:
                                    const QList<EnemyData>& enemies);
     
     void checkBulletEnemyCollisions(const QList<BulletData>& bullets,
-                                   const QList<EnemyData>& enemies);
+                                   const QList<EnemyData>& enemies,
+                                   int bulletDamage = 1);
 
     // 碰撞查询
     bool checkPlayerEnemyCollision(const QPointF& playerPos, 
@@ -51,6 +52,11 @@ public:
     bool isRectCollidingWithMap(const QPointF& position, int size) const;
     // 获取最近的可行走位置
     QPointF getNearestWalkablePosition(const QPointF& position, int size) const;
+    // 处理子弹穿透逻辑
+    void handleBulletPenetration(const BulletData& bullet, 
+                                const QList<EnemyData>& enemies,
+                                int bulletDamage);
+
 signals:
     void playerHitByEnemy(int enemyId);
     void enemyHitByBullet(int bulletId, int enemyId);

@@ -50,7 +50,7 @@ void PlayerViewModel::shoot(const QPointF& direction)
             shootInShotgunPattern(direction);
         } else {
             // 正常射击模式：只向指定方向发射一颗子弹
-            m_bulletViewModel->createBullet(m_stats.position, direction, 170);
+            m_bulletViewModel->createBullet(m_stats.position, direction, 170, m_stats.bulletDamage);
         }
         
         m_currentShootCooldown = m_stats.shootCooldown;
@@ -84,7 +84,7 @@ void PlayerViewModel::addLife()
 void PlayerViewModel::reset()
 {
     m_stats.lives = 4;
-    m_stats.coins = 0;
+    m_stats.coins = 1000;
     m_stats.position = QPointF(MAP_WIDTH/2, MAP_HEIGHT/2);
     m_stats.shootingDirection = QPointF(1, 0);
     m_stats.moveSpeed = 80.0;
@@ -95,7 +95,7 @@ void PlayerViewModel::reset()
     m_stats.badgeMode = false;
     m_stats.zombieMode = false;
     m_stats.moving = false;
-
+    m_stats.bulletDamage = 1;  // 重置子弹伤害值为1
 
     m_bulletViewModel->clearAllBullets();
     m_currentShootCooldown = 0.0;
@@ -130,7 +130,7 @@ void PlayerViewModel::shootInEightDirections()
     
     // 向8个方向发射子弹
     for (const auto& direction : directions) {
-        m_bulletViewModel->createBullet(m_stats.position, direction, 170);
+        m_bulletViewModel->createBullet(m_stats.position, direction, 170, m_stats.bulletDamage);
     }
     
     qDebug() << "8方向射击：向8个方向发射子弹";
@@ -159,7 +159,7 @@ void PlayerViewModel::shootInShotgunPattern(const QPointF& direction)
     
     // 向确定的方向发射子弹
     for (const auto& dir : directions) {
-        m_bulletViewModel->createBullet(m_stats.position, dir, 170);
+        m_bulletViewModel->createBullet(m_stats.position, dir, 170, m_stats.bulletDamage);
     }
     
     qDebug() << "霰弹枪射击：向" << directions.size() << "个方向发射子弹";
@@ -197,9 +197,9 @@ void PlayerViewModel::shootInWheelShotgunCombination()
         QPointF rightDir(std::cos(rightAngle), std::sin(rightAngle));
         
         // 向三个方向发射子弹
-        m_bulletViewModel->createBullet(m_stats.position, leftDir, 170);
-        m_bulletViewModel->createBullet(m_stats.position, centerDir, 170);
-        m_bulletViewModel->createBullet(m_stats.position, rightDir, 170);
+        m_bulletViewModel->createBullet(m_stats.position, leftDir, 170, m_stats.bulletDamage);
+        m_bulletViewModel->createBullet(m_stats.position, centerDir, 170, m_stats.bulletDamage);
+        m_bulletViewModel->createBullet(m_stats.position, rightDir, 170, m_stats.bulletDamage);
     }
     
     qDebug() << "轮子+霰弹枪组合射击：向8个方向发射霰弹枪模式子弹，总共" << (8 * 3) << "颗子弹";

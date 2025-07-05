@@ -24,6 +24,7 @@ PlayerEntity::PlayerEntity(QObject *parent) : Entity(parent) {
     m_animations[PlayerState::ShootLeftWalk]  = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_left"), 8.0, true);
     m_animations[PlayerState::ShootRightWalk] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_right"), 8.0, true);
     m_animations[PlayerState::Lifting] = new Animation(SpriteManager::instance().getAnimationSequence("player_lifting_heart"), 8.0, true);
+    m_animations[PlayerState::Lightning] = new Animation(SpriteManager::instance().getAnimationSequence("player_lightning"), 4.0, true);
     m_animations[PlayerState::Kiss] = new Animation(SpriteManager::instance().getAnimationSequence("kiss"), 8.0, true);
     m_animations[PlayerState::WalkLiftingHeart] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_lifting_heart"), 8.0, true);
     m_animations[PlayerState::Dying] = new Animation(SpriteManager::instance().getAnimationSequence("player_dying"), 8.0, false);
@@ -116,60 +117,96 @@ MonsterEntity::MonsterEntity(const MonsterType &monsterType, QObject *parent) : 
     m_velocity = QPointF(0, 0);
     switch (monsterType) {
     case MonsterType::orc:
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("orc_walk"), 8.0, true);
+        m_animations[MonsterState::Walking] = new Animation(SpriteManager::instance().getAnimationSequence("orc_walk"), 8.0, true);
+        m_animations[MonsterState::Hit] = new Animation(SpriteManager::instance().getAnimationSequence("orc_hit"), 8.0, false);
         break;
     case MonsterType::spikeball:
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_walk"), 8.0, true);
+        m_animations[MonsterState::Walking] = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_walk"), 8.0, true);
+        m_animations[MonsterState::Hit] = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_hit"), 8.0, false);
         break;
     case MonsterType::ogre:
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("ogre_walk"), 8.0, true);
+        m_animations[MonsterState::Walking] = new Animation(SpriteManager::instance().getAnimationSequence("ogre_walk"), 8.0, true);
+        m_animations[MonsterState::Hit] = new Animation(SpriteManager::instance().getAnimationSequence("ogre_hit"), 8.0, false);
         break;
     case MonsterType::mushroom:
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("mushroom_walk"), 8.0, true);
+        m_animations[MonsterState::Walking] = new Animation(SpriteManager::instance().getAnimationSequence("mushroom_walk"), 8.0, true);
+        m_animations[MonsterState::Hit] = new Animation(SpriteManager::instance().getAnimationSequence("mushroom_hit"), 8.0, false);
         break;
     case MonsterType::pixie:
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("pixie_walk"), 8.0, true);
+        m_animations[MonsterState::Walking] = new Animation(SpriteManager::instance().getAnimationSequence("pixie_walk"), 8.0, true);
+        m_animations[MonsterState::Hit] = new Animation(SpriteManager::instance().getAnimationSequence("pixie_hit"), 8.0, false);
         break;
     case MonsterType::mummy:
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("mummy_walk"), 8.0, true);
+        m_animations[MonsterState::Walking] = new Animation(SpriteManager::instance().getAnimationSequence("mummy_walk"), 8.0, true);
+        m_animations[MonsterState::Hit] = new Animation(SpriteManager::instance().getAnimationSequence("mummy_hit"), 8.0, false);
         break;
     case MonsterType::imp:
-        m_animation = new Animation(SpriteManager::instance().getAnimationSequence("imp_walk"), 8.0, true);
+        m_animations[MonsterState::Walking] = new Animation(SpriteManager::instance().getAnimationSequence("imp_walk"), 8.0, true);
+        m_animations[MonsterState::Hit] = new Animation(SpriteManager::instance().getAnimationSequence("imp_hit"), 8.0, false);
         break;
     default:
         break;
     }
+    m_currentAnimation = m_animations.value(m_currentState, nullptr);
 }
 
 MonsterEntity::~MonsterEntity() {
-    delete m_animation;
+    qDeleteAll(m_animations);
 }
 
 void MonsterEntity::setVelocity(const QPointF& velocity) {
     m_velocity = velocity;
 }
 
+void MonsterEntity::deploy() {
+    if (monsterType == MonsterType::spikeball && m_currentState != MonsterState::Deployed && m_currentState != MonsterState::Hit) {
+        delete m_animations[MonsterState::Hit];
+        m_animations[MonsterState::Deployed] = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_deploy"), 8.0, false);
+        m_animations[MonsterState::Hit] = new Animation(SpriteManager::instance().getAnimationSequence("spikeball_deploy_hit"), 8.0, false);
+        setState(MonsterState::Deployed);
+    }
+}
+void MonsterEntity::onHit() {
+    setState(MonsterState::Hit);
+    m_hitTimer = 0.10;
+}
+
+void MonsterEntity::setState(MonsterState newState) {
+    if (m_currentState != newState) {
+            m_currentState = newState;
+            m_currentAnimation = m_animations.value(m_currentState, nullptr);
+    }
+}
+
 void MonsterEntity::update(double deltaTime) {
     // if (shouldBeRemoved()) return;
-    if (m_animation) {
-        m_animation->update(deltaTime);
+    if (m_currentAnimation) {
+        m_currentAnimation->update(deltaTime);
     }
-    // 如果被冻结，完全不更新
-    if (m_isFrozen) {
-        return;
-    }
-    
     switch (m_currentState) {
+        case MonsterState::Hit:
+            m_hitTimer -= deltaTime;
+            if (m_hitTimer <= 0) {
+                m_hitTimer = 0;
+                if (m_animations[MonsterState::Deployed] == nullptr) {
+                    setState(MonsterState::Walking);
+                } else {
+                    setState(MonsterState::Deployed);
+                }
+            }
         case MonsterState::Walking:
             m_position += m_velocity * deltaTime;
+            break;
+        case MonsterState::Deployed:
+            break;
+        default:
             break;
     }
 }
 
 void MonsterEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QPointF& viewOffset) {
-    if (!m_animation) return;
-
-    const QString& currentFrameName = m_animation->getCurrentFrameName();
+    if (!m_currentAnimation) return;
+    const QString& currentFrameName = m_currentAnimation->getCurrentFrameName();
     QList<SpritePart> parts = SpriteManager::instance().getCompositeParts(currentFrameName);
     double scale = 3.0; 
     QPointF destinationAnchor(m_position.x()*scale, m_position.y()*scale);
@@ -268,9 +305,6 @@ ItemEntity::ItemEntity(int itemtype, QObject *parent, QPointF pos)
 }
 
 void ItemEntity::update(double deltaTime) {
-    if (m_lingerTimer > 0) {
-        m_lingerTimer -= deltaTime;
-    }
     if (m_currentState == ItemState::Drop && m_lingerTimer <= 3.0) {
         setState(ItemState::Flash);
     }
@@ -330,6 +364,37 @@ QString ItemEntity::typeToString(ItemType type) {
         break;
     case ItemType::badge:
         stringtype = "badge";
+        break;
+    // 供应商道具类型映射
+    case ItemType::vendor_boots_1:
+        stringtype = "boots_1";  // 靴子1
+        break;
+    case ItemType::vendor_boots_2:
+        stringtype = "boots_2";  // 靴子2
+        break;
+    case ItemType::vendor_extra_life:
+        stringtype = "more_live";  // 额外生命
+        break;
+    case ItemType::vendor_gun_1:
+        stringtype = "gun_1";  // 枪1
+        break;
+    case ItemType::vendor_gun_2:
+        stringtype = "gun_2";  // 枪2
+        break;
+    case ItemType::vendor_gun_3:
+        stringtype = "gun_3";  // 枪3
+        break;
+    case ItemType::vendor_ammo_1:
+        stringtype = "bullet_1";  // 弹药1
+        break;
+    case ItemType::vendor_ammo_2:
+        stringtype = "bullet_2";  // 弹药2
+        break;
+    case ItemType::vendor_ammo_3:
+        stringtype = "bullet_3";  // 弹药3
+        break;
+    case ItemType::vendor_badge:
+        stringtype = "badge";  // 治安官徽章
         break;
     default:
         break;
@@ -408,9 +473,9 @@ void VendorEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QP
         QRectF tableclothDestRect(tableclothTopLeft, tableclothScaledSize);
         painter->drawPixmap(tableclothDestRect, spriteSheet, tableclothSourceRect); 
         double itemSpacing = 10.0; 
-        double allItemsWidth = (itemList.size() * 16 * scale) + ((itemList.size() - 1) * itemSpacing);
+        double allItemsWidth = (m_availableItems.size() * 16 * scale) + ((m_availableItems.size() - 1) * itemSpacing);
         double currentItemX = tableclothDestRect.center().x() - allItemsWidth / 2.0;
-        for (int itemType : itemList) {
+        for (int itemType : m_availableItems) {
             QString itemName = ItemEntity::typeToString(static_cast<ItemType>(itemType));
             QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemName);
             
