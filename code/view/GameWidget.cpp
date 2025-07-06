@@ -257,7 +257,7 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset, const QRe
     itemRectF.translate(viewOffset);
     painter->drawPixmap(itemRectF, m_spriteSheet, itemRect);
     if (m_hasPossessedItem) {
-        QString itemSpriteName = ItemEntity::typeToString(static_cast<ItemType>(m_possessedItemType));
+        QString itemSpriteName = ItemEntity::typeToString(static_cast<int>(m_possessedItemType));
         QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemSpriteName);
         if (!itemSourceRect.isNull()) {
             double itemScaleRatio = 0.8; 

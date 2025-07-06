@@ -109,19 +109,19 @@ void VendorManager::initializeVendorItems() {
     // 重置所有槽位进度
     for (int i = 0; i < 4; i++) m_slotProgress[i] = 0;
     // 槽位0：靴子系列 + 额外生命
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_boots_1, 8, 0, 0));
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_boots_2, 20, 0, 1));
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_extra_life, 10, 0, 2, false, true)); // 无限购买
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_boots_1, 2, 0, 0));   // 靴子1 - 2金币
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_boots_2, 5, 0, 1));   // 靴子2 - 5金币
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_extra_life, 3, 0, 2, false, true)); // 额外生命 - 3金币，无限购买
     // 槽位1：枪系列 + 徽章
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_gun_1, 10, 1, 0));
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_gun_2, 20, 1, 1));
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_gun_3, 30, 1, 2));
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_badge, 10, 1, 3, false, true)); // 无限购买
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_gun_1, 3, 1, 0));    // 枪1 - 3金币
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_gun_2, 6, 1, 1));    // 枪2 - 6金币
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_gun_3, 10, 1, 2));   // 枪3 - 10金币
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_badge, 3, 1, 3, false, true)); // 治安官徽章 - 3金币，无限购买
     // 槽位2：弹药系列 + 徽章
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_ammo_1, 15, 2, 0));
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_ammo_2, 30, 2, 1));
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_ammo_3, 45, 2, 2));
-    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_badge, 10, 2, 3, false, true)); // 无限购买
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_ammo_1, 5, 2, 0));   // 弹药1 - 5金币
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_ammo_2, 8, 2, 1));   // 弹药2 - 8金币
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_ammo_3, 12, 2, 2));  // 弹药3 - 12金币
+    m_vendorItems.append(VendorItemConfig(ItemEffectManager::vendor_badge, 3, 2, 3, false, true)); // 治安官徽章 - 3金币，无限购买
     qDebug() << "[供应商初始化] 槽位进度: [0]" << m_slotProgress[0] << "[1]" << m_slotProgress[1] << "[2]" << m_slotProgress[2];
 }
 

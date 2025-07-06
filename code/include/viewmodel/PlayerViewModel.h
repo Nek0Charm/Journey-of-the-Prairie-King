@@ -39,7 +39,7 @@ public:
     void addLife();
     void takeDamage();
     void update(double deltaTime);
-    void reset();
+    void reset(bool resetVendorEffects = true);
     
     
     // 状态查询

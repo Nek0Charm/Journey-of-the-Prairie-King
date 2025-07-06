@@ -2,12 +2,14 @@
 #include "common/GameMap.h"
 #include "viewmodel/CollisionSystem.h"
 #include <QVector>
+#include <QRandomGenerator>
+#include <QDebug>
 
 PlayerViewModel::PlayerViewModel(QObject *parent)
     : QObject(parent)
 {
     m_bulletViewModel = std::make_unique<BulletViewModel>(this);
-    reset();
+    reset(true);
 }
 
 void PlayerViewModel::move(double deltaTime)
@@ -81,21 +83,26 @@ void PlayerViewModel::addLife()
     emit livesChanged();
 }
 
-void PlayerViewModel::reset()
+void PlayerViewModel::reset(bool resetVendorEffects)
 {
     m_stats.lives = 4;
-    m_stats.coins = 1000;
+    m_stats.coins = 0;  // 初始金币为0
     m_stats.position = QPointF(MAP_WIDTH/2, MAP_HEIGHT/2);
     m_stats.shootingDirection = QPointF(1, 0);
-    m_stats.moveSpeed = 80.0;
-    m_stats.shootCooldown = 0.2;
+    
+    if (resetVendorEffects) {
+        // 重置供应商效果
+        m_stats.moveSpeed = 80.0;
+        m_stats.shootCooldown = 0.2;
+        m_stats.bulletDamage = 1;  // 重置子弹伤害值为1
+        m_stats.shotgunMode = false;
+    }
+    // 临时效果总是重置
     m_stats.stealthMode = false;
     m_stats.wheelMode = false; 
-    m_stats.shotgunMode = false;
     m_stats.badgeMode = false;
     m_stats.zombieMode = false;
     m_stats.moving = false;
-    m_stats.bulletDamage = 1;  // 重置子弹伤害值为1
 
     m_bulletViewModel->clearAllBullets();
     m_currentShootCooldown = 0.0;
@@ -104,8 +111,6 @@ void PlayerViewModel::reset()
     emit coinsChanged(m_stats.coins);
     emit playerStealthModeChanged(m_stats.stealthMode);
     emit zombieModeChanged(m_stats.zombieMode);
-    
-    
 }
 
 
@@ -207,14 +212,35 @@ void PlayerViewModel::shootInWheelShotgunCombination()
 
 void PlayerViewModel::teleportToRandomPosition()
 {
-    // 生成随机位置，避开边界
+    // 生成随机位置，避开边界和障碍物
     double margin = 50.0;
-    double x = QRandomGenerator::global()->bounded(static_cast<int>(margin), static_cast<int>(MAP_WIDTH - margin));
-    double y = QRandomGenerator::global()->bounded(static_cast<int>(margin), static_cast<int>(MAP_HEIGHT - margin));
+    int maxAttempts = 50; // 最大尝试次数
+    QPointF newPosition;
+    bool validPositionFound = false;
     
-    QPointF newPosition(x, y);
+    for (int attempt = 0; attempt < maxAttempts && !validPositionFound; ++attempt) {
+        double x = QRandomGenerator::global()->bounded(static_cast<int>(margin), static_cast<int>(MAP_WIDTH - margin));
+        double y = QRandomGenerator::global()->bounded(static_cast<int>(margin), static_cast<int>(MAP_HEIGHT - margin));
+        
+        newPosition = QPointF(x, y);
+        
+        // 检查位置是否在可行走区域内
+        if (CollisionSystem::instance().isPointInWalkableTile(newPosition)) {
+            // 检查是否与障碍物碰撞
+            if (!CollisionSystem::instance().isRectCollidingWithMap(newPosition, 16)) {
+                validPositionFound = true;
+                qDebug() << "烟雾弹传送：找到有效位置" << newPosition << "，尝试次数:" << attempt + 1;
+            }
+        }
+    }
+    
+    // 如果没找到有效位置，使用最近的可行走位置
+    if (!validPositionFound) {
+        newPosition = CollisionSystem::instance().getNearestWalkablePosition(newPosition, 16);
+        qDebug() << "烟雾弹传送：未找到理想位置，使用最近可行走位置" << newPosition;
+    }
+    
     setPositon(newPosition);
-    
     qDebug() << "传送至随机位置:" << newPosition;
 }
 

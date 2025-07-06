@@ -151,19 +151,19 @@ enum class ItemType {
         
         // 供应商升级道具类型
         // 卡槽1：靴子系列
-        vendor_boots_1,      // 靴子1 - 8金币 11
-        vendor_boots_2,      // 靴子2 - 20金币 12
+        vendor_boots_1,      // 靴子1 - 8金币
+        vendor_boots_2,      // 靴子2 - 20金币
         vendor_extra_life,   // 额外生命 - 10金币
         
         // 卡槽2：枪系列
-        vendor_gun_1,        // 枪1 - 10金币 13
-        vendor_gun_2,        // 枪2 - 20金币 14
-        vendor_gun_3,        // 枪3 - 30金币 15
+        vendor_gun_1,        // 枪1 - 10金币
+        vendor_gun_2,        // 枪2 - 20金币
+        vendor_gun_3,        // 枪3 - 30金币
         
         // 卡槽3：弹药系列
-        vendor_ammo_1,       // 弹药1 - 15金币 16
-        vendor_ammo_2,       // 弹药2 - 30金币 17
-        vendor_ammo_3,       // 弹药3 - 45金币 18
+        vendor_ammo_1,       // 弹药1 - 15金币
+        vendor_ammo_2,       // 弹药2 - 30金币
+        vendor_ammo_3,       // 弹药3 - 45金币
         
         // 通用
         vendor_badge         // 治安官徽章 - 10金币
@@ -178,11 +178,11 @@ public:
     void setState(ItemState newState) { m_currentState = newState; }
     void setLingerTimer(double timer) { m_lingerTimer = timer; }
     ItemState getState() { return m_currentState; }
-    ItemType getType() const { return m_itemType; }
+    int getType() const { return m_itemType; }  // 返回int类型
     bool isVisible();
-    static QString typeToString(ItemType type);
+    static QString typeToString(int type); // 改为使用int类型
 private:
-    ItemType m_itemType;
+    int m_itemType; // 改为使用int类型
     ItemState m_currentState;
     double m_lingerTimer;
 };
