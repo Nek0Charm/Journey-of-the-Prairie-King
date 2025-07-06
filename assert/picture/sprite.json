@@ -82,23 +82,31 @@
 
     "orc_walk_1": { "x": 223, "y": 64, "w": 16, "h": 16 },
     "orc_walk_2": { "x": 239, "y": 64, "w": 16, "h": 16 },
+    "orc_hit": { "x": 223, "y": 48, "w": 16, "h": 16 },
     "spikeball_walk_1": { "x": 415, "y": 64, "w": 16, "h": 16 },
     "spikeball_walk_2": { "x": 431, "y": 64, "w": 16, "h": 16 },
+    "spikeball_hit": { "x": 319, "y": 48, "w": 16, "h": 16 },
     "ogre_walk_1": { "x": 287, "y": 64, "w": 16, "h": 16 },
     "ogre_walk_2": { "x": 303, "y": 64, "w": 16, "h": 16 },
+    "orge_hit": { "x": 255, "y": 48, "w": 16, "h": 16 },
     "mushroom_walk_1": { "x": 383, "y": 64, "w": 16, "h": 16 },
     "mushroom_walk_2": { "x": 399, "y": 64, "w": 16, "h": 16 },
+    "mushroom_hit": { "x": 303, "y": 48, "w": 16, "h": 16 },
     "pixie_walk_1": { "x": 255, "y": 64, "w": 16, "h": 16 },
     "pixie_walk_2": { "x": 271, "y": 64, "w": 16, "h": 16 },
+    "pixie_hit": { "x": 239, "y": 48, "w": 16, "h": 16 },
     "mummy_walk_1": { "x": 319, "y": 64, "w": 16, "h": 16 },
     "mummy_walk_2": { "x": 335, "y": 64, "w": 16, "h": 16 },
+    "mummy_hit": { "x": 271, "y": 48, "w": 16, "h": 16 },
     "imp_walk_1": { "x": 351, "y": 64, "w": 16, "h": 16 },
     "imp_walk_2": { "x": 367, "y": 64, "w": 16, "h": 16 },
+    "imp_hit": { "x": 287, "y": 48, "w": 16, "h": 16 },
 
     "spikeball_deploy_1": { "x": 223, "y": 80, "w": 16, "h": 16 },
     "spikeball_deploy_2": { "x": 239, "y": 80, "w": 16, "h": 16 },
     "spikeball_deploy_3": { "x": 255, "y": 80, "w": 16, "h": 16 },
     "spikeball_deploy_4": { "x": 447, "y": 64, "w": 16, "h": 16 },
+    "spikeball_deploy_hit": { "x": 351, "y": 48, "w": 16, "h": 16 },
 
     "orc_die_1": { "x": 383, "y": 48, "w": 16, "h": 16 },
     "orc_die_2": { "x": 399, "y": 48, "w": 16, "h": 16 },
@@ -331,13 +339,25 @@
       "orc_walk_1",
       "orc_walk_2"
     ],
+    "orc_hit": [
+      "orc_hit"
+    ],
     "spikeball_walk": [
       "spikeball_walk_1",
       "spikeball_walk_2"
     ],
+    "spikeball_hit": [
+      "spikeball_hit"
+    ],
     "ogre_walk": [
       "ogre_walk_1",
       "ogre_walk_2"
+    ], 
+    "ogre_hit": [
+      "orge_hit"
+    ],
+    "mushroom_hit": [
+      "mushroom_hit"
     ],
     "mushroom_walk": [
       "mushroom_walk_1",
@@ -347,19 +367,31 @@
       "pixie_walk_1",
       "pixie_walk_2"
     ],
+    "pixie_hit": [
+      "pixie_hit"
+    ],
     "mummy_walk": [
       "mummy_walk_1",
       "mummy_walk_2"
     ],
+    "mummy_hit": [
+      "mummy_hit"
+    ],
     "imp_walk": [
       "imp_walk_1",
       "imp_walk_2"
+    ],
+    "imp_hit": [
+      "imp_hit"
     ],
     "spikeball_deploy": [
       "spikeball_deploy_1",
       "spikeball_deploy_2",
       "spikeball_deploy_3",
       "spikeball_deploy_4"
+    ],
+    "spikeball_deploy_hit": [
+      "spikeball_deploy_hit"
     ],
     "orc_die": [
       "orc_die_1",

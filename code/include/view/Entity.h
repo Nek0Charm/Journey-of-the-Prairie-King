@@ -65,10 +65,9 @@ private:
 
 enum class MonsterState {
     Walking,
+    Hit,
     WaitingToDeploy,  // 新增：已到达目标，等待部署
     Deployed,  // 部署状态
-    Dying, 
-    Dead   
 };
 
 enum class MonsterType {
@@ -91,14 +90,18 @@ public:
     void setVelocity(const QPointF& velocity);
     void setFrozen(bool frozen) { m_isFrozen = frozen; }
     bool isFrozen() const { return m_isFrozen; }
+    void deploy(); 
     MonsterType getType() const {return monsterType;}
+    void onHit(); //
 private:
     void updateAnimation(); // 新增：根据状态更新动画
-    Animation* m_animation;    
+    Animation* m_currentAnimation;
+    QMap<MonsterState, Animation*> m_animations;
     QPointF m_velocity; 
     MonsterType  monsterType;
     MonsterState m_currentState;
     bool m_isFrozen = false; 
+    double m_hitTimer = 0; // 用于处理被击中后的短暂无敌时间
 };
 
 enum class DeadMonsterState {
