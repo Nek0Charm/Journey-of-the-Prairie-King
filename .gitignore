@@ -2,3 +2,5 @@ CMakeUserPresets.json
 CMakePresets.json
 build/
 .vscode/
+vcpkg/
+vcpkg_installed/
