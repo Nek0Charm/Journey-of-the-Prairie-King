@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->setCentralWidget(m_stackedWidget);
     setWindowTitle("Maodie Adventure");
     setupUi();
+    setupConnections();
     update();
 }
 
@@ -54,7 +55,6 @@ void MainWindow::update() {
                 break;
         }
     }
-    setupConnections();
 }
 
 void MainWindow::onStartGameRequested()

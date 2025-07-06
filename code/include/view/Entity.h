@@ -33,6 +33,7 @@ enum class PlayerState {
     ShootLeftWalk,
     ShootRightWalk,
     Lifting,
+    LiftingHeart,
     Lightning,
     Kiss,
     WalkLiftingHeart,

@@ -43,6 +43,7 @@ signals:
     void gameWin(); // 游戏胜利信号
     void pauseGame();
     void resumeGame();
+    void manualNextGame();  // 手动切换到下一个布局
 
 public slots:
     // void onStateUpdated();

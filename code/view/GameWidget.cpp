@@ -426,7 +426,11 @@ void GameWidget::timerEvent() {
         emit vendorDisappear();
     }
     if (keys[Qt::Key_M]) {
-        startMapTransition("map_1", "2");
+        // 手动切换到下一个布局
+        emit manualNextGame();
+    }
+    if (keys[Qt::Key_O]) {
+        onGameWin();
     }
     // 供应商物品购买 - 根据实际可购买的物品响应按键
     static bool key1Pressed = false, key2Pressed = false, key3Pressed = false;
@@ -457,8 +461,6 @@ void GameWidget::timerEvent() {
         } else if (!keys[Qt::Key_3]) {
             key3Pressed = false;
         }
-    } else if (keys[Qt::Key_O]) {
-        onGameWin();
     }
 }
 
@@ -672,8 +674,9 @@ void GameWidget::onVendorAppeared() {
     // 供应商出现时的处理逻辑
     qDebug() << "供应商出现在UI中";
     
-    // 获取可购买的物品列表并更新供应商显示
+    // 触发供应商的显示动画
     if (vendor) {
+        vendor->onVendorAppear();
         // 使用当前已设置的供应商物品列表
         vendor->setAvailableItems(m_availableVendorItems);
         qDebug() << "供应商显示物品列表:" << m_availableVendorItems;
@@ -689,6 +692,7 @@ void GameWidget::onVendorDisappeared() {
     
     // 隐藏供应商实体
     if (vendor) {
+        vendor->onVendorDisappear();  // 设置供应商状态为Disappearing
         vendor->setAvailableItems(QList<int>());
         qDebug() << "供应商实体已隐藏，物品列表已清空";
     }
@@ -732,6 +736,8 @@ void GameWidget::setAvailableVendorItems(const QList<int>& items) {
 }
 
 void GameWidget::onGameWin() {
+    m_gameMap->loadFromFile(":/assert/picture/gamemap.json", "end", "1");
+    m_gameMap->setMapTitle("end");
     m_isGamePaused = true;
     emit gameWin(); 
 }

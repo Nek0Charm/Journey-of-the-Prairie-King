@@ -26,6 +26,7 @@ public:
     void resumeGame();
     void endGame();
     void nextGame();
+    void manualNextGame();  // 手动切换到下一个布局
     void updateGame(double deltaTime);
 
     ItemEffectManager* getItemEffectManager() const { return m_itemEffectManager.get(); }
@@ -61,6 +62,7 @@ signals:
     void enemiesChanged(QList<EnemyData> enemies);
     void itemsChanged(QList<ItemData> items);
     void mapChanged();
+    void gameWin();  // 游戏胜利信号
     void vendorAppeared();
     void vendorDisappeared();
     void vendorItemPurchased(int itemType);
@@ -76,7 +78,8 @@ private:
     std::unique_ptr<ItemEffectManager> m_itemEffectManager;
     std::unique_ptr<VendorManager> m_vendorManager;
     double m_gameTime = 0.0;   
-    int m_currentArea = 12;  // 当前区域，临时改为1-2来测试供应商
+    int m_currentArea = 11;  // 当前区域，从1-1开始
+    bool m_vendorActivated = false;  // 供应商是否已激活
     
     void checkGameState();
     void handlePlayerDeath();

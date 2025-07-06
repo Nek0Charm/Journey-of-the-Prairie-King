@@ -25,6 +25,7 @@ PlayerEntity::PlayerEntity(QObject *parent) : Entity(parent) {
     m_animations[PlayerState::ShootRightWalk] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_right"), 8.0, true);
     m_animations[PlayerState::Lifting] = new Animation(SpriteManager::instance().getAnimationSequence("player_lifting"), 8.0, true);
     m_animations[PlayerState::Lightning] = new Animation(SpriteManager::instance().getAnimationSequence("player_lightning"), 4.0, true);
+    m_animations[PlayerState::LiftingHeart] = new Animation(SpriteManager::instance().getAnimationSequence("player_lifting_heart"), 8.0, false);
     m_animations[PlayerState::Kiss] = new Animation(SpriteManager::instance().getAnimationSequence("kiss"), 8.0, true);
     m_animations[PlayerState::WalkLiftingHeart] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_lifting_heart"), 8.0, true);
     m_animations[PlayerState::Dying] = new Animation(SpriteManager::instance().getAnimationSequence("player_dying"), 8.0, false);
@@ -68,7 +69,7 @@ void PlayerEntity::update(double deltaTime) {
             setState(PlayerState::WalkLiftingHeart);
             m_position += QPointF(deltaTime*16, 0);
         } else if (m_invincibilityTimer < 7 && m_invincibilityTimer >= 0) {
-            setState(PlayerState::Lifting);
+            setState(PlayerState::LiftingHeart);
         } else if (m_invincibilityTimer < 0) {
             setState(PlayerState::Kiss);
         }
