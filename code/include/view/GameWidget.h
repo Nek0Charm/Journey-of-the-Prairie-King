@@ -19,7 +19,7 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *event) override;
-    void paintUi(QPainter *painter, const QPointF& viewOffset);
+    void paintUi(QPainter *painter, const QPointF& viewOffset, const QRectF& mapRect);
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void timerEvent();
@@ -30,6 +30,7 @@ protected:
     void updateExplosion(double deltaTime);
     void startExplosionSequence(double duration);
     void releaseSmoke(double duration);
+    void purchase(int itemType);
 
 signals:
     void setMovingDirection(QPointF direction, bool isMoving);
@@ -42,6 +43,7 @@ signals:
     void gameWin(); // 游戏胜利信号
     void pauseGame();
     void resumeGame();
+    void manualNextGame();  // 手动切换到下一个布局
 
 public slots:
     // void onStateUpdated();
@@ -70,6 +72,7 @@ public slots:
     void onEnemyHitByBullet(int enemyId); // 敌人被子弹击中时的槽
     // 更新供应商可购买物品列表
     void updateVendorItems();
+    void triggerLightning(const QPointF& startPosition);
     void onGameWin();
 
 private:
@@ -85,6 +88,8 @@ private:
     QMap<int, MonsterEntity*> m_monsters; 
     QMap<int, DeadMonsterEntity*> m_deadmonsters;
     QMap<int, ItemEntity*> m_items;
+    ItemEntity* m_purchasedItem = nullptr;
+    QMap<int, ItemEntity*> ui_items; 
 
     bool m_isTransitioning;
     double m_transitionDuration;
@@ -99,7 +104,6 @@ private:
     double m_smokeReleaseTimer = 0.0;
     double m_nextSmokeReleaseTimer = 0.0;
     double m_pausedTime = 0.0;
-    void triggerLightning(const QPointF& startPosition);
     /*
     这些变量需要随着GameViewModel内值的变化而变化
     */

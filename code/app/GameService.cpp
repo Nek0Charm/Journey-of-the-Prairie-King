@@ -20,6 +20,7 @@ void GameService::setupConnections() {
     connect(m_mainWindow->getGameWidget(), &GameWidget::resumeGame, m_gameViewModel, &GameViewModel::resumeGame);
     connect(m_gameViewModel, &GameViewModel::gameStateChanged, m_mainWindow, &MainWindow::onGameStateChanged);
     connect(m_gameViewModel, &GameViewModel::mapChanged, m_mainWindow->getGameWidget(), &GameWidget::onMapChanged);
+    connect(m_gameViewModel, &GameViewModel::gameWin, m_mainWindow->getGameWidget(), &GameWidget::onGameWin);
 
 
     connect(m_gameViewModel, &GameViewModel::playerPositonChanged, m_mainWindow->getGameWidget(), &GameWidget::playerPositionChanged);
@@ -60,7 +61,7 @@ void GameService::setupConnections() {
     
     // 连接敌人爆炸事件信号
     connect(m_gameViewModel->getEnemyManager(), &EnemyManager::enemyDestroyed, m_audioEventListener, &AudioEventListener::onEnemyExplosion);
-    connect(m_gameViewModel->getEnemyManager(), &EnemyManager::enemyHitByBullet, m_mainWindow->getGameWidget(), &GameWidget::onEnemyHitByBullet);
+    connect(m_gameViewModel->getEnemyManager(), &EnemyManager::enemyDamaged, m_mainWindow->getGameWidget(), &GameWidget::onEnemyHitByBullet);
     // 新增：连接游戏状态变化信号
     connect(m_gameViewModel, &GameViewModel::gameStateChanged, m_audioEventListener, &AudioEventListener::onGameStateChanged);
     
@@ -95,7 +96,7 @@ void GameService::setupConnections() {
     connect(m_gameViewModel, &GameViewModel::vendorItemsChanged,
             m_mainWindow->getGameWidget(), &GameWidget::setAvailableVendorItems);
             
-    // 连接供应商出现请求到VendorManager
-    connect(m_mainWindow->getGameWidget(), &GameWidget::vendorAppear,
-            m_gameViewModel->getVendorManager(), &VendorManager::showVendor);
+    // 连接手动切换布局信号
+    connect(m_mainWindow->getGameWidget(), &GameWidget::manualNextGame,
+            m_gameViewModel, &GameViewModel::manualNextGame);
 }

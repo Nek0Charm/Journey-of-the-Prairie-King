@@ -62,10 +62,16 @@ void EnemyManager::spawnEnemy(const QPointF& position, int enemyType)
     enemy.hasReachedTarget = false;
     enemy.hasCreatedObstacle = false;
     
-    // 使用Orc的稳定生成逻辑：简单的随机目标位置
-    int px = QRandomGenerator::global()->bounded(128)+64;
-    int py = QRandomGenerator::global()->bounded(128)+64;
-    enemy.targetPosition = QPointF(px, py);
+    // 根据敌人类型设置目标位置
+    if (enemyType == 1) {
+        // 刺球怪使用专门的部署位置生成逻辑
+        enemy.targetPosition = getRandomDeployPosition();
+    } else {
+        // 其他敌人使用简单的随机目标位置
+        int px = QRandomGenerator::global()->bounded(128)+64;
+        int py = QRandomGenerator::global()->bounded(128)+64;
+        enemy.targetPosition = QPointF(px, py);
+    }
     
     // 根据敌人类型设置属性
     switch (enemyType) {
@@ -140,12 +146,12 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
         if (enemy.isActive) {
             // 如果玩家处于潜行模式，敌人停止移动
             enemy.time += deltaTime;
-            enemy.targetPosition = playerPos;   
-            if(!enemy.isSmart && enemy.time >= 1) {
-                enemy.time = 0.0;
-                // Spikeball不应该改变目标位置，它有自己的部署目标
-                if (enemy.enemyType != 1) {
-                    enemy.targetPosition = playerPos;
+            
+            // 只有非刺球怪才更新目标位置为玩家位置
+            if (enemy.enemyType != 1) {
+                enemy.targetPosition = playerPos;   
+                if(!enemy.isSmart && enemy.time >= 1) {
+                    enemy.time = 0.0;
                     if(!enemy.isSmart) {
                         int px = QRandomGenerator::global()->bounded(208)+16;
                         int py = QRandomGenerator::global()->bounded(208)+64;
@@ -170,14 +176,17 @@ void EnemyManager::updateEnemies(double deltaTime, const QPointF& playerPos, boo
                     updateEnemyAI(enemy, enemy.targetPosition);
                 }
             }
-            QPointF new_pos = enemy.position;
-            new_pos.setX(new_pos.x() + enemy.velocity.x() * deltaTime);
-            if(!CollisionSystem::instance().isRectCollidingWithMap(new_pos,16)) {
-                enemy.position.setX(new_pos.x());
-            }
-            new_pos.setY(new_pos.y() + enemy.velocity.y() * deltaTime);
-            if(!CollisionSystem::instance().isRectCollidingWithMap(new_pos,16)) {
-                enemy.position.setY(new_pos.y());
+            // 只有未部署的刺球怪才更新位置
+            if (!(enemy.enemyType == 1 && enemy.isDeployed)) {
+                QPointF new_pos = enemy.position;
+                new_pos.setX(new_pos.x() + enemy.velocity.x() * deltaTime);
+                if(!CollisionSystem::instance().isRectCollidingWithMap(new_pos,16)) {
+                    enemy.position.setX(new_pos.x());
+                }
+                new_pos.setY(new_pos.y() + enemy.velocity.y() * deltaTime);
+                if(!CollisionSystem::instance().isRectCollidingWithMap(new_pos,16)) {
+                    enemy.position.setY(new_pos.y());
+                }
             }
         }
     }
@@ -201,7 +210,6 @@ void EnemyManager::damageEnemy(int bulletId, int enemyId, int damage)
             }
             
             enemy.health -= actualDamage;
-            emit enemyHitByBullet(enemyId); // 发出敌人被子弹击中的信号
             qDebug() << "Enemy ID:" << enemyId << "damaged by bullet ID:" << bulletId
                      << ", remaining health:" << enemy.health;
             if (enemy.health <= 0) {
@@ -312,47 +320,44 @@ void EnemyManager::updateSpikeballAI(EnemyData& enemy, const QPointF& playerPos,
         // 检查是否到达目标位置
         double distanceToTarget = EnemyManager::calculateDistance(enemy.position, enemy.targetPosition);
         qDebug() << "Spikeball ID:" << enemy.id << "距离目标:" << distanceToTarget << "位置:" << enemy.position << "目标:" << enemy.targetPosition;
-        if (distanceToTarget < 10.0) {
+        
+        if (distanceToTarget < 15.0) {
+            // 到达目标位置，进入部署状态
             enemy.hasReachedTarget = true;
             enemy.velocity = QPointF(0, 0);
-            // 直接进入部署状态
             enemy.isDeployed = true;
             enemy.health = 6; // 部署后血量变为6
-            qDebug() << "Spikeball reached target position and deployed at:" << enemy.targetPosition;
+            qDebug() << "Spikeball ID:" << enemy.id << "到达目标位置并部署在:" << enemy.targetPosition;
         } else {
-            // 继续移动到目标位置
-            QPointF direction = calculateDirectionToPlayer(enemy.position, enemy.targetPosition);
+            // 继续移动到目标位置，使用智能路径计算
+            QPointF direction = calculateDirectionToPlayer(enemy.position, enemy.targetPosition, enemy.id);
             
-            // 如果路径被阻塞，使用简单的直线方向作为备选
-            if (direction == QPointF(0, 0)) {
+            if (direction != QPointF(0, 0)) {
+                enemy.velocity = direction * enemy.moveSpeed;
+                qDebug() << "Spikeball ID:" << enemy.id << "网格移动到目标，方向:" << direction;
+            } else {
+                // 如果无法找到路径，使用简单的直线方向
                 QPointF diff = enemy.targetPosition - enemy.position;
                 double length = std::sqrt(diff.x() * diff.x() + diff.y() * diff.y());
+                
                 if (length > 0.1) {
-                    direction = diff / length;
+                    // 选择X或Y方向中距离较大的一个，避免原地抖动
+                    if (std::abs(diff.x()) > std::abs(diff.y())) {
+                        direction = QPointF(diff.x() > 0 ? 1 : -1, 0);
+                    } else {
+                        direction = QPointF(0, diff.y() > 0 ? 1 : -1);
+                    }
+                    enemy.velocity = direction * enemy.moveSpeed;
                     qDebug() << "Spikeball ID:" << enemy.id << "使用直线路径，方向:" << direction;
                 } else {
-                    // 如果距离太近，随机选择一个方向
-                    double angle = QRandomGenerator::global()->bounded(2 * M_PI);
-                    direction = QPointF(std::cos(angle), std::sin(angle));
-                    qDebug() << "Spikeball ID:" << enemy.id << "距离太近，使用随机方向:" << direction;
+                    // 如果距离太近，直接到达目标
+                    enemy.hasReachedTarget = true;
+                    enemy.velocity = QPointF(0, 0);
+                    enemy.isDeployed = true;
+                    enemy.health = 6;
+                    qDebug() << "Spikeball ID:" << enemy.id << "距离太近，直接部署";
                 }
             }
-            
-            // 确保方向不为零向量
-            if (direction == QPointF(0, 0)) {
-                // 最后的备选方案：向地图中心移动
-                QPointF center(128, 128);
-                QPointF diff = center - enemy.position;
-                double length = std::sqrt(diff.x() * diff.x() + diff.y() * diff.y());
-                if (length > 0.1) {
-                    direction = diff / length;
-                } else {
-                    direction = QPointF(1, 0); // 向右移动
-                }
-                qDebug() << "Spikeball ID:" << enemy.id << "使用备选方向:" << direction;
-            }
-            
-            enemy.velocity = direction * enemy.moveSpeed;
         }
     }
 }

@@ -13,15 +13,6 @@ void VendorManager::checkVendorAppearance(int currentArea) {
 //获取当前关卡编号
 }
 
-bool VendorManager::shouldShowVendor(int area1, int area2) const {
-    // 供应商出现的区域: 1-2、1-4、2-1、2-3、3-1和3-3
-    QList<QPair<int, int>> vendorAreas = {
-        {1, 2}, {1, 4}, {2, 1}, {2, 3}, {3, 1}, {3, 3}
-    };
-    
-    return vendorAreas.contains({area1, area2});
-}
-
 void VendorManager::showVendor() {
     if (!m_isActive) {
         m_isActive = true;

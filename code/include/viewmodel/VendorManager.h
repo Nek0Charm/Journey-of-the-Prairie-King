@@ -17,7 +17,6 @@ public:
     
     // 供应商管理
     void checkVendorAppearance(int currentArea);
-    bool shouldShowVendor(int area1, int area2) const;
     void showVendor();
     void hideVendor();
     bool isVendorActive() const { return m_isActive; }
