@@ -510,8 +510,8 @@ void ItemEffectManager::applyVendorBadgeEffect(PlayerViewModel* player, EnemyMan
     // 永久提升射击速度
     player->setShootCooldown(baseCooldown * 0.7); // 提升30%
     
-    // 启用霰弹枪模式（永久）
-    player->setShotgunMode(true);
+    // 启用治安官徽章模式（永久）- 这是关键！
+    player->setBadgeMode(true);
     
-    qDebug() << "供应商治安官徽章效果：永久获得移动速度+30%、射击速度+30%、霰弹枪模式";
+    qDebug() << "供应商治安官徽章效果：永久获得移动速度+30%、射击速度+30%、治安官徽章模式";
 }

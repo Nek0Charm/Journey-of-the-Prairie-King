@@ -17,7 +17,6 @@ void VendorManager::showVendor() {
     if (!m_isActive) {
         m_isActive = true;
         emit vendorAppeared();
-        qDebug() << "供应商出现";
     }
 }
 //出现之后应该有一个动画效果
@@ -25,7 +24,6 @@ void VendorManager::hideVendor() {
     if (m_isActive) {
         m_isActive = false;
         emit vendorDisappeared();
-        qDebug() << "供应商消失";
     }
 }
 
@@ -35,7 +33,7 @@ QList<int> VendorManager::getAvailableUpgradeItems() const {
     
     // 槽位0
     for (const auto& item : m_vendorItems) {
-        if (item.slotIndex == 0 && isItemAvailableForSlot(item)) {
+        if (item.slotIndex == 0 && isItemAvailable(item.itemType)) {
             availableItems.append(item.itemType);
             slotInfo << QString("[0]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[0]);
             break;
@@ -43,7 +41,7 @@ QList<int> VendorManager::getAvailableUpgradeItems() const {
     }
     // 槽位1
     for (const auto& item : m_vendorItems) {
-        if (item.slotIndex == 1 && isItemAvailableForSlot(item)) {
+        if (item.slotIndex == 1 && isItemAvailable(item.itemType)) {
             availableItems.append(item.itemType);
             slotInfo << QString("[1]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[1]);
             break;
@@ -51,7 +49,7 @@ QList<int> VendorManager::getAvailableUpgradeItems() const {
     }
     // 槽位2
     for (const auto& item : m_vendorItems) {
-        if (item.slotIndex == 2 && isItemAvailableForSlot(item)) {
+        if (item.slotIndex == 2 && isItemAvailable(item.itemType)) {
             availableItems.append(item.itemType);
             slotInfo << QString("[2]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[2]);
             break;
@@ -190,29 +188,4 @@ bool VendorManager::isItemAvailable(int itemType) const {
     return false;
 }
 
-bool VendorManager::isItemAvailableForSlot(const VendorItemConfig& item) const {
-    // 检查是否为困难模式专用物品
-    if (item.isHardModeOnly && !m_isHardMode) {
-        return false;
-    }
-    
-    // 检查购买进度
-    int slotIndex = item.slotIndex;
-    int itemIndex = item.itemIndex;
-    
-    // 特殊处理：无限购买物品（额外生命、治安官徽章）
-    if (item.isInfinitePurchase) {
-        // 如果已经到达该槽位的最后一个物品，则始终可用
-        int currentProgress = m_slotProgress[slotIndex];
-        // 对于无限购买物品，只要进度达到或超过其itemIndex，就始终可用
-        return currentProgress >= itemIndex;
-    }
-    
-    // 对于其他槽位，检查当前进度
-    if (slotIndex >= 0 && slotIndex < 4) {
-        int currentProgress = m_slotProgress[slotIndex];
-        return itemIndex == currentProgress;
-    }
-    
-    return false;
-} 
+ 

@@ -329,7 +329,6 @@ bool ItemEntity::isVisible() {
 }
 
 QString ItemEntity::typeToString(int type) {
-    qDebug() << "ItemEntity::typeToString called with type:" << type;
     QString stringtype;
     switch (type) {
     case 0: // coin
