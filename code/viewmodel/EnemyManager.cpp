@@ -201,7 +201,6 @@ void EnemyManager::damageEnemy(int bulletId, int enemyId, int damage)
             }
             
             enemy.health -= actualDamage;
-            emit enemyHitByBullet(enemyId); // 发出敌人被子弹击中的信号
             qDebug() << "Enemy ID:" << enemyId << "damaged by bullet ID:" << bulletId
                      << ", remaining health:" << enemy.health;
             if (enemy.health <= 0) {
