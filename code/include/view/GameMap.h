@@ -31,6 +31,7 @@ public:
     void update(double deltaTime);
     int getWidth() const;
     int getHeight() const;
+    QString getMapTitle() const { return map_title; }
     void createExplosion(const QPointF& position);
 private:
     QList<QList<int>> m_tiles;       // 存储地图布局的二维列表

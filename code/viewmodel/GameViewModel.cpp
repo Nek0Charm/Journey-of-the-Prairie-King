@@ -52,7 +52,63 @@ void GameViewModel::endGame()
 void GameViewModel::nextGame() {
     m_enemyManager->clearAllEnemies();
     m_gameTime = 0.0;
+    
+    // 更新当前区域编号
+    int area1 = m_currentArea / 10;  // 地图编号
+    int area2 = m_currentArea % 10;  // 布局编号
+    
+    // 切换到下一个布局
+    area2++;
+    
+    // 如果布局超出范围，切换到下一个地图
+    if (area2 > 5) {  // 假设每个地图最多5个布局
+        area1++;
+        area2 = 1;
+    }
+    
+    // 如果地图超出范围，回到第一关
+    if (area1 > 3) {  // 假设最多3个地图
+        area1 = 1;
+        area2 = 1;
+    }
+    
+    m_currentArea = area1 * 10 + area2;
+    
+    // 检查是否是布局1-2结束后（area1=1, area2=3，即map_1的布局3）
+    if (area1 == 1 && area2 == 3) {
+        qDebug() << "布局1-2结束，触发游戏胜利";
+        // 重置供应商状态，防止供应商再次出现
+        m_vendorActivated = false;
+        m_vendorManager->hideVendor();
+        // 触发游戏胜利
+        emit gameWin();
+        return;
+    }
+    
+    // 根据当前区域加载对应的地图
+    QString mapName = QString("map_%1").arg(area1);
+    QString layoutName = QString::number(area2);
+    
+    GameMap::instance().loadFromFile(":/assert/picture/gamemap.json", mapName, layoutName);
+    
+    // 只在切换到不同地图或布局2结束后重置供应商状态
+    if (area1 > 1 || (area1 == 1 && area2 > 2)) {
+        m_vendorActivated = false;
+        m_vendorManager->hideVendor();
+    }
+    
     emit mapChanged();
+}
+
+void GameViewModel::manualNextGame() {
+    // 手动切换到下一个布局，隐藏供应商
+    qDebug() << "手动切换到下一个布局，隐藏供应商";
+    m_vendorManager->hideVendor();
+    m_vendorActivated = false;
+    // 发送供应商消失信号，确保UI更新
+    emit vendorDisappeared();
+    // 然后切换到下一个布局
+    nextGame();
 }
 
 void GameViewModel::playerAttack(const QPointF& direction) {
@@ -78,11 +134,17 @@ void GameViewModel::updateGame(double deltaTime)
 
     m_gameTime += deltaTime;
     m_gameTime = std::min(m_gameTime, MAX_GAMETIME);
-    if(m_gameTime == MAX_GAMETIME && m_enemyManager->getActiveEnemyCount() == 0) {
+    
+    // 检查是否应该激活供应商（只在布局1-1结束后）
+    int currentArea1 = m_currentArea / 10;  // 当前地图编号
+    int currentArea2 = m_currentArea % 10;  // 当前布局编号
+    if(m_gameTime >= MAX_GAMETIME && m_enemyManager->getActiveEnemyCount() == 0 && !m_vendorActivated && currentArea1 == 1 && currentArea2 == 1) {
         emit gameTimeChanged(m_gameTime);
-        GameMap::instance().loadFromFile(":/assert/picture/gamemap.json", "map_1", "2");
-        nextGame();
-        return;
+        qDebug() << "布局1-1结束，激活供应商";
+        // 激活供应商
+        m_vendorManager->showVendor();
+        m_vendorActivated = true;
+        // 不要return，让后续的供应商状态更新逻辑执行
     }
     emit gameTimeChanged(m_gameTime);
     m_collisionSystem->checkCollisions(*m_player, 
@@ -103,9 +165,6 @@ void GameViewModel::updateGame(double deltaTime)
     // 更新道具效果
     m_itemEffectManager->updateEffects(deltaTime, m_player.get());
     
-    // 检查供应商出现
-    m_vendorManager->checkVendorAppearance(m_currentArea);
-    
     // 只在供应商激活时才发出供应商物品列表变化信号
     static QList<int> lastVendorItems;
     static bool lastVendorActive = false;
@@ -115,11 +174,13 @@ void GameViewModel::updateGame(double deltaTime)
         QList<int> currentVendorItems = m_vendorManager->getAvailableUpgradeItems();
         if (lastVendorItems != currentVendorItems || !lastVendorActive) {
             lastVendorItems = currentVendorItems;
+            qDebug() << "供应商状态更新，发送物品列表:" << currentVendorItems;
             emit vendorItemsChanged(currentVendorItems);
         }
     } else if (lastVendorActive) {
         // 供应商刚刚消失，清空物品列表
         lastVendorItems.clear();
+        qDebug() << "供应商消失，清空物品列表";
         emit vendorItemsChanged(QList<int>());
     }
     

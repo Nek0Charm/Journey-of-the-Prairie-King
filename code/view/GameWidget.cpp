@@ -393,16 +393,9 @@ void GameWidget::timerEvent() {
     } else if (!keys[Qt::Key_Space]) {
         m_spaceKeyPressed = false;
     }
-    if (keys[Qt::Key_E]) {
-        emit vendorAppear();
-        if (vendor) {
-            vendor->onVendorAppear();
-        }
-        // 通知VendorManager激活供应商状态
-        emit vendorAppear();  // 这个信号会通过GameService连接到VendorManager
-    }
     if (keys[Qt::Key_M]) {
-        startMapTransition("map_1", "2");
+        // 手动切换到下一个布局
+        emit manualNextGame();
     }
     // 供应商物品购买 - 根据实际可购买的物品响应按键
     static bool key1Pressed = false, key2Pressed = false, key3Pressed = false;
@@ -633,8 +626,9 @@ void GameWidget::onVendorAppeared() {
     // 供应商出现时的处理逻辑
     qDebug() << "供应商出现在UI中";
     
-    // 获取可购买的物品列表并更新供应商显示
+    // 触发供应商的显示动画
     if (vendor) {
+        vendor->onVendorAppear();
         // 使用当前已设置的供应商物品列表
         vendor->setAvailableItems(m_availableVendorItems);
         qDebug() << "供应商显示物品列表:" << m_availableVendorItems;
@@ -650,6 +644,7 @@ void GameWidget::onVendorDisappeared() {
     
     // 隐藏供应商实体
     if (vendor) {
+        vendor->onVendorDisappear();  // 设置供应商状态为Disappearing
         vendor->setAvailableItems(QList<int>());
         qDebug() << "供应商实体已隐藏，物品列表已清空";
     }
