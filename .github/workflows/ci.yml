@@ -1,0 +1,109 @@
+name: Qt CI/CD with CMake and vcpkg
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*' # 当推送版本标签时 (例如 v1.0.0)
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      # 不要因为一个平台失败就取消所有平台的构建
+      fail-fast: false
+      matrix:
+        config:
+          - { name: 'Windows (MSVC)', os: windows-latest, triplet: 'x64-windows' }
+          - { name: 'Ubuntu (GCC)', os: ubuntu-latest, triplet: 'x64-linux' }
+          - { name: 'macOS (Clang)', os: macos-latest, triplet: 'x64-osx' }
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. 设置 vcpkg (包括缓存)
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          # vcpkg-root 是 vcpkg 将被克隆到的目录
+          vcpkgDirectory: ${{ runner.temp }}/vcpkg
+          # vcpkg-commit-id 可以锁定 vcpkg 的一个特定版本，以保证构建的可复现性
+          # vcpkgCommitId: 'aabbccddeeff'
+          # 使用 vcpkg.json 清单模式
+          runVcpkgInstall: true
+          # 指定 vcpkg 的缓存键，当 vcpkg.json 文件变化时，缓存会失效
+          vcpkgJsonGlob: 'vcpkg.json'
+
+      # 3. 配置 CMake
+      - name: Configure CMake
+        run: >
+          cmake -B build
+          -S .
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE=${{ runner.temp }}/vcpkg/scripts/buildsystems/vcpkg.cmake
+
+      # 4. 构建项目
+      - name: Build with CMake
+        run: cmake --build build --config Release
+
+      # 6. 打包应用程序
+      - name: Package Application (Windows)
+        if: matrix.config.os == 'windows-latest'
+        run: |
+          mkdir staging
+          copy build\Release\MaodieAdventure.exe staging
+          windeployqt --release staging\MaodieAdventure.exe
+          7z a -tzip maodie-adventure-windows.zip ./staging/*
+        # windeployqt 路径会被 vcpkg 自动添加到 PATH
+
+      - name: Package Application (macOS)
+        if: matrix.config.os == 'macos-latest'
+        run: |
+          macdeployqt build/MaodieAdventure.app -dmg
+          mv build/MaodieAdventure.dmg maodie-adventure-macos.dmg
+
+      - name: Package Application (Linux)
+        if: matrix.config.os == 'ubuntu-latest'
+        run: |
+          # 使用 linuxdeployqt 工具打包
+          # 需要先下载它
+          wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+          chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+          # 运行打包
+          ./linuxdeployqt-continuous-x86_64.AppImage build/MaodieAdventure -appimage
+          mv MaodieAdventure*.AppImage maodie-adventure-linux.AppImage
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: maodie-adventure-${{ matrix.config.os }}
+          path: |
+            maodie-adventure-windows.zip
+            maodie-adventure-macos.dmg
+            maodie-adventure-linux.AppImage
+
+  # --- 持续交付部分 ---
+  release:
+    name: Create GitHub Release
+    # 仅当创建了版本标签时才运行
+    if: startsWith(github.ref, 'refs/tags/v')
+    # 等待所有平台的 build 作业都成功
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/*/* 

@@ -136,21 +136,3 @@ bool CollisionSystem::isRectCollidingWithMap(const QPointF& position, int size) 
     }
     return false;
 }
-
-QPointF CollisionSystem::getNearestWalkablePosition(const QPointF& position, int size) const
-{
-    QPointF nearestPos = position;
-    int row = static_cast<int>(position.y() / 16);
-    int col = static_cast<int>(position.x() / 16);
-
-    for (int r = row; r < GameMap::instance().getHeight(); ++r) {
-        for (int c = col; c < GameMap::instance().getWidth(); ++c) {
-            if (!isRectCollidingWithMap(QPointF(c * 16, r * 16), size)){
-                nearestPos.setX(c * 16 );
-                nearestPos.setY(r * 16 );
-                return nearestPos;
-            }
-        }
-    }
-    return nearestPos; 
-}
