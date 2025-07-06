@@ -736,6 +736,29 @@ void GameWidget::setAvailableVendorItems(const QList<int>& items) {
 }
 
 void GameWidget::onGameWin() {
+    // 清除所有游戏元素，确保游戏胜利画面干净
+    qDebug() << "游戏胜利，清除所有游戏元素";
+    
+    // 清除所有敌人
+    qDeleteAll(m_monsters);
+    m_monsters.clear();
+    qDeleteAll(m_deadmonsters);
+    m_deadmonsters.clear();
+    
+    // 清除所有道具
+    qDeleteAll(m_items);
+    m_items.clear();
+    
+    // 清除所有子弹数据
+    m_bullets.clear();
+    
+    // 清除所有敌人数据
+    m_enemyDataList.clear();
+    
+    // 清除所有道具数据
+    m_itemDataList.clear();
+    
+    // 加载游戏胜利地图
     m_gameMap->loadFromFile(":/assert/picture/gamemap.json", "end", "1");
     m_gameMap->setMapTitle("end");
     m_isGamePaused = true;

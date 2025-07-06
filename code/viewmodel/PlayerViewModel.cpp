@@ -234,10 +234,10 @@ void PlayerViewModel::teleportToRandomPosition()
         }
     }
     
-    // 如果没找到有效位置，使用最近的可行走位置
+    // 如果没找到有效位置，使用地图中心位置
     if (!validPositionFound) {
-        newPosition = CollisionSystem::instance().getNearestWalkablePosition(newPosition, 16);
-        qDebug() << "烟雾弹传送：未找到理想位置，使用最近可行走位置" << newPosition;
+        newPosition = QPointF(MAP_WIDTH/2, MAP_HEIGHT/2);
+        qDebug() << "烟雾弹传送：未找到理想位置，使用地图中心位置" << newPosition;
     }
     
     setPositon(newPosition);
