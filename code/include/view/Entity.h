@@ -51,6 +51,7 @@ public:
     bool isInvincible() const {return m_isInvincible;}
     void setInvincible(bool res) {m_isInvincible = res;}
     void setInvincibilityTime(int t) {m_invincibilityTimer = t;}
+    PlayerState getState() { return m_currentState; }
 public slots:
     void onGameWin();
 private:
@@ -60,6 +61,8 @@ private:
     double m_invincibilityTimer = 0;
     bool m_isInvincible = false;
     bool m_isGamewin = false;
+    int m_bulletLevel = 0;
+    int m_gunLevel = 0;
 };
 
 
@@ -147,19 +150,19 @@ enum class ItemType {
         
         // 供应商升级道具类型
         // 卡槽1：靴子系列
-        vendor_boots_1,      // 靴子1 - 8金币
-        vendor_boots_2,      // 靴子2 - 20金币
+        vendor_boots_1,      // 靴子1 - 8金币 11
+        vendor_boots_2,      // 靴子2 - 20金币 12
         vendor_extra_life,   // 额外生命 - 10金币
         
         // 卡槽2：枪系列
-        vendor_gun_1,        // 枪1 - 10金币
-        vendor_gun_2,        // 枪2 - 20金币
-        vendor_gun_3,        // 枪3 - 30金币
+        vendor_gun_1,        // 枪1 - 10金币 13
+        vendor_gun_2,        // 枪2 - 20金币 14
+        vendor_gun_3,        // 枪3 - 30金币 15
         
         // 卡槽3：弹药系列
-        vendor_ammo_1,       // 弹药1 - 15金币
-        vendor_ammo_2,       // 弹药2 - 30金币
-        vendor_ammo_3,       // 弹药3 - 45金币
+        vendor_ammo_1,       // 弹药1 - 15金币 16
+        vendor_ammo_2,       // 弹药2 - 30金币 17
+        vendor_ammo_3,       // 弹药3 - 45金币 18
         
         // 通用
         vendor_badge         // 治安官徽章 - 10金币
@@ -174,6 +177,7 @@ public:
     void setState(ItemState newState) { m_currentState = newState; }
     void setLingerTimer(double timer) { m_lingerTimer = timer; }
     ItemState getState() { return m_currentState; }
+    ItemType getType() const { return m_itemType; }
     bool isVisible();
     static QString typeToString(ItemType type);
 private:
@@ -183,7 +187,8 @@ private:
 };
 
 enum class VendorState {
-    Walk,
+    Come,
+    Leave,
     LookDown,
     LookLeft,
     LookRight,

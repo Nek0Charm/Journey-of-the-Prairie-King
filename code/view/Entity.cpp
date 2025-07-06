@@ -23,7 +23,7 @@ PlayerEntity::PlayerEntity(QObject *parent) : Entity(parent) {
     m_animations[PlayerState::ShootUpWalk]    = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_up"), 8.0, true);
     m_animations[PlayerState::ShootLeftWalk]  = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_left"), 8.0, true);
     m_animations[PlayerState::ShootRightWalk] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_right"), 8.0, true);
-    m_animations[PlayerState::Lifting] = new Animation(SpriteManager::instance().getAnimationSequence("player_lifting_heart"), 8.0, true);
+    m_animations[PlayerState::Lifting] = new Animation(SpriteManager::instance().getAnimationSequence("player_lifting"), 8.0, true);
     m_animations[PlayerState::Lightning] = new Animation(SpriteManager::instance().getAnimationSequence("player_lightning"), 4.0, true);
     m_animations[PlayerState::Kiss] = new Animation(SpriteManager::instance().getAnimationSequence("kiss"), 8.0, true);
     m_animations[PlayerState::WalkLiftingHeart] = new Animation(SpriteManager::instance().getAnimationSequence("player_walk_lifting_heart"), 8.0, true);
@@ -405,7 +405,8 @@ QString ItemEntity::typeToString(ItemType type) {
 VendorEntity::VendorEntity(QObject *parent): Entity(parent) {
     m_currentState = VendorState::Disappearing;
     m_animations[VendorState::LookDown] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_look_down"), 8.0, true);
-    m_animations[VendorState::Walk] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_walk"), 8.0, true);
+    m_animations[VendorState::Come] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_walk"), 8.0, true);
+    m_animations[VendorState::Leave] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_walk"), 8.0, true);
     m_animations[VendorState::LookLeft] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_look_left"), 8.0, true);
     m_animations[VendorState::LookRight] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_look_right"), 8.0, true);
     m_animations[VendorState::Singing] = new Animation(SpriteManager::instance().getAnimationSequence("vendor_singing"), 4.0, true);
@@ -421,11 +422,18 @@ void VendorEntity::update(double deltaTime, const QPointF& playerPosition) {
         return;// Don't update position or animation if disappearing
     }
     m_currentAnimation = m_animations.value(m_currentState, nullptr);
-    if (m_currentState == VendorState::Walk) {
+    if (m_currentState == VendorState::Come) {
         // qDebug() << "VendorEntity::update: Walking";
         m_lingerTimer -= deltaTime;
         m_position += QPointF(0, 16 * deltaTime);
-        double distance = QLineF(m_position, playerPosition).length();
+    } else if (m_currentState == VendorState::Leave) {
+        // qDebug() << "VendorEntity::update: Leaving";
+        m_lingerTimer -= deltaTime;
+        m_position += QPointF(0, -16 * deltaTime);
+        if (m_lingerTimer <= 0) {
+            setState(VendorState::Disappearing);
+            return;
+        }
     }
     if (m_lingerTimer <= 0 && m_currentState != VendorState::Singing) {
         if (playerPosition.x() - m_position.x() > 16) {
@@ -441,7 +449,6 @@ void VendorEntity::update(double deltaTime, const QPointF& playerPosition) {
             setState(VendorState::Disappearing);
         }
     }
-    
     if (m_currentAnimation) {
         // qDebug() << "VendorEntity::update: Current animation is not null";
         m_currentAnimation->update(deltaTime);
@@ -462,7 +469,7 @@ void VendorEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QP
     QRectF vendorDestRect(vendorScreenAnchor, vendorSourceRect.size() * scale);
     painter->drawPixmap(vendorDestRect, spriteSheet, vendorSourceRect);
 
-    if (m_currentState != VendorState::Walk && m_currentState != VendorState::Singing) {
+    if (m_currentState != VendorState::Come && m_currentState != VendorState::Singing && m_currentState != VendorState::Leave) {
         QRect tableclothSourceRect = SpriteManager::instance().getSpriteRect("tablecloth");
         if (tableclothSourceRect.isNull()) return;
         QSizeF tableclothScaledSize(tableclothSourceRect.width() * scale, tableclothSourceRect.height() * scale);
@@ -494,11 +501,12 @@ void VendorEntity::paint(QPainter* painter, const QPixmap& spriteSheet, const QP
 }
 
 void VendorEntity::onVendorDisappear() {
-    setState(VendorState::Disappearing);
+    setState(VendorState::Leave);
+    m_lingerTimer = 6.0;
 }
 
 void VendorEntity::onVendorAppear() {
-    setState(VendorState::Walk);
+    setState(VendorState::Come);
     m_lingerTimer = 6.0;
     m_position = QPointF(16*8, 0);
 }

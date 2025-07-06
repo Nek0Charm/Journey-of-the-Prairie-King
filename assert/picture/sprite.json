@@ -42,7 +42,10 @@
     "tablecloth": { "x": 400, "y": 96, "w": 63, "h": 32 },
     "heart": {"x": 399, "y": 131, "w": 16, "h": 12},
 
-    "player_bullet": { "x": 389, "y": 112, "w": 4, "h": 4 },
+    "player_bullet_1": { "x": 389, "y": 112, "w": 4, "h": 4 },
+    "player_bullet_2": { "x": 389, "y": 116, "w": 4, "h": 4 },
+    "player_bullet_3": { "x": 389, "y": 120, "w": 4, "h": 4 },
+    "player_bullet_4": { "x": 389, "y": 124, "w": 4, "h": 4 },
     "coin": { "x": 143, "y": 160, "w": 16, "h": 16 },
     "five_coins": { "x": 159, "y": 160, "w": 16, "h": 16 },
     "wheel": {"x": 175, "y": 160, "w": 16, "h": 16 },
@@ -294,6 +297,9 @@
       "player_walk_lifting_heart_2",
       "player_walk_lifting_heart_3",
       "player_walk_lifting_heart_4"
+    ],
+    "player_lifting": [
+      "player_lifting"
     ],
     "player_dying": [
       "player_dying_1",
