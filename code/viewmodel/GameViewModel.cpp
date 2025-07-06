@@ -146,6 +146,17 @@ void GameViewModel::updateGame(double deltaTime)
         m_vendorActivated = true;
         // 不要return，让后续的供应商状态更新逻辑执行
     }
+    
+    // 检查布局1-2结束后是否应该自动触发游戏胜利
+    if(m_gameTime >= MAX_GAMETIME && m_enemyManager->getActiveEnemyCount() == 0 && currentArea1 == 1 && currentArea2 == 2) {
+        qDebug() << "布局1-2结束，自动触发游戏胜利";
+        // 重置供应商状态
+        m_vendorActivated = false;
+        m_vendorManager->hideVendor();
+        // 触发游戏胜利
+        emit gameWin();
+        return;
+    }
     emit gameTimeChanged(m_gameTime);
     m_collisionSystem->checkCollisions(*m_player, 
                                       m_enemyManager->getEnemies(),
