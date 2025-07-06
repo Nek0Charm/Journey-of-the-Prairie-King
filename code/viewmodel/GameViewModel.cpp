@@ -132,6 +132,12 @@ void GameViewModel::updateGame(double deltaTime)
         return;
     }
 
+    // 防护性检查，确保所有组件都存在
+    if (!m_player || !m_enemyManager || !m_collisionSystem || !m_item || !m_itemEffectManager || !m_vendorManager) {
+        qWarning() << "GameViewModel::updateGame - 某些组件为空，跳过更新";
+        return;
+    }
+
     m_gameTime += deltaTime;
     m_gameTime = std::min(m_gameTime, MAX_GAMETIME);
     
@@ -158,15 +164,14 @@ void GameViewModel::updateGame(double deltaTime)
         return;
     }
     emit gameTimeChanged(m_gameTime);
-    m_collisionSystem->checkCollisions(*m_player, 
-                                      m_enemyManager->getEnemies(),
-                                      m_player->getActiveBullets());
+    
     // 更新玩家
     m_player->update(deltaTime);
     
     // 更新敌人（传递玩家潜行状态）
     m_enemyManager->updateEnemies(deltaTime, m_player->getPosition(), m_player->isStealthMode(), m_player->isZombieMode(), m_gameTime == MAX_GAMETIME);
 
+    // 碰撞检测（只调用一次）
     m_collisionSystem->checkCollisions(*m_player, 
                                       m_enemyManager->getEnemies(),
                                       m_player->getActiveBullets());
