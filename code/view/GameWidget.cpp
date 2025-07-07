@@ -166,7 +166,7 @@ void GameWidget::playerLivesDown() {
     player->setState(PlayerState::Dying);
     m_isGamePaused = true;
     emit pauseGame();
-    m_pausedTime = 3.0;
+    m_pausedTime = 2.0;  
 }
 
 void GameWidget::paintEvent(QPaintEvent *event) {
@@ -220,8 +220,8 @@ void GameWidget::paintEvent(QPaintEvent *event) {
         QPointF nextMapOffset = viewOffsetMap + QPointF(0, mapHeight);
         m_nextMap->paint(&painter, m_spriteSheet, nextMapOffset);
     }
-    vendor->paint(&painter, m_spriteSheet, viewOffsetMap);
     for (auto it: m_deadmonsters) it->paint(&painter, m_spriteSheet, viewOffsetMap);
+    vendor->paint(&painter, m_spriteSheet, viewOffsetMap);
     for (auto it: m_items) it->paint(&painter, m_spriteSheet, viewOffsetMap);
     player->paint(&painter, m_spriteSheet, viewOffsetMap);
     if (player->getState() == PlayerState::Lifting) {
@@ -257,7 +257,7 @@ void GameWidget::paintUi(QPainter *painter, const QPointF& viewOffset, const QRe
     itemRectF.translate(viewOffset);
     painter->drawPixmap(itemRectF, m_spriteSheet, itemRect);
     if (m_hasPossessedItem) {
-        QString itemSpriteName = ItemEntity::typeToString(static_cast<ItemType>(m_possessedItemType));
+        QString itemSpriteName = ItemEntity::typeToString(static_cast<int>(m_possessedItemType));
         QRect itemSourceRect = SpriteManager::instance().getSpriteRect(itemSpriteName);
         if (!itemSourceRect.isNull()) {
             double itemScaleRatio = 0.8; 
@@ -440,7 +440,6 @@ void GameWidget::timerEvent() {
         
         if (keys[Qt::Key_1] && !key1Pressed && m_availableVendorItems.size() >= 1) {
             key1Pressed = true;
-            qDebug() << "尝试购买第一个物品:" << m_availableVendorItems[0];
             emit purchaseVendorItem(m_availableVendorItems[0]);  // 购买第一个可购买物品
         } else if (!keys[Qt::Key_1]) {
             key1Pressed = false;
@@ -448,7 +447,6 @@ void GameWidget::timerEvent() {
         
         if (keys[Qt::Key_2] && !key2Pressed && m_availableVendorItems.size() >= 2) {
             key2Pressed = true;
-            qDebug() << "尝试购买第二个物品:" << m_availableVendorItems[1];
             emit purchaseVendorItem(m_availableVendorItems[1]);  // 购买第二个可购买物品
         } else if (!keys[Qt::Key_2]) {
             key2Pressed = false;
@@ -456,7 +454,6 @@ void GameWidget::timerEvent() {
         
         if (keys[Qt::Key_3] && !key3Pressed && m_availableVendorItems.size() >= 3) {
             key3Pressed = true;
-            qDebug() << "尝试购买第三个物品:" << m_availableVendorItems[2];
             emit purchaseVendorItem(m_availableVendorItems[2]);  // 购买第三个可购买物品
         } else if (!keys[Qt::Key_3]) {
             key3Pressed = false;
@@ -648,7 +645,7 @@ void GameWidget::releaseSmoke(double duration) {
 
 void GameWidget::purchase(int itemType) {
     emit pauseGame();
-    m_pausedTime = 3.0;
+    m_pausedTime = 0.5;  
     m_isGamePaused = true;
     m_purchasedItem = new ItemEntity(itemType);
     if (itemType == 12 || itemType == 14 || itemType == 15 || itemType == 17 || itemType == 18) {
@@ -672,20 +669,17 @@ void GameWidget::onVendorDisappear() {
 // 新增的供应商相关方法
 void GameWidget::onVendorAppeared() {
     // 供应商出现时的处理逻辑
-    qDebug() << "供应商出现在UI中";
     
     // 触发供应商的显示动画
     if (vendor) {
         vendor->onVendorAppear();
         // 使用当前已设置的供应商物品列表
         vendor->setAvailableItems(m_availableVendorItems);
-        qDebug() << "供应商显示物品列表:" << m_availableVendorItems;
     }
 }
 
 void GameWidget::onVendorDisappeared() {
     // 供应商消失时的处理逻辑
-    qDebug() << "供应商从UI中消失";
     
     // 清空供应商物品列表
     m_availableVendorItems.clear();
@@ -694,12 +688,10 @@ void GameWidget::onVendorDisappeared() {
     if (vendor) {
         vendor->onVendorDisappear();  // 设置供应商状态为Disappearing
         vendor->setAvailableItems(QList<int>());
-        qDebug() << "供应商实体已隐藏，物品列表已清空";
     }
 }
 
 void GameWidget::onVendorItemPurchased(int itemType) {
-    qDebug() << "供应商物品购买成功，物品类型:" << itemType;
     purchase(itemType);
 }
 
@@ -736,6 +728,29 @@ void GameWidget::setAvailableVendorItems(const QList<int>& items) {
 }
 
 void GameWidget::onGameWin() {
+    // 清除所有游戏元素，确保游戏胜利画面干净
+    qDebug() << "游戏胜利，清除所有游戏元素";
+    
+    // 清除所有敌人
+    qDeleteAll(m_monsters);
+    m_monsters.clear();
+    qDeleteAll(m_deadmonsters);
+    m_deadmonsters.clear();
+    
+    // 清除所有道具
+    qDeleteAll(m_items);
+    m_items.clear();
+    
+    // 清除所有子弹数据
+    m_bullets.clear();
+    
+    // 清除所有敌人数据
+    m_enemyDataList.clear();
+    
+    // 清除所有道具数据
+    m_itemDataList.clear();
+    
+    // 加载游戏胜利地图
     m_gameMap->loadFromFile(":/assert/picture/gamemap.json", "end", "1");
     m_gameMap->setMapTitle("end");
     m_isGamePaused = true;

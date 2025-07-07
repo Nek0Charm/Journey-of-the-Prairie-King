@@ -92,6 +92,7 @@ private:
     void handleCreateItem(int enemyId, const QPointF& position);
     void handleItemUsed(int itemType);
     void handleItemUsedImmediately(int itemType);
+    void clearAllGameElements();  // 清除所有游戏元素
 };
 
 #endif // GAMEVIEWMODEL_H

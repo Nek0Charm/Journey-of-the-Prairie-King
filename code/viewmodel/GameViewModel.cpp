@@ -159,6 +159,10 @@ void GameViewModel::updateGame(double deltaTime)
         // 重置供应商状态
         m_vendorActivated = false;
         m_vendorManager->hideVendor();
+        
+        // 清除所有游戏元素，为游戏胜利画面做准备
+        clearAllGameElements();
+        
         // 触发游戏胜利
         emit gameWin();
         return;
@@ -364,4 +368,12 @@ bool GameViewModel::canPurchaseVendorItem(int itemType) const {
 
 int GameViewModel::getVendorItemPrice(int itemType) const {
     return m_vendorManager ? m_vendorManager->getItemPrice(itemType) : 0;
+}
+
+void GameViewModel::clearAllGameElements()
+{
+    m_enemyManager->clearAllEnemies();
+    m_item->clearAllItems();
+    m_player->getBulletViewModel()->clearAllBullets();
+    m_itemEffectManager->clearAllEffects();
 }

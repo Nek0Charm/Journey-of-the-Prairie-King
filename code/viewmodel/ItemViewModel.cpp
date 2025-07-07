@@ -154,17 +154,17 @@ int ItemViewModel::selectRandomItemType() const {
     // 平衡的道具生成概率分布
     int randomValue = QRandomGenerator::global()->bounded(100);
     
-    if (randomValue < 25) return ItemEffectManager::coin;          // 25% 金币
-    if (randomValue < 40) return ItemEffectManager::five_coins;    // 15% 五金币
-    if (randomValue < 50) return ItemEffectManager::extra_life;    // 10% 额外生命
-    if (randomValue < 60) return ItemEffectManager::coffee;        // 10% 咖啡
-    if (randomValue < 68) return ItemEffectManager::machine_gun;   // 8% 机枪
-    if (randomValue < 75) return ItemEffectManager::bomb;          // 7% 清屏核弹
-    if (randomValue < 82) return ItemEffectManager::shotgun;       // 7% 霰弹枪
-    if (randomValue < 88) return ItemEffectManager::smoke_bomb;    // 6% 烟雾弹
-    if (randomValue < 93) return ItemEffectManager::tombstone;     // 5% 墓碑
-    if (randomValue < 97) return ItemEffectManager::wheel;         // 4% 轮子
-    if (randomValue < 100) return ItemEffectManager::badge;        // 3% 治安官徽章
+    if (randomValue < 10) return ItemEffectManager::coin;           // 10% 金币
+    if (randomValue < 40) return ItemEffectManager::five_coins;     // 30% 五金币
+    if (randomValue < 50) return ItemEffectManager::extra_life;     // 10% 额外生命
+    if (randomValue < 60) return ItemEffectManager::coffee;         // 10% 咖啡
+    if (randomValue < 68) return ItemEffectManager::machine_gun;    // 8% 机枪
+    if (randomValue < 75) return ItemEffectManager::bomb;           // 7% 清屏核弹
+    if (randomValue < 82) return ItemEffectManager::shotgun;        // 7% 霰弹枪
+    if (randomValue < 88) return ItemEffectManager::smoke_bomb;     // 6% 烟雾弹
+    if (randomValue < 93) return ItemEffectManager::tombstone;      // 5% 墓碑
+    if (randomValue < 97) return ItemEffectManager::wheel;          // 4% 轮子
+    if (randomValue < 100) return ItemEffectManager::badge;         // 3% 治安官徽章
     
     return ItemEffectManager::coin; // 默认返回金币
 }

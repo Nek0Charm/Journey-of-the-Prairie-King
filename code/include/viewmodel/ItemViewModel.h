@@ -44,7 +44,7 @@ private:
     int m_nextItemId = 0; 
     bool m_possessingItem = false;
     QMap<QPair<int, int>, int> m_itemPositions;
-    double m_spawnProbability = 0.2; // 默认20%概率生成道具
+    double m_spawnProbability = 0.3; // 默认30%概率生成道具
     
     void useItemImmediately(const ItemData& item); // 立即使用道具
     int selectRandomItemType() const; // 选择随机道具类型
