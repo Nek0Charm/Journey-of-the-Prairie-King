@@ -19,19 +19,11 @@ jobs:
       matrix:
         config:
           - { name: 'Windows (MSVC)', os: windows-latest, triplet: 'x64-windows' }
-          - { name: 'Ubuntu (GCC)', os: ubuntu-latest, triplet: 'x64-linux' }
-          - { name: 'macOS (Clang)', os: macos-latest, triplet: 'x64-osx' }
 
     steps:
       # 1. 检出代码
       - name: Checkout repository
         uses: actions/checkout@v4
-        
-      - name: Install Linux Build Dependencies
-        if: runner.os == 'Linux' # 仅在 Linux 环境下运行
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y autoconf-archive
 
       # 2. 设置 vcpkg (包括缓存)
       - name: Setup vcpkg
@@ -69,26 +61,9 @@ jobs:
         run: |
           mkdir staging
           copy build\Release\MaodieAdventure.exe staging
-          windeployqt --release staging\MaodieAdventure.exe
+          vcpkg/installed/x64-windows/tools/qt6/bin/windeployqt --release staging\MaodieAdventure.exe
           7z a -tzip maodie-adventure-windows.zip ./staging/*
         # windeployqt 路径会被 vcpkg 自动添加到 PATH
-
-      - name: Package Application (macOS)
-        if: matrix.config.os == 'macos-latest'
-        run: |
-          macdeployqt build/MaodieAdventure.app -dmg
-          mv build/MaodieAdventure.dmg maodie-adventure-macos.dmg
-
-      - name: Package Application (Linux)
-        if: matrix.config.os == 'ubuntu-latest'
-        run: |
-          # 使用 linuxdeployqt 工具打包
-          # 需要先下载它
-          wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-          chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-          # 运行打包
-          ./linuxdeployqt-continuous-x86_64.AppImage build/MaodieAdventure -appimage
-          mv MaodieAdventure*.AppImage maodie-adventure-linux.AppImage
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -96,8 +71,6 @@ jobs:
           name: maodie-adventure-${{ matrix.config.os }}
           path: |
             maodie-adventure-windows.zip
-            maodie-adventure-macos.dmg
-            maodie-adventure-linux.AppImage
 
   # --- 持续交付部分 ---
   release:
