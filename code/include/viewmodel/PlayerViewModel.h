@@ -103,6 +103,10 @@ public:
     // 子弹伤害值相关
     void setBulletDamage(int damage) {m_stats.bulletDamage = damage;}
     int getBulletDamage() const {return m_stats.bulletDamage;}
+    
+    // 供应商治安官徽章效果相关
+    void setVendorBadgeActive(bool active) {m_vendorBadgeActive = active;}
+    bool isVendorBadgeActive() const {return m_vendorBadgeActive;}
 
 signals:
     void playerDied();
@@ -119,6 +123,7 @@ private:
     PlayerStats m_stats;
     double m_currentShootCooldown = 0.0;
     std::unique_ptr<BulletViewModel> m_bulletViewModel;
+    bool m_vendorBadgeActive = false; // 标记是否已获得供应商治安官徽章效果
     
     void updateShootCooldown(double deltaTime);
     void shootInEightDirections();  // 8方向射击

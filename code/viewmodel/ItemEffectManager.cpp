@@ -382,8 +382,13 @@ void ItemEffectManager::restorePlayerFromEffect(EffectType type, double original
             qDebug() << "霰弹枪模式关闭";
             break;
         case BADGE_MODE:
-            player->setBadgeMode(false);
-            qDebug() << "治安官徽章模式关闭";
+            // 如果玩家已获得供应商治安官徽章效果，则不重置
+            if (!player->isVendorBadgeActive()) {
+                player->setBadgeMode(false);
+                qDebug() << "治安官徽章模式关闭";
+            } else {
+                qDebug() << "治安官徽章模式保持（供应商永久效果）";
+            }
             break;
         case ZOMBIE_MODE:
             player->setZombieMode(false);
@@ -424,10 +429,15 @@ void ItemEffectManager::checkAndRemoveExpiredEffects(double currentTime, PlayerV
 }
 
 void ItemEffectManager::clearAllEffects(PlayerViewModel* player) {
-    // 恢复所有效果到原始状态
+    // 恢复所有效果到原始状态，但不重置供应商的永久效果
     for (auto it = m_activeEffects.begin(); it != m_activeEffects.end(); ++it) {
         if (player) {
-            restorePlayerFromEffect(it.key(), it.value().originalValue, player);
+            // 不重置供应商的永久效果（BADGE_MODE, 移动速度, 射击速度等）
+            // 这些效果应该在整个游戏过程中保持
+            EffectType type = it.key();
+            if (type != BADGE_MODE) { // 不重置治安官徽章模式
+                restorePlayerFromEffect(type, it.value().originalValue, player);
+            }
         }
     }
     
@@ -435,7 +445,7 @@ void ItemEffectManager::clearAllEffects(PlayerViewModel* player) {
     m_activeEffects.clear();
     m_currentTime = 0.0;
     
-    qDebug() << "清除所有道具效果";
+    qDebug() << "清除所有道具效果（保留供应商永久效果）";
 }
 
 void ItemEffectManager::applyVendorAmmoEffect(PlayerViewModel* player, EnemyManager* enemyManager, int itemType, bool isImmediate) {
@@ -512,6 +522,9 @@ void ItemEffectManager::applyVendorBadgeEffect(PlayerViewModel* player, EnemyMan
     
     // 启用治安官徽章模式（永久）- 这是关键！
     player->setBadgeMode(true);
+    
+    // 标记玩家已获得供应商治安官徽章效果，防止被其他效果覆盖
+    player->setVendorBadgeActive(true);
     
     qDebug() << "供应商治安官徽章效果：永久获得移动速度+30%、射击速度+30%、治安官徽章模式";
 }
