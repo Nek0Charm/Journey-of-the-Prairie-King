@@ -26,6 +26,12 @@ jobs:
       # 1. 检出代码
       - name: Checkout repository
         uses: actions/checkout@v4
+        
+      - name: Install Linux Build Dependencies
+        if: runner.os == 'Linux' # 仅在 Linux 环境下运行
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf-archive
 
       # 2. 设置 vcpkg (包括缓存)
       - name: Setup vcpkg
