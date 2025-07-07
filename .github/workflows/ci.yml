@@ -40,6 +40,11 @@ jobs:
           # 指定 vcpkg 的缓存键，当 vcpkg.json 文件变化时，缓存会失效
           vcpkgJsonGlob: 'vcpkg.json'
 
+      - name: Add Qt tools to PATH
+        if: matrix.config.os == 'windows-latest'
+        run: echo "$VCPKG_ROOT/installed/${{ matrix.config.triplet }}/tools/qt6/bin" >> $env:GITHUB_PATH
+        shell: pwsh
+
       # 3. 配置 CMake
       - name: Configure CMake
         run: >
