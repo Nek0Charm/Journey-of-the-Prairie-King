@@ -31,30 +31,46 @@ QList<int> VendorManager::getAvailableUpgradeItems() const {
     QList<int> availableItems;
     QStringList slotInfo;
     
-    // 槽位0
-    for (const auto& item : m_vendorItems) {
-        if (item.slotIndex == 0 && isItemAvailable(item.itemType)) {
-            availableItems.append(item.itemType);
-            slotInfo << QString("[0]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[0]);
-            break;
+    // 为每个槽位找到当前进度对应的物品
+    for (int slotIndex = 0; slotIndex < 3; ++slotIndex) {
+        int currentProgress = m_slotProgress[slotIndex];
+        bool foundItem = false;
+        
+        // 遍历该槽位的所有物品，找到当前进度对应的物品
+        for (const auto& item : m_vendorItems) {
+            if (item.slotIndex == slotIndex) {
+                // 直接在这里检查物品是否可用，而不是调用isItemAvailable
+                bool isAvailable = false;
+                
+                // 检查是否为困难模式专用物品
+                if (item.isHardModeOnly && !m_isHardMode) {
+                    continue;
+                }
+                
+                // 特殊处理：无限购买物品（额外生命、治安官徽章）
+                if (item.isInfinitePurchase) {
+                    // 对于无限购买物品，只要进度达到或超过其itemIndex，就始终可用
+                    isAvailable = currentProgress >= item.itemIndex;
+                } else {
+                    // 对于其他槽位，检查当前进度
+                    isAvailable = item.itemIndex == currentProgress;
+                }
+                
+                if (isAvailable) {
+                    availableItems.append(item.itemType);
+                    slotInfo << QString("[%1]%2(ID:%3,进度:%4)").arg(slotIndex).arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(currentProgress);
+                    foundItem = true;
+                    break;
+                }
+            }
+        }
+        
+        // 如果没有找到物品，记录调试信息
+        if (!foundItem) {
+            slotInfo << QString("[%1]无可用物品(进度:%2)").arg(slotIndex).arg(currentProgress);
         }
     }
-    // 槽位1
-    for (const auto& item : m_vendorItems) {
-        if (item.slotIndex == 1 && isItemAvailable(item.itemType)) {
-            availableItems.append(item.itemType);
-            slotInfo << QString("[1]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[1]);
-            break;
-        }
-    }
-    // 槽位2
-    for (const auto& item : m_vendorItems) {
-        if (item.slotIndex == 2 && isItemAvailable(item.itemType)) {
-            availableItems.append(item.itemType);
-            slotInfo << QString("[2]%1(ID:%2,进度:%3)").arg(ItemEffectManager::getItemName(item.itemType)).arg(item.itemType).arg(m_slotProgress[2]);
-            break;
-        }
-    }
+    
     qDebug() << "[供应商可购买物品]" << slotInfo.join(" | ");
     return availableItems;
 }
@@ -169,18 +185,16 @@ bool VendorManager::isItemAvailable(int itemType) const {
             // 检查购买进度
             int slotIndex = item.slotIndex;
             int itemIndex = item.itemIndex;
+            int currentProgress = m_slotProgress[slotIndex];
             
             // 特殊处理：无限购买物品（额外生命、治安官徽章）
             if (item.isInfinitePurchase) {
-                // 如果已经到达该槽位的最后一个物品，则始终可用
-                int currentProgress = m_slotProgress[slotIndex];
                 // 对于无限购买物品，只要进度达到或超过其itemIndex，就始终可用
                 return currentProgress >= itemIndex;
             }
             
             // 对于其他槽位，检查当前进度
             if (slotIndex >= 0 && slotIndex < 4) {
-                int currentProgress = m_slotProgress[slotIndex];
                 return itemIndex == currentProgress;
             }
         }
